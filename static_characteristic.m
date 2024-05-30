@@ -24,6 +24,7 @@ xlabel('F_{1}');
 ylabel('h_{1}, h_{2}');
 legend('h_{1}(F_1)', 'h_{2}(F_1)', 'Location', 'northwest');
 title("Charakterystyka statyczna w zależności od F_1");
+grid on;
 
 %% Punkt pracy
 F_1 = F_10;
@@ -43,4 +44,5 @@ xlabel('F_{D}');
 ylabel('h_{1}, h_{2}');
 legend('h_{1}(F_D)', 'h_{2}(F_D)', 'Location', 'northwest');
 title("Charakterystyka statyczna w zależności od F_D");
+grid on;
 end

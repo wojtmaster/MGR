@@ -1,11 +1,6 @@
-function [delta_u] = DMC_numeric_fuzzy(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, delta_u_max, kk, tau, t, R_U, R_Y, optimal_params_U, optimal_params_Y)
+function [delta_u] = DMC_numeric_fuzzy(F_10, h_20, a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, delta_u_max, kk, tau, R, optimal_params, u_start, u_end, n)
     M = zeros(N, Nu);
     M_p = zeros(N, D-1);
-
-    F_10 = 90;
-    h_20 = 36;
-    u_0 = 45;
-    y_0 = 10;
     
     % Implementacja macierzy M_p
     for i = 1:N
@@ -88,7 +83,7 @@ function [delta_u] = DMC_numeric_fuzzy(a, b, N, Nu, D, lambda, s, u, y_zad, y_ma
         % Obliczenie przyrostu sterowania dla chwili (i+1) w chwili i-tej
         delta_u = quadprog(H,f,A,B,[],[],delta_U_min,delta_U_max);
         
-        % Obliczenie sterowania dla chwili (i+1) w chwili i-tej
+        % Obliczenie sterowania
         u(1,k) = u(1,k-1) + delta_u(1);
 
         % Odczyt wartości  

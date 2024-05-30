@@ -1,8 +1,7 @@
 %% PPMGR
 % Autor: Wojciech Rogalski
 % Data: 11.03.2024r.
-
-%% Regulacja kaskadowa
+% Tytuł: Regulacja kaskadowa
 clear all;
 set(groot, 'DefaultTextFontName', 'Arial');
 set(groot, 'DefaultAxesFontName', 'Arial');
@@ -48,7 +47,7 @@ modified_Euler(a, c, alpha_1, alpha_2, F_10, F_D0, h_10, h_20, V_10, V_20, t, kk
 tf_discrete(G_z, u, t, kk);
 
 %% Wartość zadana h_2
-delta_h = set_value(kk, h_20);
+y_zad = set_value(kk, h_20);
 
 %% Współczynniki do równań różnicowych na h_2
 b(1) = [G_z.Numerator{2,1}(2)];
@@ -73,19 +72,25 @@ delta_u_max = 5;
 s = step(G_z(2,1), Tp*(D-1));
 
 %% Regulacja DMC - analitycznie
-DMC_analitic(a, b, N, Nu, D, lambda, s, u, delta_h, y_max, u_max, delta_u_max, kk, tau/Tp, t);
+DMC_analitic(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, delta_u_max, kk, tau/Tp);
 
 %% Regulacja DMC - numerycznie
-DMC_numeric(a, b, N, Nu, D, lambda, s, u, delta_h, y_max, u_max, delta_u_max, kk, tau/Tp, t);
+DMC_numeric(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, delta_u_max, kk, tau/Tp);
 
-%% Fuzzy static charaacteristic
-% Zakres rozmywania y(u)
-u_start = 45;
-u_end = 135;
-[R_U, optimal_params_U] = static_characteristic_y_u(F_D0, alpha_2, u_start, u_end);
+%% Zakres rozmywania y(u)
+F_1_start = 45;
+F_1_end = 135;
+% Liczba podziałów
+n = 100;
+
+%% Fuzzy static charaacteristic - linear
+[R, optimal_params] = static_characteristic_y_u(F_D0, alpha_2, F_1_start, F_1_end, n, 'linear');
+
+%% Fuzzy static charaacteristic - nonlinear
+[R, optimal_params] = static_characteristic_y_u(F_D0, alpha_2, F_1_start, F_1_end, n, 'nonlinear');
 
 %% Fuzzy DMC - analitic
-DMC_analitic_fuzzy(a, b, N, Nu, D, lambda, s, u, delta_h, y_max, u_max, delta_u_max, kk, tau/Tp, t, R_U, R_Y, optimal_params_U, optimal_params_Y);
+DMC_analitic_fuzzy(F_10, h_20, a, b, dcgain(G_z(2,1)), N, Nu, D, lambda, s, u, y_zad, y_max, u_max, delta_u_max, kk, tau/Tp, R, optimal_params, F_1_start, F_1_end, n);
 
 %% Fuzzy DMC - numeric
-DMC_numeric_fuzzy(a, b, N, Nu, D, lambda, s, u, delta_h, y_max, u_max, delta_u_max, kk, tau/Tp, t, R_U, R_Y, optimal_params_U, optimal_params_Y);
+% DMC_numeric_fuzzy(F_10, h_20, a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, delta_u_max, kk, tau/Tp, R, optimal_params, F_1_start, F_1_end, n);

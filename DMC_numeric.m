@@ -1,4 +1,4 @@
-function [delta_u] = DMC_numeric(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, delta_u_max, kk, tau, t)
+function [delta_u] = DMC_numeric(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, delta_u_max, kk, tau)
     M = zeros(N, Nu);
     M_p = zeros(N, D-1);
     
@@ -56,13 +56,7 @@ function [delta_u] = DMC_numeric(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_m
         end
            
         % Przepisanie sterowań do wektora przeszłych sterowań
-        for i = (D-1):-1:1
-            if i == 1
-                delta_up(i) = delta_u(1);
-            else
-                delta_up(i) = delta_up(i-1);
-            end
-        end
+        delta_up = [delta_u(1); delta_up(1:end-1)];
     
         U_k_1 = ones(Nu,1)*u(1,k-1);
         Y = ones(N,1)*y(k);
@@ -77,31 +71,33 @@ function [delta_u] = DMC_numeric(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_m
         % Obliczenie przyrostu sterowania dla chwili (i+1) w chwili i-tej
         delta_u = quadprog(H,f,A,B,[],[],delta_U_min,delta_U_max);
         
-        % Obliczenie sterowania dla chwili (i+1) w chwili i-tej
+        % Obliczenie sterowania
         u(1,k) = u(1,k-1) + delta_u(1); 
     
         % Obliczenie wskaźnika regulacji
-        error(k) = error(k-1) + 1/2 * (y_zad(k) - y(k))^2;
+        error(k) = (y_zad(k) - y(k))^2;
     end
-    disp(sum(error));
+    disp(sum(error) / kk);
     
     % Prezentacja wyników
     figure;
     hold on;
-    stairs(0:kk-1, y_zad);
-    stairs(0:kk-1, y);
+    stairs(0:kk-1, y_zad, 'LineWidth', 1.2);
+    stairs(0:kk-1, y, 'LineWidth', 1.2);
     hold off;
     legend('y_{zad}', 'y');
     title('Poziom wody w drugim zbiorniku - h_2');
     xlabel('k');
     ylabel('y(k)');
+    grid on;
     
     figure;
     hold on;
-    stairs(0:kk-1, u(1,:));
+    stairs(0:kk-1, u(1,:), 'LineWidth', 1.2);
     hold off;
     legend('u');
     title('Sygnał sterujący F_1');
     xlabel('k');
     ylabel('u');
+    grid on;
 end

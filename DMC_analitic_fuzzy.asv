@@ -1,4 +1,4 @@
-function [] = DMC_analitic_fuzzy(F_10, h_20, a, b, K_stat, N, Nu, D, lambda, S, u, y_zad, y_max, u_max, delta_u_max, kk, tau, R, optimal_params, F_1_start, F_1_end, n)
+function [] = DMC_analitic_fuzzy(F_10, h_20, a, b, N, Nu, D, lambda, S, u, y_zad, y_max, u_max, delta_u_max, kk, tau, R, optimal_params, F_1_start, F_1_end, n)
 
     M = zeros(N, Nu);
     M_p = zeros(N, D-1);
@@ -63,32 +63,7 @@ function [] = DMC_analitic_fuzzy(F_10, h_20, a, b, K_stat, N, Nu, D, lambda, S, 
         e = y_zad(k) - y(k);
         
         % Charakterystyka rozmyta
-        s = S*y_static(k-1);
-        % Implementacja macierzy M_p
-        for i = 1:N
-            for j = 1:D-1
-                if(i+j <= D)
-                    M_p(i,j) = s(i+j) - s(j);
-                else 
-                    M_p(i,j) = s(D) - s(j);
-                end
-            end
-        end
         
-        % % Implementacja macierzy M
-        % for i = 1:N
-        %     for j = 1:Nu
-        %         if(i >= j)
-        %             M(i,j) = s(i-j+1);
-        %         end
-        %     end
-        % end
-        % 
-        % % Macierz K
-        % K = ((M' * M + lambda * eye(Nu))^(-1)) * M';
-        % ke = sum(K(1, :));
-        ku = K(1, :) * M_p;
-
         % Obliczenie przyrostu sterowania dla chwili (i+1) w chwili i-tej
         delta_u = ke * e - ku * delta_up;
         
@@ -99,7 +74,7 @@ function [] = DMC_analitic_fuzzy(F_10, h_20, a, b, K_stat, N, Nu, D, lambda, S, 
             delta_u = -delta_u_max;
         end
         
-        % Obliczenie sterowania
+        % Obliczenie sterowania dla chwili (i+1) w chwili i-tej
         u(1,k) = u(1,k-1) + delta_u; 
         
         % Ograniczenie sterowania

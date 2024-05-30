@@ -1,4 +1,4 @@
-function Y = find_value(params, u, u_0, R)
+function Y = find_value(params, F_1, index, R)
     a = zeros(size(R));
     b = zeros(size(R));
     for i = 1:length(R)
@@ -9,15 +9,15 @@ function Y = find_value(params, u, u_0, R)
     Y = 0;
     weight = 0;
     for i = 1:length(R)
-        if round(u-(u_0-1)) >= length(R{i})
-            Y = Y + R{i}(end)*(a(i) + b(i)*u);
+        if index >= length(R{i})
+            Y = Y + R{i}(end)*(a(i) + b(i)*F_1);
             weight = weight + R{i}(end);
-        elseif round(u-(u_0-1)) <= 0
-            Y = Y + R{i}(1)*(a(i) + b(i)*u);
+        elseif index <= 0
+            Y = Y + R{i}(1)*(a(i) + b(i)*F_1);
             weight = weight + R{i}(1);
         else
-            Y = Y + R{i}(round(u-(u_0-1)))*(a(i) + b(i)*u);
-            weight = weight + R{i}(round(u-(u_0-1)));
+            Y = Y + R{i}(index)*(a(i) + b(i)*F_1);
+            weight = weight + R{i}(index);
         end
     end
     Y = Y / weight;

@@ -10,6 +10,8 @@ hold off;
 legend('h_1^{G(z)}');
 xlabel('k');
 ylabel('h [cm]');
+title('Wysokość słupa cieczy w zbiorniku 1. - h_1(k)');
+grid on;
 
 figure;
 hold on;
@@ -18,4 +20,6 @@ hold off;
 legend('h_2^{G(z)}');
 xlabel('k');
 ylabel('h [cm]');
+title('Wysokość słupa cieczy w zbiorniku 2. - h_2(k)');
+grid on;
 end

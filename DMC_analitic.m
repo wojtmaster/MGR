@@ -1,4 +1,4 @@
-function [] = DMC_analitic(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, delta_u_max, kk, tau, t)
+function [] = DMC_analitic(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, delta_u_max, kk, tau)
 
     M = zeros(N, Nu);
     M_p = zeros(N, D-1);
@@ -38,7 +38,6 @@ function [] = DMC_analitic(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, de
     
     % Sterowanie DMC
     for k = 2:kk
-        % F_1
         if k == 2
             y(k) = - a(1)*y(k-1) + b(1)*u(2,k-1);
         elseif k <= tau+1
@@ -57,13 +56,7 @@ function [] = DMC_analitic(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, de
         end
     
         % Przepisanie sterowań do wektora przeszłych sterowań
-            for i = (D-1):-1:1
-                if i == 1
-                    delta_up(i) = delta_u;
-                else
-                    delta_up(i) = delta_up(i-1);
-                end
-            end 
+        delta_up = [delta_u; delta_up(1:end-1)];
     
         % Oblicznie uchybu    
         e = y_zad(k) - y(k);
@@ -78,7 +71,7 @@ function [] = DMC_analitic(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, de
             delta_u = -delta_u_max;
         end
         
-        % Obliczenie sterowania dla chwili (i+1) w chwili i-tej
+        % Obliczenie sterowania
         u(1,k) = u(1,k-1) + delta_u; 
         
         % Ograniczenie sterowania
@@ -89,27 +82,29 @@ function [] = DMC_analitic(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, de
         end
     
         % Obliczenie wskaźnika regulacji
-        error(k) = error(k-1) + 1/2 * (y_zad(k) - y(k))^2;
+        error(k) = (y_zad(k) - y(k))^2;
     end
-    disp(sum(error));
+    disp(sum(error)/kk);
     
     %% Prezentacja wyników
     figure;
     hold on;
-    stairs(0:kk-1, y_zad);
-    stairs(0:kk-1, y);
+    stairs(0:kk-1, y_zad, 'LineWidth', 1.2);
+    stairs(0:kk-1, y, 'LineWidth', 1.2);
     hold off;
     legend('y_{zad}', 'y');
     title('Poziom wody w drugim zbiorniku - h_2');
     xlabel('k');
     ylabel('y(k)');
+    grid on;
     
     figure;
     hold on;
-    stairs(0:kk-1, u(1,:));
+    stairs(0:kk-1, u(1,:), 'LineWidth', 1.2);
     hold off;
     legend('u');
     title('Sygnał sterujący F_1');
     xlabel('k');
     ylabel('u');
+    grid on;
 end
