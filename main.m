@@ -42,10 +42,9 @@ static_characteristic(F_10, F_D0, h_10, h_20, alpha_1, alpha_2);
 modified_Euler(a, c, alpha_1, alpha_2, F_10, F_D0, h_10, h_20, V_10, V_20, t, kk, tau, Tp, u);
 
 %% Transmitancje G(s) i G(z)
-[G_s, G_z] = tf_function(a, c, alpha_1, alpha_2, V_10, V_20, tau, Tp);
+[G_z] = tf_function(a, c, alpha_1, alpha_2, V_10, V_20, tau, Tp);
 
 %% Przebiegi wartości wyjściowych obliczone przy pomocy G(s), G(z)
-tf_continious(G_s, u, t);
 tf_discrete(G_z, u, t, kk);
 
 %% Wartość zadana h_2
@@ -57,14 +56,6 @@ b(2) = [G_z.Numerator{2,1}(3)];
 
 a(1) = [G_z.Denominator{2,1}(2)];
 a(2) = [G_z.Denominator{2,1}(3)];
-
-%% PID(z)
-% Parametry PID
-Kp = 6.07 * 0.45;
-Ti = 460/2;
-Td = 460/8;
-
-PID_controller(Kp, Ti, Td, a, b, u, delta_h, Tp, kk, tau/Tp, t);
 
 %% Regulator DMC
 % Horyzonty
@@ -92,13 +83,6 @@ DMC_numeric(a, b, N, Nu, D, lambda, s, u, delta_h, y_max, u_max, delta_u_max, kk
 u_start = 45;
 u_end = 135;
 [R_U, optimal_params_U] = static_characteristic_y_u(F_D0, alpha_2, u_start, u_end);
-% Zakres rozmywania u(y)
-y_start = 10;
-y_end = 70;
-[R_Y, optimal_params_Y] = static_characteristic_u_y(F_D0, alpha_2, y_start, y_end);
-
-%% Fuzzy PID
-PID_controller_fuzzy(Kp, Ti, Td, a, b, u, delta_h, Tp, kk, tau/Tp, t, R_U, R_Y, optimal_params_U, optimal_params_Y);
 
 %% Fuzzy DMC - analitic
 DMC_analitic_fuzzy(a, b, N, Nu, D, lambda, s, u, delta_h, y_max, u_max, delta_u_max, kk, tau/Tp, t, R_U, R_Y, optimal_params_U, optimal_params_Y);
