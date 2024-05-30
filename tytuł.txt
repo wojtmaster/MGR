@@ -1,0 +1,6 @@
+Tytuł: Zastosowanie modeli statyki typu Takagi-Sugeno z następnikami hiperbolicznymi w algorytmach regulacji predykcyjnej.
+
+Cel: Celem pracy jest zbadanie jakości modelowania z wykorzystaniem modeli strukturyzowanych, z modelami statyki typu Takagi-Sugeno, 
+     w których w następnikach reguł, zamiast funkcji liniowych, wykorzystuje się funkcje hiperboliczne. 
+     Modele te zostaną wykorzystane do opracowania szeregu algorytmów regulacji predykcyjnej procesów nieliniowych. 
+     Następnie, działanie tych algorytmów zostanie porównane z działaniem algorytmów bazujących na klasycznych modelach Takagi-Sugeno, z następnikami liniowymi.
