@@ -3,11 +3,6 @@ function [R, optimal_params] = static_characteristic_y_u(F_D0, alpha_2, F_1_star
     F_D = F_D0;
     y = ((F_1+F_D) / alpha_2).^2;
     
-    fig_u = figure;
-    figure(fig_u);
-    plot(F_1, y, 'b-');
-    hold on;
-    
     % Fuzzy sets
     R = cell(1,5);
     alpha = [-0.1, 0.1, 0.1, 0.1, 0.1];
@@ -37,6 +32,11 @@ function [R, optimal_params] = static_characteristic_y_u(F_D0, alpha_2, F_1_star
     a = ones(size(R));
     b = ones(size(R));
      
+    fig_u = figure;
+    figure(fig_u);
+    plot(F_1, y, 'b-', 'LineWidth', 1.2);
+    hold on;
+
     if strcmp(s, 'linear')
         % MNK: Minimalizacja sumy kwadratów błędów
         fun = @(params) sum((y - fuzzy_linear_model(params, F_1, R)).^2);

@@ -4,7 +4,7 @@ clear;
 N = 6;
 D = N;
 Nu = 3;
-lambda = 0.01;
+lambda = 5;
 
 Tp = 1;
 % Próbki dyskretne
@@ -114,7 +114,7 @@ y_zad = zeros(kk,1);
 y_zad(2:end) = 1;
 
 delta_up = zeros(1, nb-1);
-delta_uk = 0;
+delta_u = 0;
 
 u = zeros(1,kk);
 u_max = 2;
@@ -131,23 +131,24 @@ for k = 2:kk
 
     for i = (nb-1):-1:1
         if i == 1
-            delta_up(i) = delta_uk;
+            delta_up(i) = delta_u;
         else
             delta_up(i) = delta_up(i-1);
         end
     end
+    delta_up = [delta_u, delta_up(1:end-1)];
 
     if k == 2
-        delta_uk = k_e*y_zad(k) - k_y*[y(k-1); 0] - k_u*delta_up';
+        delta_u = k_e*y_zad(k) - k_y*[y(k-1); 0] - k_u*delta_up';
     else
-        delta_uk = k_e*y_zad(k) - k_y*[y(k-1); y(k-2)] - k_u*delta_up';
+        delta_u = k_e*y_zad(k) - k_y*[y(k-1); y(k-2)] - k_u*delta_up';
     end
-    if delta_uk > delta_uk_max
-        delta_uk = delta_uk_max;
-    elseif delta_uk < -delta_uk_max
-        delta_uk = -delta_uk_max;
+    if delta_u > delta_uk_max
+        delta_u = delta_uk_max;
+    elseif delta_u < -delta_uk_max
+        delta_u = -delta_uk_max;
     end
-    u(k) = u(k-1) + delta_uk;
+    u(k) = u(k-1) + delta_u;
     if u(k) > u_max
         u(k) = u_max;
     elseif u(k) < -u_max

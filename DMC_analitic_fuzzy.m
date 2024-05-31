@@ -1,4 +1,4 @@
-function [] = DMC_analitic_fuzzy(F_10, h_20, a, b, K_stat, N, Nu, D, lambda, S, u, y_zad, y_max, u_max, delta_u_max, kk, tau, R, optimal_params, F_1_start, F_1_end, n)
+function [y_static] = DMC_analitic_fuzzy(F_10, h_20, a, b, K_stat, N, Nu, D, lambda, S, u, y_zad, y_max, u_max, delta_u_max, kk, tau, R, optimal_params, F_1_start, F_1_end, n)
 
     M = zeros(N, Nu);
     M_p = zeros(N, D-1);
@@ -63,7 +63,7 @@ function [] = DMC_analitic_fuzzy(F_10, h_20, a, b, K_stat, N, Nu, D, lambda, S, 
         e = y_zad(k) - y(k);
         
         % Charakterystyka rozmyta
-        s = S*y_static(k-1);
+        s = S*y_static(k-1) / K_stat;
         % Implementacja macierzy M_p
         for i = 1:N
             for j = 1:D-1
@@ -75,18 +75,18 @@ function [] = DMC_analitic_fuzzy(F_10, h_20, a, b, K_stat, N, Nu, D, lambda, S, 
             end
         end
         
-        % % Implementacja macierzy M
-        % for i = 1:N
-        %     for j = 1:Nu
-        %         if(i >= j)
-        %             M(i,j) = s(i-j+1);
-        %         end
-        %     end
-        % end
-        % 
-        % % Macierz K
-        % K = ((M' * M + lambda * eye(Nu))^(-1)) * M';
-        % ke = sum(K(1, :));
+        % Implementacja macierzy M
+        for i = 1:N
+            for j = 1:Nu
+                if(i >= j)
+                    M(i,j) = s(i-j+1);
+                end
+            end
+        end
+
+        % Macierz K
+        K = ((M' * M + lambda * eye(Nu))^(-1)) * M';
+        ke = sum(K(1, :));
         ku = K(1, :) * M_p;
 
         % Obliczenie przyrostu sterowania dla chwili (i+1) w chwili i-tej
@@ -110,7 +110,7 @@ function [] = DMC_analitic_fuzzy(F_10, h_20, a, b, K_stat, N, Nu, D, lambda, S, 
         end
         
         index = round((u(1,k)+F_10-F_1_start)*n / (F_1_end-F_1_start));
-        y_static(k) = find_value(optimal_params, u(1,k)+F_10, index, R) - h_20;
+        y_static(k) = abs(find_value(optimal_params, u(1,k)+F_10, index, R) - h_20);
     
         % Obliczenie wskaźnika regulacji
         error(k) = (y_zad(k) - y(k))^2;
@@ -120,20 +120,22 @@ function [] = DMC_analitic_fuzzy(F_10, h_20, a, b, K_stat, N, Nu, D, lambda, S, 
     %% Prezentacja wyników
     figure;
     hold on;
-    stairs(0:kk-1, y_zad);
-    stairs(0:kk-1, y);
+    stairs(0:kk-1, y_zad, 'LineWidth', 1.2);
+    stairs(0:kk-1, y, 'LineWidth', 1.2);
     hold off;
     legend('y_{zad}', 'y');
     title('Poziom wody w drugim zbiorniku - h_2(k)');
     xlabel('k');
     ylabel('y(k)');
+    grid on;
     
     figure;
     hold on;
-    stairs(0:kk-1, u(1,:));
+    stairs(0:kk-1, u(1,:), 'LineWidth', 1.2);
     hold off;
     legend('u');
     title('Sygnał sterujący F_1(k)');
     xlabel('k');
     ylabel('u');
+    grid on;
 end
