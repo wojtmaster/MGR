@@ -30,18 +30,29 @@ Tp = 20;
 kk = 500;
 % Wektor czasu
 t = 0:Tp:(kk-1)*Tp;
+% Zakres wyznaczanej charakterystyki statycznej
+F_1_start = 45;
+F_1_end = 135;
+% Liczba podziałów wartości sterowania F_1 (do charakterystyki statycznej)
+n = 200;
+
+%% Transmitancje G(z)
+[G_z] = tf_function(a, c, alpha_1, alpha_2, V_10, V_20, tau, Tp);
 
 %% Charakrerystyka statyczna
-static_characteristic(F_10, F_D0, h_10, h_20, alpha_1, alpha_2);
+[h_2, F_1] = static_characteristic(F_1_start, F_1_end, F_D0, alpha_2, n);
+
+%% Fuzzy static charaacteristic - linear
+[R, optimal_params] = static_characteristic_y_u(F_1, h_2, n, 'linear');
+
+%% Fuzzy static charaacteristic - nonlinear
+% [R, optimal_params] = static_characteristic_y_u(F_D0, alpha_2, F_1_start, F_1_end, n, 'nonlinear');
 
 %% Wymuszenia
 [u] = enforce(kk);
 
 %% Linearyzacja za pomocą zmodyfikowanej metody Eulera
 modified_Euler(a, c, alpha_1, alpha_2, F_10, F_D0, h_10, h_20, V_10, V_20, t, kk, tau, Tp, u);
-
-%% Transmitancje G(s) i G(z)
-[G_z] = tf_function(a, c, alpha_1, alpha_2, V_10, V_20, tau, Tp);
 
 %% Przebiegi wartości wyjściowych obliczone przy pomocy G(s), G(z)
 tf_discrete(G_z, u, t, kk);
@@ -50,11 +61,11 @@ tf_discrete(G_z, u, t, kk);
 y_zad = set_value(kk, h_20);
 
 %% Współczynniki do równań różnicowych na h_2
-b(1) = [G_z.Numerator{2,1}(2)];
-b(2) = [G_z.Numerator{2,1}(3)];
+b(1) = [G_z.Numerator{1}(2)];
+b(2) = [G_z.Numerator{1}(3)];
 
-a(1) = [G_z.Denominator{2,1}(2)];
-a(2) = [G_z.Denominator{2,1}(3)];
+a(1) = [G_z.Denominator{1}(2)];
+a(2) = [G_z.Denominator{1}(3)];
 
 %% Regulator DMC
 % Horyzonty
@@ -69,7 +80,7 @@ u_max = 15;
 delta_u_max = 5;
 
 % Odpwiedzi skokowe
-s = step(G_z(2,1), Tp*(D-1));
+s = step(G_z(1), Tp*(D-1));
 
 %% Regulacja DMC - analitycznie
 DMC_analitic(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, delta_u_max, kk, tau/Tp);
@@ -77,17 +88,10 @@ DMC_analitic(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, delta_u_max, kk,
 %% Regulacja DMC - numerycznie
 DMC_numeric(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, delta_u_max, kk, tau/Tp);
 
-%% Zakres rozmywania y(u)
-F_1_start = 45;
-F_1_end = 135;
-% Liczba podziałów
-n = 100;
+%% Regulacja DMC-SL - analitycznie
 
-%% Fuzzy static charaacteristic - linear
-[R, optimal_params] = static_characteristic_y_u(F_D0, alpha_2, F_1_start, F_1_end, n, 'linear');
 
-%% Fuzzy static charaacteristic - nonlinear
-[R, optimal_params] = static_characteristic_y_u(F_D0, alpha_2, F_1_start, F_1_end, n, 'nonlinear');
+
 
 %% Fuzzy DMC - analitic
 DMC_analitic_fuzzy(F_10, h_20, a, b, dcgain(G_z(2,1)), N, Nu, D, lambda, s, u, y_zad, y_max, u_max, delta_u_max, kk, tau/Tp, R, optimal_params, F_1_start, F_1_end, n);

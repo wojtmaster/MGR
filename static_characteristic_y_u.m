@@ -1,7 +1,7 @@
-function [R, optimal_params] = static_characteristic_y_u(F_D0, alpha_2, F_1_start, F_1_end, n, s)
-    F_1 = linspace(F_1_start, F_1_end, n);
-    F_D = F_D0;
-    y = ((F_1+F_D) / alpha_2).^2;
+function [R, optimal_params] = static_characteristic_y_u(F_1, h_2, n, s)
+    % F_1 = linspace(F_1_start, F_1_end, n);
+    % F_D = F_D0;
+    % y = ((F_1+F_D) / alpha_2).^2;
     
     % Fuzzy sets
     R = cell(1,5);
@@ -34,12 +34,12 @@ function [R, optimal_params] = static_characteristic_y_u(F_D0, alpha_2, F_1_star
      
     fig_u = figure;
     figure(fig_u);
-    plot(F_1, y, 'b-', 'LineWidth', 1.2);
+    plot(F_1, h_2, 'b-', 'LineWidth', 1.2);
     hold on;
 
     if strcmp(s, 'linear')
         % MNK: Minimalizacja sumy kwadratów błędów
-        fun = @(params) sum((y - fuzzy_linear_model(params, F_1, R)).^2);
+        fun = @(params) sum((h_2 - fuzzy_linear_model(params, F_1, R)).^2);
         initial_params = [a(1), b(1)];
         for i = 2:length(R)
             initial_params = [initial_params, a(i), b(i)];
@@ -48,20 +48,20 @@ function [R, optimal_params] = static_characteristic_y_u(F_D0, alpha_2, F_1_star
         optimal_params = fminsearch(fun, initial_params, opt);
         
         % Prezentacja wyników
-        Y = fuzzy_linear_model(optimal_params, F_1, R);
+        H_2 = fuzzy_linear_model(optimal_params, F_1, R);
         figure(fig_u);
-        plot(F_1, Y, 'ro');
+        plot(F_1, H_2, 'ro');
         xlim([45 135]);
         ylim([10 70]);
         grid on;
-        xlabel('u');
-        ylabel('y');
+        xlabel('F_1');
+        ylabel('h_2');
         plot_title = sprintf('Charakterystyka statyczna h_2(F_1) \n Następniki liniowe');
         title(plot_title);
         legend('h_2(F_1)', 'h_2(F_1) - fuzzy', 'Location', 'northwest');
     else
         % MNK: Minimalizacja sumy kwadratów błędów
-        fun = @(params) sum((y - fuzzy_nonlinear_model(params, F_1, R)).^2);
+        fun = @(params) sum((h_2 - fuzzy_nonlinear_model(params, F_1, R)).^2);
         initial_params = [a(1), b(1)];
         for i = 2:length(R)
             initial_params = [initial_params, a(i), b(i)];
@@ -70,16 +70,21 @@ function [R, optimal_params] = static_characteristic_y_u(F_D0, alpha_2, F_1_star
         optimal_params = fminsearch(fun, initial_params, opt);
         
         % Prezentacja wyników
-        Y = fuzzy_nonlinear_model(optimal_params, F_1, R);
+        H_2 = fuzzy_nonlinear_model(optimal_params, F_1, R);
         figure(fig_u);
-        plot(F_1, Y, 'ro');
+        plot(F_1, H_2, 'ro');
         xlim([45 135]);
         ylim([10 70]);
         grid on;
-        xlabel('u');
-        ylabel('y');
+        xlabel('F_1');
+        ylabel('h_2');
         plot_title = sprintf('Charakterystyka statyczna h_2(F_1) \n Następniki hiperboliczne');
         title(plot_title);
         legend('y(u)', 'y(u) - fuzzy', 'Location', 'northwest');
     end
+
+    error = sum((h_2 - H_2).^2)/n;
+    disp('MSE = ');
+    disp(error);
+
 end
