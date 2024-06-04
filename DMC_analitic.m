@@ -39,13 +39,13 @@ function [] = DMC_analitic(a, b, N, Nu, D, lambda, s, u, y_zad, y_max, u_max, de
     % Sterowanie DMC
     for k = 2:kk
         if k == 2
-            y(k) = - a(1)*y(k-1) + b(1)*u(2,k-1);
+            y(k) = - a(1)*y(k-1) + b(tau+1)*u(2,k-1);
         elseif k <= tau+1
-            y(k) = - a(1)*y(k-1) - a(2)*y(k-2) + b(1)*u(2,k-1) + b(2)*u(2,k-2);
+            y(k) = - a(1)*y(k-1) - a(2)*y(k-2) + b(tau+1)*u(2,k-1) + b(tau+2)*u(2,k-2);
         elseif k == tau+2
-            y(k) = - a(1)*y(k-1) - a(2)*y(k-2) + b(1)*u(1,k-(tau+1)) + b(1)*u(2,k-1) + b(2)*u(2,k-2);
+            y(k) = - a(1)*y(k-1) - a(2)*y(k-2) + b(tau+1)*u(1,k-(tau+1)) + b(tau+1)*u(2,k-1) + b(tau+2)*u(2,k-2);
         else
-            y(k) = - a(1)*y(k-1) - a(2)*y(k-2) + b(1)*u(1,k-(tau+1)) + b(2)*u(1,k-(tau+2)) + b(1)*u(2,k-1) + b(2)*u(2,k-2);
+            y(k) = - a(1)*y(k-1) - a(2)*y(k-2) + b(tau+1)*u(1,k-(tau+1)) + b(tau+2)*u(1,k-(tau+2)) + b(tau+1)*u(2,k-1) + b(tau+2)*u(2,k-2);
         end
     
         % Rzutowanie na ograniczenia

@@ -1,7 +1,4 @@
-function [R, optimal_params] = static_characteristic_y_u(F_1, h_2, n, s)
-    % F_1 = linspace(F_1_start, F_1_end, n);
-    % F_D = F_D0;
-    % y = ((F_1+F_D) / alpha_2).^2;
+function [R, optimal_params] = static_characteristic_y_u(F_1, F_1_ucz, F_1_wer, h_2_ucz, h_2_wer, F_1_start, F_1_end, n, s)
     
     % Fuzzy sets
     R = cell(1,5);
@@ -32,14 +29,19 @@ function [R, optimal_params] = static_characteristic_y_u(F_1, h_2, n, s)
     a = ones(size(R));
     b = ones(size(R));
      
-    fig_u = figure;
-    figure(fig_u);
-    plot(F_1, h_2, 'b-', 'LineWidth', 1.2);
+    fig_u_ucz = figure;
+    figure(fig_u_ucz);
+    plot(F_1_ucz, h_2_ucz, 'b-', 'LineWidth', 1.2);
+    hold on;
+
+    fig_u_wer = figure;
+    figure(fig_u_wer);
+    plot(F_1_wer, h_2_wer, 'b-', 'LineWidth', 1.2);
     hold on;
 
     if strcmp(s, 'linear')
         % MNK: Minimalizacja sumy kwadratów błędów
-        fun = @(params) sum((h_2 - fuzzy_linear_model(params, F_1, R)).^2);
+        fun = @(params) sum((h_2_ucz - fuzzy_linear_model(params, F_1_ucz, F_1_start, F_1_end, R, n)).^2);
         initial_params = [a(1), b(1)];
         for i = 2:length(R)
             initial_params = [initial_params, a(i), b(i)];
@@ -48,20 +50,34 @@ function [R, optimal_params] = static_characteristic_y_u(F_1, h_2, n, s)
         optimal_params = fminsearch(fun, initial_params, opt);
         
         % Prezentacja wyników
-        H_2 = fuzzy_linear_model(optimal_params, F_1, R);
-        figure(fig_u);
-        plot(F_1, H_2, 'ro');
+        % Zbiór uczący
+        h_2_mod_ucz = fuzzy_linear_model(optimal_params, F_1_ucz, F_1_start, F_1_end, R, n);
+        figure(fig_u_ucz);
+        plot(F_1_ucz, h_2_mod_ucz, 'ro');
         xlim([45 135]);
         ylim([10 70]);
         grid on;
         xlabel('F_1');
         ylabel('h_2');
-        plot_title = sprintf('Charakterystyka statyczna h_2(F_1) \n Następniki liniowe');
+        plot_title = sprintf('Charakterystyka statyczna h_{2ucz}(F_{1ucz}) \n Następniki liniowe');
+        title(plot_title);
+        legend('h_2(F_1)', 'h_2(F_1) - fuzzy', 'Location', 'northwest');
+    
+        % Zbiór weryfikujący
+        h_2_mod_wer = fuzzy_linear_model(optimal_params, F_1_wer, F_1_start, F_1_end, R, n);
+        figure(fig_u_wer);
+        plot(F_1_wer, h_2_mod_wer, 'ro');
+        xlim([45 135]);
+        ylim([10 70]);
+        grid on;
+        xlabel('F_1');
+        ylabel('h_2');
+        plot_title = sprintf('Charakterystyka statyczna h_{2wer}(F_{1wer}) \n Następniki liniowe');
         title(plot_title);
         legend('h_2(F_1)', 'h_2(F_1) - fuzzy', 'Location', 'northwest');
     else
         % MNK: Minimalizacja sumy kwadratów błędów
-        fun = @(params) sum((h_2 - fuzzy_nonlinear_model(params, F_1, R)).^2);
+        fun = @(params) sum((h_2_ucz - fuzzy_nonlinear_model(params, F_1_ucz, F_1_start, F_1_end, R, n)).^2);
         initial_params = [a(1), b(1)];
         for i = 2:length(R)
             initial_params = [initial_params, a(i), b(i)];
@@ -70,21 +86,35 @@ function [R, optimal_params] = static_characteristic_y_u(F_1, h_2, n, s)
         optimal_params = fminsearch(fun, initial_params, opt);
         
         % Prezentacja wyników
-        H_2 = fuzzy_nonlinear_model(optimal_params, F_1, R);
-        figure(fig_u);
-        plot(F_1, H_2, 'ro');
+        h_2_mod_ucz = fuzzy_nonlinear_model(optimal_params, F_1_ucz, F_1_start, F_1_end, R, n);
+        figure(fig_u_ucz);
+        plot(F_1_ucz, h_2_mod_ucz, 'ro');
         xlim([45 135]);
         ylim([10 70]);
         grid on;
         xlabel('F_1');
         ylabel('h_2');
-        plot_title = sprintf('Charakterystyka statyczna h_2(F_1) \n Następniki hiperboliczne');
+        plot_title = sprintf('Charakterystyka statyczna h_{2ucz}(F_{1ucz}) \n Następniki hiperboliczne');
+        title(plot_title);
+        legend('y(u)', 'y(u) - fuzzy', 'Location', 'northwest');
+
+        h_2_mod_wer = fuzzy_nonlinear_model(optimal_params, F_1_wer, F_1_start, F_1_end, R, n);
+        figure(fig_u_wer);
+        plot(F_1_wer, h_2_mod_wer, 'ro');
+        xlim([45 135]);
+        ylim([10 70]);
+        grid on;
+        xlabel('F_1');
+        ylabel('h_2');
+        plot_title = sprintf('Charakterystyka statyczna h_{2wer}(F_{1wer}) \n Następniki hiperboliczne');
         title(plot_title);
         legend('y(u)', 'y(u) - fuzzy', 'Location', 'northwest');
     end
 
-    error = sum((h_2 - H_2).^2)/n;
-    disp('MSE = ');
-    disp(error);
+    E_ucz = sum((h_2_ucz - h_2_mod_ucz).^2)/(n/2);
+    E_wer = sum((h_2_wer - h_2_mod_wer).^2)/(n/2);
+    
+    fprintf('Wartość E_ucz = %.3f \n', E_ucz);
+    fprintf('Wartość E_wer = %.3f \n', E_wer);
 
 end

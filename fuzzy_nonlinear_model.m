@@ -1,4 +1,4 @@
-function Y = fuzzy_nonlinear_model(params, F_1, R)
+function Y = fuzzy_nonlinear_model(params, F_1, F_1_start, F_1_end, R, n)
     a = zeros(size(R));
     b = zeros(size(R));
     for i = 1:length(R)
@@ -9,11 +9,15 @@ function Y = fuzzy_nonlinear_model(params, F_1, R)
     Y = zeros(size(F_1));
 
     for i = 1:length(F_1)
+        index = round((F_1(i)-F_1_start)*n / (F_1_end-F_1_start));
+        if index == 0
+            index = 1;
+        end
         weight = 0;
         for j = 1:length(R)
-            Y(i) = Y(i) + R{j}(i)*(a(j) + tanh(b(j)*F_1(i)));
-            % Y(i) = Y(i) + R{j}(i)*sinh(a(j) + b(j)*u(i));
-            weight = weight + R{j}(i);
+            Y(i) = Y(i) + R{j}(index)*(a(j) + tanh(b(j)*F_1(i)));
+            % Y(i) = Y(i) + R{j}(index)*sinh(a(j) + b(j)*u(i));
+            weight = weight + R{j}(index);
         end
         Y(i) = Y(i) / weight;
     end
