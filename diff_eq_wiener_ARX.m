@@ -1,4 +1,4 @@
-function [] = diff_eq_wiener_ARX(a, b, u_ucz, u_wer, y_ucz, y_wer, params, F_10, h_20, F_1_start, F_1_end, R, kk, tau, n)
+function [v] = diff_eq_wiener_ARX(a, b, K, u_ucz, u_wer, y_ucz, y_wer, params, F_10, h_20, F_1_start, F_1_end, R, kk, tau, n)
     y_mod_ucz = zeros(1, kk/2);
     y_mod_wer = zeros(1, kk/2);
     y_mod_ucz(1:tau+2) = y_ucz(1:tau+2);
@@ -9,7 +9,7 @@ function [] = diff_eq_wiener_ARX(a, b, u_ucz, u_wer, y_ucz, y_wer, params, F_10,
     % Model ARX
     % Zbiór uczący
     for k = tau+3:kk/2
-        v(k) = - a(1)*y_ucz(k-1) - a(2)*y_ucz(k-2) + b(tau+1)*(u_ucz(1,k-(tau+1)) + u_ucz(2, k-1)) + b(tau+2)*(u_ucz(1,k-(tau+2)) + u_ucz(2, k-2));
+        v(k) = - a'*[y_ucz(k-1:-1:k-2)]' + (b(tau+1:tau+2)/K)'*[u_ucz(1,k-(tau+1):-1:k-(tau+2))]' + b(tau+1:tau+2)'*[u_ucz(2, k-1:-1:k-2)]';
         index = round((v(k)+F_10-F_1_start)*n / (F_1_end-F_1_start));
         y_mod_ucz(k) = find_value(params, v(k)+F_10, index, R) - h_20;
     end
@@ -17,7 +17,7 @@ function [] = diff_eq_wiener_ARX(a, b, u_ucz, u_wer, y_ucz, y_wer, params, F_10,
     v = zeros(1, kk/2);
     % Zbiór weryfikujący
     for k = tau+3:kk/2
-        v(k) = - a(1)*y_wer(k-1) - a(2)*y_wer(k-2) + b(tau+1)*(u_wer(1,k-(tau+1)) + u_wer(2, k-1)) + b(tau+2)*(u_wer(1,k-(tau+2)) + u_wer(2, k-2));
+        v(k) = - a'*[y_wer(k-1:-1:k-2)]' + (b(tau+1:tau+2)/K)'*[u_wer(1,k-(tau+1):-1:k-(tau+2))]' + b(tau+1:tau+2)'*[u_wer(2, k-1:-1:k-2)]';
         index = round((v(k)+F_10-F_1_start)*n / (F_1_end-F_1_start));
         y_mod_wer(k) = find_value(params, v(k)+F_10, index, R) - h_20;
     end

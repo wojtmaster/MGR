@@ -63,32 +63,34 @@ y_ucz = y(1:kk/2);
 y_wer = y(kk/2+1:end);
 
 %% Model o rzędzie dynamiki równym N
+% Rząd dynamiki
 N = 2;
-Y_ucz = y_ucz(N+1:end)';
-M_ucz = u_ucz(1, N:end-1)';
-M_wer = u_wer(1, N:end-1)';
+% Opóźnienie
+delay = tau/Tp;
+Y_ucz = y_ucz(N+delay+1:end)';
+M_ucz = u_ucz(1, N:end-(delay+1))';
+M_wer = u_wer(1, N:end-(delay+1))';
 % u(1, :)
-for i = N-1:-1:1
-    M_ucz = [M_ucz, u_ucz(1, i:end-(N+1-i))'];
-    M_wer = [M_wer, u_wer(1, i:end-(N+1-i))'];
+for i = 2:N
+    M_ucz = [M_ucz, u_ucz(1, (N+1)-i:end-(delay+i))'];
+    M_wer = [M_wer, u_wer(1, (N+1)-i:end-(delay+i))'];
 end
 % u(2, :)
-for i = N:-1:1
-    M_ucz = [M_ucz, u_ucz(2, i:end-(N+1-i))'];
-    M_wer = [M_wer, u_wer(2, i:end-(N+1-i))'];
+for i = 1:N
+    M_ucz = [M_ucz, u_ucz(2, (N+delay+1)-i:end-i)'];
+    M_wer = [M_wer, u_wer(2, (N+delay+1)-i:end-i)'];
 end
 % y(:)
-for i = N:-1:1
-    M_ucz = [M_ucz, y_ucz(i:end-(N+1-i))'];
-    M_wer = [M_wer, y_wer(i:end-(N+1-i))'];
+for i = 1:N
+    M_ucz = [M_ucz, y_ucz((N+delay+1)-i:end-i)'];
+    M_wer = [M_wer, y_wer((N+delay+1)-i:end-i)'];
 end
 
 w = M_ucz\Y_ucz;
-% w = (M_ucz'*M_ucz)^(-1)*M_ucz'*Y_ucz;
 
 %% ARX
-Y_ucz = [y_ucz(1:N)'; M_ucz*w];
-Y_wer = [y_wer(1:N)'; M_wer*w];
+Y_ucz = [y_ucz(1:(N+delay))'; M_ucz*w];
+Y_wer = [y_wer(1:(N+delay))'; M_wer*w];
 
 E_ucz = sum((y_ucz'-Y_ucz).^2)/(kk/2);
 E_wer = sum((y_wer' - Y_wer).^2)/(kk/2);
@@ -99,7 +101,7 @@ fprintf('E_wer = %.3f \n', E_wer);
 figure;
 stairs(0:kk/2-1, Y_ucz, 'b', 'LineWidth', 1.2);
 hold on;
-stairs(0:kk/2-1, y_ucz, 'r', 'LineWidth', 1.2);
+stairs(0:kk/2-1, y_ucz, 'r', 'LineWidth', 0.8);
 plot_title = sprintf('Zbiór uczący - y_{ucz}(k) \n N = %d     E_{ucz} = %.3f', N, E_ucz);
 title(plot_title);
 legend('y_{mod}', 'y');
@@ -110,7 +112,7 @@ grid on;
 figure;
 stairs(0:kk/2-1, Y_wer, 'b', 'LineWidth', 1.2);
 hold on;
-stairs(0:kk/2-1, y_wer, 'r', 'LineWidth', 1.2);
+stairs(0:kk/2-1, y_wer, 'r', 'LineWidth', 0.8);
 plot_title = sprintf('Zbiór weryfikujący - y_{wer}(k) \n N = %d     E_{ucz} = %.3f', N, E_wer);
 title(plot_title);
 legend('y_{mod}', 'y');
@@ -121,14 +123,14 @@ grid on;
 %% OE
 Y_ucz = zeros(kk/2, 1);
 Y_wer = zeros(kk/2, 1);
-Y_ucz(1:N) = y_ucz(1:N)';
-Y_wer(1:N) = y_wer(1:N)';
-for i = N+1:kk/2
-    M_temp_ucz = u_ucz(1, i-1);
-    M_temp_wer = u_wer(1, i-1);
+Y_ucz(1:N+delay) = y_ucz(1:N+delay)';
+Y_wer(1:N+delay) = y_wer(1:N+delay)';
+for i = (N+delay)+1:kk/2
+    M_temp_ucz = u_ucz(1, i-(delay+1));
+    M_temp_wer = u_wer(1, i-(delay+1));
     for j = 2:N
-        M_temp_ucz = [M_temp_ucz, u_ucz(1, i-j)];
-        M_temp_wer = [M_temp_wer, u_wer(1, i-j)];
+        M_temp_ucz = [M_temp_ucz, u_ucz(1, i-(delay+j))];
+        M_temp_wer = [M_temp_wer, u_wer(1, i-(delay+j))];
     end
     for j = 1:N
         M_temp_ucz = [M_temp_ucz, u_ucz(2, i-j)];
@@ -151,7 +153,7 @@ fprintf('E_wer = %.3f \n', E_wer);
 figure;
 stairs(0:kk/2-1, Y_ucz, 'b', 'LineWidth', 1.2);
 hold on;
-stairs(0:kk/2-1, y_ucz, 'r', 'LineWidth', 1.2);
+stairs(0:kk/2-1, y_ucz, 'r', 'LineWidth', 0.8);
 plot_title = sprintf('Zbiór uczący - y_{ucz}(k) \n N = %d     E_{ucz} = %.3f', N, E_ucz);
 title(plot_title);
 legend('y_{mod}', 'y');
@@ -162,7 +164,7 @@ grid on;
 figure;
 stairs(0:kk/2-1, Y_wer, 'b', 'LineWidth', 1.2);
 hold on;
-stairs(0:kk/2-1, y_wer, 'r', 'LineWidth', 1.2);
+stairs(0:kk/2-1, y_wer, 'r', 'LineWidth', 0.8);
 plot_title = sprintf('Zbiór weryfikujący - y_{wer}(k) \n N = %d     E_{ucz} = %.3f', N, E_wer);
 title(plot_title);
 legend('y_{mod}', 'y');
@@ -179,28 +181,29 @@ G_z = tf({b_1, b_2}, a, 1, 'Variable', 'z', 'Ts', Tp);
 G_z.Variable = 'z^-1';
 
 a = a(2:end);
-b(:,1) = b_1(2:end)/dcgain(G_z(2,1));
-b(:,2) = b_2(2:end)/dcgain(G_z(2,2));
+b(:,1) = b_1(2:end)/dcgain(G_z(1));
+b(:,2) = b_2(2:end);
+% b(:,2) = b_2(2:end)/dcgain(G_z(2));
 
 y_mod_ucz = zeros(1, kk/2);
 y_mod_wer = zeros(1, kk/2);
-y_mod_ucz(1:N) = y_ucz(1:N);
-y_mod_wer(1:N) = y_wer(1:N);
+y_mod_ucz(1:N+delay) = y_ucz(1:N+delay);
+y_mod_wer(1:N+delay) = y_wer(1:N+delay);
 
 z = zeros(1, kk/2);
 
-%% Model ARX
-for k = N+1:kk/2
+%% Model Hammersteina ARX
+for k = N+delay+1:kk/2
     index = round((u_ucz(1,k)+F_10-F_1_start)*n / (F_1_end-F_1_start));
     z(k) = find_value(optimal_params, u_ucz(1,k)+F_10, index, R) - h_20;
-    y_mod_ucz(k) = - a * [y_ucz(k-1:-1:k-N)]' + b(:, 1)'*[z(k-1:-1:k-N)]' + b(:,2)'*[u_ucz(2, k-1:-1:k-N)]';
+    y_mod_ucz(k) = - a * [y_ucz(k-1:-1:k-N)]' + b(:, 1)'*[z(k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_ucz(2, k-1:-1:k-N)]';
 end
 
 % Zbiór weryfikujący
-for k = N+1:kk/2
+for k = N+delay+1:kk/2
     index = round((u_wer(1,k)+F_10-F_1_start)*n / (F_1_end-F_1_start));
     z(k) = find_value(optimal_params, u_wer(1,k)+F_10, index, R) - h_20;
-    y_mod_wer(k) =  - a * [y_wer(k-1:-1:k-N)]' + b(:, 1)'*[z(k-1:-1:k-N)]' + b(:,2)'*[u_wer(2, k-1:-1:k-N)]';
+    y_mod_wer(k) =  - a * [y_wer(k-1:-1:k-N)]' + b(:, 1)'*[z(k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_wer(2, k-1:-1:k-N)]';
 end
 
 E_ucz = sum((y_ucz - y_mod_ucz).^2)/(kk/2);
@@ -233,24 +236,121 @@ title(plot_title);
 legend('y_{mod}', 'y');
 grid on;
 
-%% Model OE
+%% Model Hammersteina OE
 % Zbiór uczący
-for k = N+1:kk/2
+for k = N+delay+1:kk/2
     index = round((u_ucz(1,k)+F_10-F_1_start)*n / (F_1_end-F_1_start));
     z(k) = find_value(optimal_params, u_ucz(1,k)+F_10, index, R) - h_20;
-    y_mod_ucz(k) = - a * [y_mod_ucz(k-1:-1:k-N)]' + b(:, 1)'*[z(k-1:-1:k-N)]' + b(:,2)'*[u_ucz(2, k-1:-1:k-N)]';
+    y_mod_ucz(k) = - a * [y_mod_ucz(k-1:-1:k-N)]' + b(:, 1)'*[z(k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_ucz(2, k-1:-1:k-N)]';
 end
 
 % Zbiór weryfikujący
-for k = N+1:kk/2
+for k = N+delay+1:kk/2
     index = round((u_wer(1,k)+F_10-F_1_start)*n / (F_1_end-F_1_start));
     z(k) = find_value(optimal_params, u_wer(1,k)+F_10, index, R) - h_20;
-    y_mod_wer(k) =  - a * [y_mod_wer(k-1:-1:k-N)]' + b(:, 1)'*[z(k-1:-1:k-N)]' + b(:,2)'*[u_wer(2, k-1:-1:k-N)]';
+    y_mod_wer(k) =  - a * [y_mod_wer(k-1:-1:k-N)]' + b(:, 1)'*[z(k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_wer(2, k-1:-1:k-N)]';
 end
 
 E_ucz = sum((y_ucz - y_mod_ucz).^2)/(kk/2);
 E_wer = sum((y_wer - y_mod_wer).^2)/(kk/2);
 fprintf('Model OE \n');
+fprintf('E_ucz = %.3f \n', E_ucz);
+fprintf('E_wer = %.3f \n', E_wer);
+
+figure;
+hold on;
+stairs(0:kk/2-1, y_mod_ucz, 'b-', 'LineWidth', 1.2);
+stairs(0:kk/2-1, y_ucz, 'r-', 'LineWidth', 0.8);
+hold off;
+xlabel('k');
+ylabel('y_{ucz}(k)');
+plot_title = sprintf('Zbiór uczący - y_{ucz}(k) \n E_{ucz} = %.3f', E_ucz);
+title(plot_title);
+legend('y_{mod}', 'y');
+grid on;
+
+figure;
+hold on;
+stairs(0:kk/2-1, y_mod_wer, 'b-', 'LineWidth', 1.2);
+stairs(0:kk/2-1, y_wer, 'r-', 'LineWidth', 0.8);
+hold off;
+xlabel('k');
+ylabel('y_{wer}(k)');
+plot_title = sprintf('Zbiór weryfikujący - y_{wer}(k) \n E_{wer} = %.3f', E_wer);
+title(plot_title);
+legend('y_{mod}', 'y');
+grid on;
+
+%% Model Wienera ARX
+v = zeros(1, kk/2);
+
+% Model ARX
+% Zbiór uczący
+for k = N+delay+1:kk/2
+    v(k) = - a * [y_ucz(k-1:-1:k-N)]' + b(:, 1)'*[u_ucz(1, k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_ucz(2, k-1:-1:k-N)]';
+    index = round((v(k)+F_10-F_1_start)*n / (F_1_end-F_1_start));
+    y_mod_ucz(k) = find_value(optimal_params, v(k)+F_10, index, R) - h_20;
+end
+
+v = zeros(1, kk/2);
+% Zbiór weryfikujący
+for k = N+delay+1:kk/2
+    v(k) =  - a * [y_wer(k-1:-1:k-N)]' + b(:, 1)'*[u_wer(1, k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_wer(2, k-1:-1:k-N)]';
+    index = round((v(k)+F_10-F_1_start)*n / (F_1_end-F_1_start));
+    y_mod_wer(k) = find_value(optimal_params, v(k)+F_10, index, R) - h_20;
+end
+
+E_ucz = sum((y_ucz - y_mod_ucz).^2)/(kk/2);
+E_wer = sum((y_wer - y_mod_wer).^2)/(kk/2);
+fprintf('Model ARX \n');
+fprintf('E_ucz = %.3f \n', E_ucz);
+fprintf('E_wer = %.3f \n', E_wer);
+
+figure;
+hold on;
+stairs(0:kk/2-1, y_mod_ucz, 'b-', 'LineWidth', 1.2);
+stairs(0:kk/2-1, y_ucz, 'r-', 'LineWidth', 0.8);
+hold off;
+xlabel('k');
+ylabel('y_{ucz}(k)');
+plot_title = sprintf('Zbiór uczący - y_{ucz}(k) \n E_{ucz} = %.3f', E_ucz);
+title(plot_title);
+legend('y_{mod}', 'y');
+grid on;
+
+figure;
+hold on;
+stairs(0:kk/2-1, y_mod_wer, 'b-', 'LineWidth', 1.2);
+stairs(0:kk/2-1, y_wer, 'r-', 'LineWidth', 0.8);
+hold off;
+xlabel('k');
+ylabel('y_{wer}(k)');
+plot_title = sprintf('Zbiór weryfikujący - y_{wer}(k) \n E_{wer} = %.3f', E_wer);
+title(plot_title);
+legend('y_{mod}', 'y');
+grid on;
+%% Model WIenera OE
+v = zeros(1, kk/2);
+
+% Model ARX
+% Zbiór uczący
+for k = N+delay+1:kk/2
+    v(k) = - a * [y_mod_ucz(k-1:-1:k-N)]' + b(:, 1)'*[u_ucz(1, k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_ucz(2, k-1:-1:k-N)]';
+    index = round((v(k)+F_10-F_1_start)*n / (F_1_end-F_1_start));
+    y_mod_ucz(k) = find_value(optimal_params, v(k)+F_10, index, R) - h_20;
+end
+
+v = zeros(1, kk/2);
+% Zbiór weryfikujący
+for k = N+delay+1:kk/2
+    v(k) =  - a * [y_mod_wer(k-1:-1:k-N)]' + b(:, 1)'*[u_wer(1, k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_wer(2, k-1:-1:k-N)]';
+    index = round((v(k)+F_10-F_1_start)*n / (F_1_end-F_1_start));
+    y_mod_wer(k) = find_value(optimal_params, v(k)+F_10, index, R) - h_20;
+end
+
+E_ucz = sum((y_ucz - y_mod_ucz).^2)/(kk/2);
+E_wer = sum((y_wer - y_mod_wer).^2)/(kk/2);
+fprintf('Model ARX \n');
 fprintf('E_ucz = %.3f \n', E_ucz);
 fprintf('E_wer = %.3f \n', E_wer);
 

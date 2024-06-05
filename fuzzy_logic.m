@@ -140,9 +140,9 @@ FIS = addRule(FIS, [ ...
 %end
 
 %% Generate input-output data and plot it
-kk = 200;
+kk = 180;
 alpha_2 = 20;
-u = linspace(-100, 100, kk)';
+u = linspace(45, 135, kk)';
 F_D = 30;
 y = ((u+F_D)/alpha_2).^2;
 % Plot of parabola
@@ -156,6 +156,7 @@ data=[u y];
 trndata=data(1:2:size(u),:);
 chkdata=data(2:2:size(u),:);
 % Plot of training and checking data generated from parabolic equation
+figure;
 plot(trndata(:,1), trndata(:,2), 'o', chkdata(:,1), chkdata(:,2),'x');
 xlabel('u');
 ylabel('y');
@@ -164,13 +165,14 @@ grid on
 %Initialize the fuzzy system with command genfis1. Use 5 bellshaped
 %membership functions.
 nu=5; 
-mftype='gbellmf'; 
+mftype='gaussmf'; 
 % fismat = genfis1(trndata, nu, mftype);
 opt = genfisOptions('GridPartition');
 opt.NumMembershipFunctions = nu;
 opt.InputMembershipFunctionType = mftype;
 fismat = genfis(trndata(:,1), trndata(:,2), opt);
 %The initial membership functions produced by genfis1 are plotted
+figure;
 plotmf(fismat,'input',1)
 xlabel('x');
 ylabel('output');
@@ -188,6 +190,7 @@ options.ValidationData = chkdata;
 %Evaluate the output of FIS system using input x
 anfi=evalfis(parab,u);
 % Plot of trained fuzzy system using trained data
+figure;
 plot(trndata(:,1), trndata(:,2), 'o', chkdata(:,1), chkdata(:,2), 'x', u, anfi, '--');
 grid on
 xlabel('x');
@@ -195,3 +198,20 @@ ylabel('output');
 title('Goodness of fit');
 
 %save('DANE.mat', 'x', 'anfi');
+
+%%
+% Definiowanie parametrów funkcji Gaussa
+sigma = 10; % Odchylenie standardowe
+mean = 45; % Średnia
+
+% Tworzenie funkcji Gaussa
+x = 45:0.1:135; % Zakres wartości x
+y = gaussmf(x, [sigma mean]);
+
+% Wykres funkcji Gaussa
+plot(x, y);
+hold on;
+title('Funkcja Gaussa');
+xlabel('Wartość x');
+ylabel('Przynależność');
+xlim([45 135]);

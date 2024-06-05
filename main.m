@@ -60,7 +60,7 @@ h_2_wer = h_2(2:2:end);
 [R, optimal_params] = static_characteristic_y_u(F_1, F_1_ucz, F_1_wer, h_2_ucz, h_2_wer, F_1_start, F_1_end, n, 'linear');
 
 %% Fuzzy static charaacteristic - nonlinear
-% [R, optimal_params] = static_characteristic_y_u(F_D0, alpha_2, F_1_start, F_1_end, n, 'nonlinear');
+% [R, optimal_params] = static_characteristic_y_u(F_1, F_1_ucz, F_1_wer, h_2_ucz, h_2_wer, F_1_start, F_1_end, n, 'nonlinear');
 
 %% Wymuszenia + podział na zbiory danych dynamicznych
 u = enforce(kk);
@@ -82,19 +82,19 @@ diff_eq_OE(a(:,2), b(:,2), u_ucz, u_wer, y_ucz, y_wer, kk, tau/Tp);
 
 %% Przebiegi wartości wyjściowych obliczone przy pomocy statyki rozmytej - MODEL Hammersteina (ARX)
 % Przekazać do funkcji wsp. b podzielone przez dcgain
-diff_eq_hammerstein_ARX(a(:,2), b(:,2)/dcgain(G_z(2,1)), u_ucz, u_wer, y_ucz, y_wer, optimal_params, F_10, h_20, F_1_start, F_1_end, R, kk, tau/Tp, n);
+diff_eq_hammerstein_ARX(a(:,2), b(:,2), dcgain(G_z(2,1)), u_ucz, u_wer, y_ucz, y_wer, optimal_params, F_10, h_20, F_1_start, F_1_end, R, kk, tau/Tp, n);
 
 %% Przebiegi wartości wyjściowych obliczone przy pomocy statyki rozmytej - MODEL Hammersteina (OE)
 % Przekazać do funkcji wsp. b podzielone przez dcgain
-diff_eq_hammerstein_OE(a(:,2), b(:,2)/dcgain(G_z(2,1)), u_ucz, u_wer, y_ucz, y_wer, optimal_params, F_10, h_20, F_1_start, F_1_end, R, kk, tau/Tp, n);
+diff_eq_hammerstein_OE(a(:,2), b(:,2), dcgain(G_z(2,1)), u_ucz, u_wer, y_ucz, y_wer, optimal_params, F_10, h_20, F_1_start, F_1_end, R, kk, tau/Tp, n);
 
 %% Przebiegi wartości wyjściowych obliczone przy pomocy statyki rozmytej - MODEL Wienera (ARX)
 % Przekazać do funkcji wsp. b podzielone przez dcgain
-diff_eq_wiener_ARX(a(:,2), b(:,2)/dcgain(G_z(2,1)), u_ucz, u_wer, y_ucz, y_wer, optimal_params, F_10, h_20, F_1_start, F_1_end, R, kk, tau/Tp, n);
+v = diff_eq_wiener_ARX(a(:,2), b(:,2), dcgain(G_z(2,1)), u_ucz, u_wer, y_ucz, y_wer, optimal_params, F_10, h_20, F_1_start, F_1_end, R, kk, tau/Tp, n);
 
 %% Przebiegi wartości wyjściowych obliczone przy pomocy statyki rozmytej - MODEL Wienera (OE)
 % Przekazać do funkcji wsp. b podzielone przez dcgain
-diff_eq_wiener_OE(a(:,2), b(:,2)/dcgain(G_z(2,1)), u_ucz, u_wer, y_ucz, y_wer, optimal_params, F_10, h_20, F_1_start, F_1_end, R, kk, tau/Tp, n);
+diff_eq_wiener_OE(a(:,2), b(:,2), dcgain(G_z(2,1)), u_ucz, u_wer, y_ucz, y_wer, optimal_params, F_10, h_20, F_1_start, F_1_end, R, kk, tau/Tp, n);
 
 %% DMC-SL
 % Horyzonty

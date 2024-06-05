@@ -1,17 +1,33 @@
 function [R, optimal_params] = static_characteristic_y_u(F_1, F_1_ucz, F_1_wer, h_2_ucz, h_2_wer, F_1_start, F_1_end, n, s)
     
     % Fuzzy sets
-    R = cell(1,5);
-    alpha = [-0.1, 0.1, 0.1, 0.1, 0.1];
-    c = [45 70 90 110 135];
+    % R = cell(1,5);
+    % alpha = [-0.1, 0.1, 0.1, 0.1, 0.1];
+    % c = [45 70 90 110 135];
     
-    for i = 1:length(R)
-        for j = 1:length(F_1)
-            if i == 1 || i == length(R)
-                R{i}(j) = 1 / (1 + exp(-alpha(i)*(F_1(j)-c(i))));
-            else
-                R{i}(j) = 1 / (1 + exp(-alpha(i)*(F_1(j)-c(i-1)))) - 1 / (1 + exp(-alpha(i)*(F_1(j)-c(i+1))));
-            end
+    % for i = 1:length(R)
+    %     for j = 1:length(F_1)
+    %         if i == 1 || i == length(R)
+    %             R{i}(j) = 1 / (1 + exp(-alpha(i)*(F_1(j)-c(i))));
+    %         else
+    %             R{i}(j) = 1 / (1 + exp(-alpha(i)*(F_1(j)-c(i-1)))) - 1 / (1 + exp(-alpha(i)*(F_1(j)-c(i+1))));
+    %         end
+    %     end
+    % end
+
+    if strcmp(s, 'linear')
+        R = cell(1,5);
+        sigma = 12;
+        mean = [50 70 90 110 130];
+        for i = 1:length(R)
+            R{i} = gaussmf(F_1, [sigma mean(i)]);
+        end
+    else
+        R = cell(1,3);
+        sigma = 10;
+        mean = [60 90 120];
+        for i = 1:length(R)
+            R{i} = gaussmf(F_1, [sigma mean(i)]);
         end
     end
     
