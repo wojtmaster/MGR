@@ -3,15 +3,16 @@ function [R, optimal_params] = static_characteristic_y_v(v, v_ucz, v_wer, y_ucz,
     % Fuzzy sets
     if strcmp(s, 'linear')
         R = cell(1,5);
-        sigma = 10;
+        % sigma = [12 10 10 10 12];
+        sigma = [12 10 10 10 12];
         mean = [-20 -10 0 10 20];
         for i = 1:length(R)
-            R{i} = gaussmf(v, [sigma mean(i)]);
+            R{i} = gaussmf(v, [sigma(i) mean(i)]);
         end
     else
-        R = cell(1,2);
+        R = cell(1,3);
         sigma = 10;
-        mean = [-10 10];
+        mean = [-20 0 20];
         for i = 1:length(R)
             R{i} = gaussmf(v, [sigma mean(i)]);
         end

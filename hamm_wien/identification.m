@@ -34,7 +34,7 @@ t = 0:Tp:(kk-1)*Tp;
 F_1_start = 45;
 F_1_end = 135;
 % Liczba podziałów wartości sterowania F_1 (do charakterystyki statycznej)
-n = (F_1_end - F_1_start) * 2;
+n = (F_1_end - F_1_start) * 8;
 
 %% Charakrerystyka statyczna
 [h_2, F_1] = static_characteristic(F_1_start, F_1_end, F_D0, alpha_2, n);
@@ -48,8 +48,8 @@ u_wer = F_1(2:2:end) - F_10;
 y_ucz = h_2(1:2:end-1) - h_20;
 y_wer = h_2(2:2:end) - h_20;
 
-v_start = -20;
-v_end = 15;
+v_start = -25;
+v_end = 25;
 v = linspace(v_start, v_end, n);
 v_ucz = v(1:2:end-1);
 v_wer = v(2:2:end);
@@ -59,23 +59,26 @@ v_wer = v(2:2:end);
 
 %% Fuzzy static charaacteristic - Wiener
 [R_wiener, wiener_params] = static_characteristic_y_v(v, v_ucz, v_wer, y_ucz, y_wer, v_start, v_end, n, 'linear');
-
+% close all;
 %% Wymuszenia + podział na zbiory danych dynamicznych
 u = enforce(kk);
+close;
 u_ucz = [u(1, 1:kk/2); u(2, 1:kk/2)];
 u_wer = [u(1, kk/2+1:end); u(2, kk/2+1:end)];
 
 %% Wyjście OBIEKTU - modified Euler + podział na zbiory danych dynamicznych
 % Wyświetlane wartości na wykresach są sprowadzone do pkt. pracy --> wartości przyrostowe
 y = modified_Euler(A, C, alpha_1, alpha_2, F_10, F_D0, h_20, V_10, V_20, t, kk, tau, Tp, u);
+close;
 y_ucz = y(1:kk/2);
 y_wer = y(kk/2+1:end);
 
 %% Model o rzędzie dynamiki równym N
-% Rząd dynamiki
-N = 1;
-% Opóźnienie
-delay = 1;
+%%%%%%%%%%%%%%%%%%%%%%%%% Rząd dynamiki %%%%%%%%%%%%%%%%%%%%%%%%%
+N = 3;
+%%%%%%%%%%%%%%%%%%%%%%%%%% Opóźnienie %%%%%%%%%%%%%%%%%%%%%%%%%%
+delay = 0;
+
 Y_ucz = y_ucz(N+delay+1:end)';
 M_ucz = u_ucz(1, N:end-(delay+1))';
 M_wer = u_wer(1, N:end-(delay+1))';
@@ -195,19 +198,21 @@ b(:,1) = b_1(2:end)/dcgain(G_z(1));
 b(:,2) = b_2(2:end);
 % b(:,2) = b_2(2:end)/dcgain(G_z(2));
 
+%% Model Hammersteina ARX
+z = zeros(1, kk/2);
+
 y_mod_ucz = zeros(1, kk/2);
 y_mod_wer = zeros(1, kk/2);
 y_mod_ucz(1:N+delay) = y_ucz(1:N+delay);
 y_mod_wer(1:N+delay) = y_wer(1:N+delay);
-
-%% Model Hammersteina ARX
-z = zeros(1, kk/2);
 
 for k = N+delay+1:kk/2
     index = round((u_ucz(1,k)-u_start)*n / (u_end-u_start));
     z(k) = find_value(hammerstein_params, u_ucz(1,k), index, R_hammerstein);
     y_mod_ucz(k) = - a * [y_ucz(k-1:-1:k-N)]' + b(:, 1)'*[z(k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_ucz(2, k-1:-1:k-N)]';
 end
+
+z = zeros(1, kk/2);
 
 % Zbiór weryfikujący
 for k = N+delay+1:kk/2
@@ -247,12 +252,21 @@ legend('y_{mod}', 'y');
 grid on;
 
 %% Model Hammersteina OE
+z = zeros(1, kk/2);
+
+y_mod_ucz = zeros(1, kk/2);
+y_mod_wer = zeros(1, kk/2);
+y_mod_ucz(1:N+delay) = y_ucz(1:N+delay);
+y_mod_wer(1:N+delay) = y_wer(1:N+delay);
+
 % Zbiór uczący
 for k = N+delay+1:kk/2
     index = round((u_ucz(1,k)-u_start)*n / (u_end-u_start));
     z(k) = find_value(hammerstein_params, u_ucz(1,k), index, R_hammerstein);
     y_mod_ucz(k) = - a * [y_mod_ucz(k-1:-1:k-N)]' + b(:, 1)'*[z(k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_ucz(2, k-1:-1:k-N)]';
 end
+
+z = zeros(1, kk/2);
 
 % Zbiór weryfikujący
 for k = N+delay+1:kk/2
@@ -292,22 +306,65 @@ legend('y_{mod}', 'y');
 grid on;
 
 %% Model Wienera ARX
+% Dla sigma = 10 i rozmywania v [-30 30]
+
+% wiener_params(1) = -14.4;
+% wiener_params(2) = 0.49;
+% 
+% wiener_params(3) = -0.6;
+% wiener_params(4) = 0.42;
+% 
+% wiener_params(5) = 12.35;
+% wiener_params(6) = 1.57;
+% 
+% wiener_params(7) = -12.8;
+% wiener_params(8) = 2.05;
+% 
+% wiener_params(9) = -16.3;
+% wiener_params(10) = 1.35;
+
+% Dla sigma [12 10 10 10 12] i zakresu v [-25 25]
+
+wiener_params(1) = -1.2;
+wiener_params(2) = 0.9;
+
+wiener_params(3) = 5.8;
+wiener_params(4) = 1.25;
+
+wiener_params(5) = -3.05;
+wiener_params(6) = 1.27;
+
+wiener_params(7) = -0.7;
+wiener_params(8) = 0.69;
+
+wiener_params(9) = 1.6;
+wiener_params(10) = 1.19;
+
+% Model Wienera ARX
 v = zeros(1, kk/2);
+
+y_mod_ucz = zeros(1, kk/2);
+y_mod_wer = zeros(1, kk/2);
+y_mod_ucz(1:N+delay) = y_ucz(1:N+delay);
+y_mod_wer(1:N+delay) = y_wer(1:N+delay);
+
+factor = 1;
 
 % Model ARX
 % Zbiór uczący
 for k = N+delay+1:kk/2
     v(k) = - a * [y_ucz(k-1:-1:k-N)]' + b(:, 1)'*[u_ucz(1, k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_ucz(2, k-1:-1:k-N)]';
     index = round((v(k)-v_start)*n / (v_end-v_start));
-    y_mod_ucz(k) = find_value(wiener_params, v(k), index, R_wiener);
+    y_mod_ucz(k) = factor*find_value(wiener_params, v(k), index, R_wiener);
 end
 
 v = zeros(1, kk/2);
+
 % Zbiór weryfikujący
 for k = N+delay+1:kk/2
     v(k) =  - a * [y_wer(k-1:-1:k-N)]' + b(:, 1)'*[u_wer(1, k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_wer(2, k-1:-1:k-N)]';
     index = round((v(k)-v_start)*n / (v_end-v_start));
-    y_mod_wer(k) = find_value(wiener_params, v(k), index, R_wiener);
+    y_mod_wer(k) = factor*find_value(wiener_params, v(k), index, R_wiener);
 end
 
 E_ucz = sum((y_ucz - y_mod_ucz).^2)/(kk/2);
@@ -339,25 +396,51 @@ plot_title = sprintf('Zbiór weryfikujący - y_{wer}(k) \n E_{wer} = %.3f', E_we
 title(plot_title);
 legend('y_{mod}', 'y');
 grid on;
+
+% close all;
 %% Model Wienera OE
+wiener_params(1) = -1.15;
+wiener_params(2) = 0.8;
+
+wiener_params(3) = 5.8;
+wiener_params(4) = 1.25;
+
+wiener_params(5) = -3.05;
+wiener_params(6) = 1.27;
+
+wiener_params(7) = -0.6;
+wiener_params(8) = 0.85;
+
+wiener_params(9) = 1.55;
+wiener_params(10) = 1.17;
+
 v = zeros(1, kk/2);
-alpha = 1;
+
+y_mod_ucz = zeros(1, kk/2);
+y_mod_wer = zeros(1, kk/2);
+y_mod_ucz(1:N+delay) = y_ucz(1:N+delay);
+y_mod_wer(1:N+delay) = y_wer(1:N+delay);
+v(1:N+delay) = y_ucz(1:N+delay);
+
+% factor = 0.635;
+factor = 0.595;
+
 % Model OE
 % Zbiór uczący
 for k = N+delay+1:kk/2
-    v(k) = - a * [y_mod_ucz(k-1:-1:k-N)]' + b(:, 1)'*[u_ucz(1, k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_ucz(2, k-1:-1:k-N)]';
-    v(k) = alpha*v(k);
+    v(k) = - a * [v(k-1:-1:k-N)]' + b(:, 1)'*[u_ucz(1, k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_ucz(2, k-1:-1:k-N)]';
     index = round((v(k)-v_start)*n / (v_end-v_start));
-    y_mod_ucz(k) = find_value(wiener_params, v(k), index, R_wiener);
+    y_mod_ucz(k) = factor*find_value(wiener_params, v(k), index, R_wiener);
 end
 
 v = zeros(1, kk/2);
+v(1:N+delay) = y_wer(1:N+delay);
+
 % Zbiór weryfikujący
 for k = N+delay+1:kk/2
-    v(k) =  - a * [y_mod_wer(k-1:-1:k-N)]' + b(:, 1)'*[u_wer(1, k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_wer(2, k-1:-1:k-N)]';
-    v(k) = alpha*v(k);
+    v(k) =  - a * [v(k-1:-1:k-N)]' + b(:, 1)'*[u_wer(1, k-(delay+1):-1:k-(delay+N))]' + b(:,2)'*[u_wer(2, k-1:-1:k-N)]';
     index = round((v(k)-v_start)*n / (v_end-v_start));
-    y_mod_wer(k) = find_value(wiener_params, v(k), index, R_wiener);
+    y_mod_wer(k) = factor*find_value(wiener_params, v(k), index, R_wiener);
 end
 
 E_ucz = sum((y_ucz - y_mod_ucz).^2)/(kk/2);

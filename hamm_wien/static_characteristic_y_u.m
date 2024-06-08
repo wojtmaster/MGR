@@ -1,19 +1,6 @@
 function [R, optimal_params] = static_characteristic_y_u(u, u_ucz, u_wer, y_ucz, y_wer, u_start, u_end, n, s)
     
     % Fuzzy sets
-    % R = cell(1,5);
-    % alpha = [-0.1, 0.1, 0.1, 0.1, 0.1];
-    % c = [45 70 90 110 135];
-    
-    % for i = 1:length(R)
-    %     for j = 1:length(F_1)
-    %         if i == 1 || i == length(R)
-    %             R{i}(j) = 1 / (1 + exp(-alpha(i)*(F_1(j)-c(i))));
-    %         else
-    %             R{i}(j) = 1 / (1 + exp(-alpha(i)*(F_1(j)-c(i-1)))) - 1 / (1 + exp(-alpha(i)*(F_1(j)-c(i+1))));
-    %         end
-    %     end
-    % end
 
     if strcmp(s, 'linear')
         R = cell(1,5);
