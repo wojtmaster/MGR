@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.3.3)  30 MAY 2024 15:59
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.3.3)  13 JUN 2024 08:47
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1012,43 +1012,94 @@ LaTeX Font Info:    External font `plex10' loaded for size
 \tf@toc=\write4
 \openout4 = `PPMGR_Wojciech_Rogalski.toc'.
 
- [1
+ (wstep.tex [1
 
 ]
 Rozdzia\PlPrIeC {\l } 1.
-[2
 
-]
+Overfull \hbox (13.74216pt too wide) detected at line 10
+[][]
+ []
+
+<pictures/schemat.png, id=14, 430.60875pt x 367.3725pt>
+File: pictures/schemat.png Graphic file (type png)
+<use pictures/schemat.png>
+Package pdftex.def Info: pictures/schemat.png  used on input line 28.
+(pdftex.def)             Requested size: 364.19664pt x 310.72092pt.
+) [2
+
+{C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/pl/p
+lme.enc}{C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/enc/dv
+ips/pl/plmi.enc}{C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/font
+s/enc/dvips/pl/plms.enc} <./pictures/schemat.png>]
 Rozdzia\PlPrIeC {\l } 2.
+<pictures/static_characteristic.pdf, id=27, 362.35374pt x 309.155pt>
+File: pictures/static_characteristic.pdf Graphic file (type pdf)
+<use pictures/static_characteristic.pdf>
+Package pdftex.def Info: pictures/static_characteristic.pdf  used on input line
+ 180.
+(pdftex.def)             Requested size: 364.19664pt x 310.73453pt.
 [3
 
-]
+ <./pictures/static_characteristic.pdf>]
+<pictures/u_F1.pdf, id=66, 371.3875pt x 299.1175pt>
+File: pictures/u_F1.pdf Graphic file (type pdf)
+<use pictures/u_F1.pdf>
+Package pdftex.def Info: pictures/u_F1.pdf  used on input line 209.
+(pdftex.def)             Requested size: 204.85844pt x 164.99892pt.
+LaTeX Font Info:    External font `plex10' loaded for size
+(Font)              <9> on input line 209.
+<pictures/y_F1.pdf, id=67, 370.38374pt x 304.13625pt>
+File: pictures/y_F1.pdf Graphic file (type pdf)
+<use pictures/y_F1.pdf>
+Package pdftex.def Info: pictures/y_F1.pdf  used on input line 212.
+(pdftex.def)             Requested size: 204.85844pt x 168.21751pt.
+<pictures/arx_ucz.pdf, id=68, 376.40625pt x 307.1475pt>
+File: pictures/arx_ucz.pdf Graphic file (type pdf)
+<use pictures/arx_ucz.pdf>
+Package pdftex.def Info: pictures/arx_ucz.pdf  used on input line 243.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/arx_wer.pdf, id=69, 376.40625pt x 307.1475pt>
+File: pictures/arx_wer.pdf Graphic file (type pdf)
+<use pictures/arx_wer.pdf>
+Package pdftex.def Info: pictures/arx_wer.pdf  used on input line 246.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/oe_ucz.pdf, id=70, 376.40625pt x 307.1475pt>
+File: pictures/oe_ucz.pdf Graphic file (type pdf)
+<use pictures/oe_ucz.pdf>
+Package pdftex.def Info: pictures/oe_ucz.pdf  used on input line 252.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/oe_wer.pdf, id=71, 376.40625pt x 307.1475pt>
+File: pictures/oe_wer.pdf Graphic file (type pdf)
+<use pictures/oe_wer.pdf>
+Package pdftex.def Info: pictures/oe_wer.pdf  used on input line 255.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+ [4{C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/p
+l/plit.enc} <./pictures/u_F1.pdf> <./pictures/y_F1.pdf>] [5 <./pictures/arx_ucz
+.pdf> <./pictures/arx_wer.pdf> <./pictures/oe_ucz.pdf> <./pictures/oe_wer.pdf>]
+ [6]
 Rozdzia\PlPrIeC {\l } 3.
-[4
+[7
 
 ]
 Rozdzia\PlPrIeC {\l } 4.
-[5
+[8
 
 ]
 Rozdzia\PlPrIeC {\l } 5.
-[6
-
-]
-Rozdzia\PlPrIeC {\l } 6.
-[7
+[9
 
 ] (PPMGR_Wojciech_Rogalski.lof)
 \tf@lof=\write5
 \openout5 = `PPMGR_Wojciech_Rogalski.lof'.
 
- [8
+ [10
 
 ] (PPMGR_Wojciech_Rogalski.lot)
 \tf@lot=\write6
 \openout6 = `PPMGR_Wojciech_Rogalski.lot'.
 
- [9
+ [11
 
 ]
 (PPMGR_Wojciech_Rogalski.aux)
@@ -1058,20 +1109,34 @@ L3 programming layer <2024-01-04>
  ***********
  ) 
 Here is how much of TeX's memory you used:
- 24317 strings out of 474485
- 531506 string characters out of 5737599
- 1929542 words of memory out of 5000000
- 46213 multiletter control sequences out of 15000+600000
- 571317 words of font info for 75 fonts, out of 8000000 for 9000
+ 24444 strings out of 474485
+ 534588 string characters out of 5737599
+ 1940542 words of memory out of 5000000
+ 46327 multiletter control sequences out of 15000+600000
+ 574252 words of font info for 83 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 84i,8n,93p,472b,529s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/type1/public
-/pl/plbx10.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts
-/type1/public/pl/plbx12.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs
-/MiKTeX/fonts/type1/public/pl/plr10.pfb>
-Output written on PPMGR_Wojciech_Rogalski.pdf (10 pages, 44112 bytes).
+ 84i,14n,93p,635b,529s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ <C:\Users\HP.LAPTOP-VKB5R2K8\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/e
+c/dpi600\tcrm1095.pk><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX
+/fonts/type1/public/pl/plbx10.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Pr
+ograms/MiKTeX/fonts/type1/public/pl/plbx12.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/App
+Data/Local/Programs/MiKTeX/fonts/type1/public/pl/plex10.pfb><C:/Users/HP.LAPTOP
+-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/type1/public/pl/plmi10.pfb><C:/Us
+ers/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/type1/public/pl/plmi
+8.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/type1/pu
+blic/pl/plmi9.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fo
+nts/type1/public/pl/plr10.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Progra
+ms/MiKTeX/fonts/type1/public/pl/plr6.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/L
+ocal/Programs/MiKTeX/fonts/type1/public/pl/plr7.pfb><C:/Users/HP.LAPTOP-VKB5R2K
+8/AppData/Local/Programs/MiKTeX/fonts/type1/public/pl/plr8.pfb><C:/Users/HP.LAP
+TOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/type1/public/pl/plr9.pfb><C:/U
+sers/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/type1/public/pl/pls
+y10.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/type1/
+public/pl/plsy8.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/
+fonts/type1/public/pl/plti10.pfb>
+Output written on PPMGR_Wojciech_Rogalski.pdf (12 pages, 775829 bytes).
 PDF statistics:
- 54 PDF objects out of 1000 (max. 8388607)
+ 373 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 13 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 53 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -1,24 +1,27 @@
-function [] = diff_eq_hammerstein_ARX(a, b, K, u_ucz, u_wer, y_ucz, y_wer, params, F_10, h_20, F_1_start, F_1_end, R, kk, tau, n)
+function [] = diff_eq_hammerstein_ARX(a, b, K, u_ucz, u_wer, y_ucz, y_wer, params, u_start, u_end, R, kk, tau, n)
     y_mod_ucz = zeros(1, kk/2);
     y_mod_wer = zeros(1, kk/2);
     y_mod_ucz(1:tau+2) = y_ucz(1:tau+2);
     y_mod_wer(1:tau+2) = y_wer(1:tau+2);
 
     z = zeros(1, kk/2);
+    z(1:tau+2) = u_ucz(1, 1:tau+2);
 
     % Model ARX
     % Zbiór uczący
     for k = tau+3:kk/2
-        index = round((u_ucz(1,k)+F_10-F_1_start)*n / (F_1_end-F_1_start));
-        z(k) = find_value(params, u_ucz(1,k)+F_10, index, R) - h_20;
+        index = round((u_ucz(1,k)-u_start)*n / (u_end-u_start));
+        z(k) = find_value(params, u_ucz(1,k), index, R);
         y_mod_ucz(k) = - a'*[y_ucz(k-1:-1:k-2)]' + (b(tau+1:tau+2)/K)'*[z(k-(tau+1):-1:k-(tau+2))]' + b(tau+1:tau+2)'*[u_ucz(2, k-1:-1:k-2)]';
     end
     
     z = zeros(1, kk/2);
+    z(1:tau+2) = u_wer(1, 1:tau+2);
+    
     % Zbiór weryfikujący
     for k = tau+3:kk/2
-        index = round((u_wer(1,k)+F_10-F_1_start)*n / (F_1_end-F_1_start));
-        z(k) = find_value(params, u_wer(1,k)+F_10, index, R) - h_20;
+        index = round((u_wer(1,k)-u_start)*n / (u_end-u_start));
+        z(k) = find_value(params, u_wer(1,k), index, R);
         y_mod_wer(k) = - a'*[y_wer(k-1:-1:k-2)]' + (b(tau+1:tau+2)/K)'*[z(k-(tau+1):-1:k-(tau+2))]' + b(tau+1:tau+2)'*[u_wer(2, k-1:-1:k-2)]';
     end
 

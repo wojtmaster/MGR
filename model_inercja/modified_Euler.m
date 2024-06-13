@@ -32,7 +32,7 @@ F_D = u(2,:) + F_D0;
 
 %% Modified Euler 
 for i = 2:kk
-    if i <= tau/Tp     
+    if i <= tau/Tp+1    
         V_1 = V_1 + Tp * fun_1(F_10, F_D(i), V_1);
         V_2 = V_2 + Tp * fun_2(V_1, V_2);
 
@@ -68,11 +68,12 @@ end
 %% Prezentacja wyników
 figure;
 hold on;
-plot(t, y_L, 'b.','LineWidth',2);
-plot(t, y, 'r.','LineWidth',2);
+% plot(t, y_L, 'b.','LineWidth',2);
+plot(t, y, 'r-','LineWidth',2);
 hold off;
 title('Wysokość słupa cieczy w zbiorniku 2. - h_2(t)');
-legend('h_{2lin}', 'h_2');
+% legend('h_{2lin}', 'h_2');
+legend('h_2');
 xlabel('t [s]');
 ylabel('h [cm]');
 grid on;

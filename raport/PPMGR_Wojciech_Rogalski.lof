@@ -1,6 +1,15 @@
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Obiekt regulacji automatycznej.}}{2}{}%
 \addvspace {10\p@ }
-\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Charakterystyka statyczna $h_2(F_1)$.}}{3}{}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Porównanie modelu liniowego z nieliniowym.}}{4}{}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Wygenerowana sekwencja sygnału sterującego $u(k)$.}}}{4}{}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Sygnał wyjściowy $y(k)$.}}}{4}{}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Symulacja odpowiednich modeli z wykorzystaniem wygenerowanej sekwencji sygnału sterującego.}}{5}{}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{5}{}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący.}}}{5}{}%
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{5}{}%
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący.}}}{5}{}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }

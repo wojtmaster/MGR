@@ -1,10 +1,14 @@
 \contentsline {chapter}{\numberline {1\relax .\enspace }Wstęp}{2}{}%
-\contentsline {chapter}{\numberline {2\relax .\enspace }Obiekt}{3}{}%
-\contentsline {chapter}{\numberline {3\relax .\enspace }Dynamic Matrix Control}{4}{}%
-\contentsline {chapter}{\numberline {4\relax .\enspace }Fuzzy logic}{5}{}%
-\contentsline {chapter}{\numberline {5\relax .\enspace }Wyniki}{6}{}%
-\contentsline {section}{\numberline {5.1\relax .\enspace }Następniki liniowe}{6}{}%
-\contentsline {section}{\numberline {5.2\relax .\enspace }Następniki hiperboliczne}{6}{}%
-\contentsline {chapter}{\numberline {6\relax .\enspace }Podsumowanie}{7}{}%
-\contentsline {chapter}{Spis rysunk\'ow}{8}{}%
-\contentsline {chapter}{Spis tabel}{9}{}%
+\contentsline {chapter}{\numberline {2\relax .\enspace }Identyfikacja}{3}{}%
+\contentsline {section}{\numberline {2.1\relax .\enspace }Charakterystyka statyczna}{3}{}%
+\contentsline {section}{\numberline {2.2\relax .\enspace }Wymuszenia}{4}{}%
+\contentsline {section}{\numberline {2.3\relax .\enspace }Podejście inżynierskie}{6}{}%
+\contentsline {chapter}{\numberline {3\relax .\enspace }Model Hammersteina}{7}{}%
+\contentsline {section}{\numberline {3.1\relax .\enspace }Następniki liniowe}{7}{}%
+\contentsline {section}{\numberline {3.2\relax .\enspace }Następniki hiperboliczne}{7}{}%
+\contentsline {chapter}{\numberline {4\relax .\enspace }Model Wienera}{8}{}%
+\contentsline {section}{\numberline {4.1\relax .\enspace }Następniki liniowe}{8}{}%
+\contentsline {section}{\numberline {4.2\relax .\enspace }Następniki hiperboliczne}{8}{}%
+\contentsline {chapter}{\numberline {5\relax .\enspace }Podsumowanie}{9}{}%
+\contentsline {chapter}{Spis rysunk\'ow}{10}{}%
+\contentsline {chapter}{Spis tabel}{11}{}%
