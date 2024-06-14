@@ -11,8 +11,8 @@ function [R, optimal_params] = static_characteristic_y_u(u, u_ucz, u_wer, y_ucz,
         end
     else
         R = cell(1,3);
-        sigma = 10;
-        mean = [-30 0 30];
+        sigma = 20;
+        mean = [-25 0 25];
         for i = 1:length(R)
             R{i} = gaussmf(u, [sigma mean(i)]);
         end
@@ -28,11 +28,12 @@ function [R, optimal_params] = static_characteristic_y_u(u, u_ucz, u_wer, y_ucz,
     ylabel('y');
     xlim([-45 45]);
     title('Zbiory rozmyte y(u)');
-    % file_name = sprintf('../raport/pictures/fuzzy_set_ham.pdf');
+    % file_name = sprintf('../raport/pictures/fuzzy_set_ham_nlin.pdf');
     % exportgraphics (gcf, file_name);
 
     a = ones(size(R));
     b = ones(size(R));
+    c = ones(size(R));
      
     fig_u_ucz = figure;
     figure(fig_u_ucz);
@@ -87,9 +88,9 @@ function [R, optimal_params] = static_characteristic_y_u(u, u_ucz, u_wer, y_ucz,
     else
         % MNK: Minimalizacja sumy kwadratów błędów
         fun = @(params) sum((y_ucz - fuzzy_nonlinear_model(params, u_ucz, u_start, u_end, R, n)).^2);
-        initial_params = [a(1), b(1)];
+        initial_params = [a(1), b(1), a(1)];
         for i = 2:length(R)
-            initial_params = [initial_params, a(i), b(i)];
+            initial_params = [initial_params, a(i), b(i), c(i)];
         end
         opt = optimset('MaxFunEvals', 10^6, 'MaxIter', 10^6);
         optimal_params = fminsearch(fun, initial_params, opt);

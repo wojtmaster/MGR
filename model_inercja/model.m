@@ -59,10 +59,9 @@ v_wer = v(2:2:end);
 
 %% Fuzzy static charaacteristic - Wiener
 [R_wiener, wiener_params] = static_characteristic_y_v(v, v_ucz, v_wer, y_ucz, y_wer, v_start, v_end, n, 'nonlinear');
-
+% close all;
 %% Wymuszenia + podział na zbiory danych dynamicznych
 u = enforce(kk);
-% close;
 u_ucz = [u(1, 1:kk/2); u(2, 1:kk/2)];
 u_wer = [u(1, kk/2+1:end); u(2, kk/2+1:end)];
 
@@ -134,8 +133,8 @@ N = 2;
 %%%%%%%%%%%%%%%%%%%%%%%%%% Opóźnienie %%%%%%%%%%%%%%%%%%%%%%%%%%
 delay = 5;
 %%%%%%%%%%%%%%%%%%%%%%%%%% Próbka %%%%%%%%%%%%%%%%%%%%%%%%%%
-c = 3;
-d = 3;
+c = 6;
+d = 1;
 
 Y_ucz = y_ucz(N+delay+1:end)';
 M_ucz = u_ucz(1, N:end-(delay+1))';
@@ -172,12 +171,12 @@ hold on;
 stairs(0:kk/2-1, y_ucz, 'r', 'LineWidth', 0.8);
 plot_title = sprintf('Zbiór uczący - y_{ucz}(k) \n N = %d     E_{ucz} = %.3f', N, E_ucz);
 title(plot_title);
-legend('y_{mod}', 'y', 'Location', 'northeast');
+legend('y_{mod}', 'y', 'Location', 'northwest');
 xlabel('k');
 ylabel('y(k)');
 grid on;
-file_name = sprintf('../raport/pictures/arx_ucz_%d%d.pdf', c, d);
-exportgraphics (gcf, file_name);
+% file_name = sprintf('../raport/pictures/arx_ucz_%d.pdf', c);
+% exportgraphics (gcf, file_name);
 
 figure;
 stairs(0:kk/2-1, Y_wer, 'b', 'LineWidth', 1.2);
@@ -185,12 +184,12 @@ hold on;
 stairs(0:kk/2-1, y_wer, 'r', 'LineWidth', 0.8);
 plot_title = sprintf('Zbiór weryfikujący - y_{wer}(k) \n N = %d     E_{wer} = %.3f', N, E_wer);
 title(plot_title);
-legend('y_{mod}', 'y', 'Location', 'northeast');
+legend('y_{mod}', 'y', 'Location', 'northwest');
 xlabel('k');
 ylabel('y(k)');
 grid on;
-file_name = sprintf('../raport/pictures/arx_wer_%d%d.pdf', c, d);
-exportgraphics (gcf, file_name);
+% file_name = sprintf('../raport/pictures/arx_wer_%d.pdf', c);
+% exportgraphics (gcf, file_name);
 
 %% OE
 Y_ucz = zeros(kk/2, 1);
@@ -228,12 +227,12 @@ hold on;
 stairs(0:kk/2-1, y_ucz, 'r', 'LineWidth', 0.8);
 plot_title = sprintf('Zbiór uczący - y_{ucz}(k) \n N = %d     E_{ucz} = %.3f', N, E_ucz);
 title(plot_title);
-legend('y_{mod}', 'y', 'Location', 'northeast');
+legend('y_{mod}', 'y', 'Location', 'northwest');
 xlabel('k');
 ylabel('y(k)');
 grid on;
-file_name = sprintf('../raport/pictures/oe_ucz_%d%d.pdf', c, d);
-exportgraphics (gcf, file_name);
+% file_name = sprintf('../raport/pictures/oe_ucz_%d.pdf', c);
+% exportgraphics (gcf, file_name);
 
 figure;
 stairs(0:kk/2-1, Y_wer, 'b', 'LineWidth', 1.2);
@@ -241,14 +240,16 @@ hold on;
 stairs(0:kk/2-1, y_wer, 'r', 'LineWidth', 0.8);
 plot_title = sprintf('Zbiór weryfikujący - y_{wer}(k) \n N = %d     E_{wer} = %.3f', N, E_wer);
 title(plot_title);
-legend('y_{mod}', 'y', 'Location', 'northeast');
+legend('y_{mod}', 'y', 'Location', 'northwest');
 xlabel('k');
 ylabel('y(k)');
 grid on;
-file_name = sprintf('../raport/pictures/oe_wer_%d%d.pdf', c, d);
-exportgraphics (gcf, file_name);
+% file_name = sprintf('../raport/pictures/oe_wer_%d.pdf', c);
+% exportgraphics (gcf, file_name);
 
 %% Model Hammersteina ARX
+factor = 1;
+
 z = zeros(1, kk/2);
 
 y_mod_ucz = zeros(1, kk/2);
@@ -258,7 +259,7 @@ y_mod_wer(1:N+delay) = y_wer(1:N+delay);
 
 for k = N+delay+1:kk/2
     index = round((u_ucz(1,k)-u_start)*n / (u_end-u_start));
-    z(k) = find_value(hammerstein_params, u_ucz(1,k), index, R_hammerstein);
+    z(k) = factor*find_value(hammerstein_params, u_ucz(1,k), index, R_hammerstein, 'nonlinear');
     y_mod_ucz(k) = - a * [y_ucz(k-1:-1:k-N)]' + b/dcgain(G_z)*[z(k-(delay+1):-1:k-(delay+N))]' + b*[u_ucz(2, k-1:-1:k-N)]';
 end
 
@@ -267,7 +268,7 @@ z = zeros(1, kk/2);
 % Zbiór weryfikujący
 for k = N+delay+1:kk/2
     index = round((u_wer(1,k)-u_start)*n / (u_end-u_start));
-    z(k) = find_value(hammerstein_params, u_wer(1,k), index, R_hammerstein);
+    z(k) = factor*find_value(hammerstein_params, u_wer(1,k), index, R_hammerstein, 'nonlinear');
     y_mod_wer(k) =  - a * [y_wer(k-1:-1:k-N)]' + b/dcgain(G_z)*[z(k-(delay+1):-1:k-(delay+N))]' + b*[u_wer(2, k-1:-1:k-N)]';
 end
 
@@ -286,9 +287,9 @@ xlabel('k');
 ylabel('y_{ucz}(k)');
 plot_title = sprintf('Zbiór uczący - y_{ucz}(k) \n E_{ucz} = %.3f', E_ucz);
 title(plot_title);
-legend('y_{mod}', 'y', 'Location', 'northeast');
+legend('y_{mod}', 'y', 'Location', 'northwest');
 grid on;
-% file_name = sprintf('../raport/pictures/arx_hamm_ucz_%d.pdf', x);
+% file_name = sprintf('../raport/pictures/arx_hamm_ucz_%d.pdf', c);
 % exportgraphics (gcf, file_name);
 
 figure;
@@ -300,12 +301,14 @@ xlabel('k');
 ylabel('y_{wer}(k)');
 plot_title = sprintf('Zbiór weryfikujący - y_{wer}(k) \n E_{wer} = %.3f', E_wer);
 title(plot_title);
-legend('y_{mod}', 'y', 'Location', 'northeast');
+legend('y_{mod}', 'y', 'Location', 'northwest');
 grid on;
-% file_name = sprintf('../raport/pictures/arx_hamm_wer_%d.pdf', x);
+% file_name = sprintf('../raport/pictures/arx_hamm_wer_%d.pdf', c);
 % exportgraphics (gcf, file_name);
 
 %% Model Hammersteina OE
+factor = 1;
+
 z = zeros(1, kk/2);
 
 y_mod_ucz = zeros(1, kk/2);
@@ -316,7 +319,7 @@ y_mod_wer(1:N+delay) = y_wer(1:N+delay);
 % Zbiór uczący
 for k = N+delay+1:kk/2
     index = round((u_ucz(1,k)-u_start)*n / (u_end-u_start));
-    z(k) = find_value(hammerstein_params, u_ucz(1,k), index, R_hammerstein);
+    z(k) = factor*find_value(hammerstein_params, u_ucz(1,k), index, R_hammerstein, 'nonlinear');
     y_mod_ucz(k) = - a * [y_mod_ucz(k-1:-1:k-N)]' + b/dcgain(G_z)*[z(k-(delay+1):-1:k-(delay+N))]' + b*[u_ucz(2, k-1:-1:k-N)]';
 end
 
@@ -325,8 +328,8 @@ z = zeros(1, kk/2);
 % Zbiór weryfikujący
 for k = N+delay+1:kk/2
     index = round((u_wer(1,k)-u_start)*n / (u_end-u_start));
-    z(k) = find_value(hammerstein_params, u_wer(1,k), index, R_hammerstein);
-    y_mod_wer(k) =  - a * [y_mod_wer(k-1:-1:k-N)]' + b/dcgain(G_z)*[z(k-(delay+1):-1:k-(delay+N))]' + b*[u_wer(2, k-1:-1:k-N)]';
+    z(k) = factor*find_value(hammerstein_params, u_wer(1,k), index, R_hammerstein, 'nonlinear');
+    y_mod_wer(k) = - a * [y_mod_wer(k-1:-1:k-N)]' + b/dcgain(G_z)*[z(k-(delay+1):-1:k-(delay+N))]' + b*[u_wer(2, k-1:-1:k-N)]';
 end
 
 E_ucz = sum((y_ucz - y_mod_ucz).^2)/(kk/2);
@@ -344,10 +347,11 @@ xlabel('k');
 ylabel('y_{ucz}(k)');
 plot_title = sprintf('Zbiór uczący - y_{ucz}(k) \n E_{ucz} = %.3f', E_ucz);
 title(plot_title);
-legend('y_{mod}', 'y', 'Location', 'northeast');
+legend('y_{mod}', 'y', 'Location', 'northwest');
 grid on;
-% file_name = sprintf('../raport/pictures/oe_hamm_ucz_%d.pdf', x);
+% file_name = sprintf('../raport/pictures/oe_hamm_ucz_%d.pdf', c);
 % exportgraphics (gcf, file_name);
+% close;
 
 figure;
 hold on;
@@ -358,26 +362,27 @@ xlabel('k');
 ylabel('y_{wer}(k)');
 plot_title = sprintf('Zbiór weryfikujący - y_{wer}(k) \n E_{wer} = %.3f', E_wer);
 title(plot_title);
-legend('y_{mod}', 'y', 'Location', 'northeast');
+legend('y_{mod}', 'y', 'Location', 'northwest');
 grid on;
-% file_name = sprintf('../raport/pictures/oe_hamm_wer_%d.pdf', x);
+% file_name = sprintf('../raport/pictures/oe_hamm_wer_%d.pdf', c);
 % exportgraphics (gcf, file_name);
+% close;
 
 %% Model Wienera ARX
-wiener_params(1) = -1.2;
-wiener_params(2) = 0.9;
-
-wiener_params(3) = 5.74;
-wiener_params(4) = 1.18;
-
-wiener_params(5) = -2.96;
-wiener_params(6) = 1.17;
-
-wiener_params(7) = -0.7;
-wiener_params(8) = 0.69;
-
-wiener_params(9) = 1.59;
-wiener_params(10) = 1.19;
+% wiener_params(1) = -1.2;
+% wiener_params(2) = 0.9;
+% 
+% wiener_params(3) = 5.74;
+% wiener_params(4) = 1.18;
+% 
+% wiener_params(5) = -2.96;
+% wiener_params(6) = 1.17;
+% 
+% wiener_params(7) = -0.7;
+% wiener_params(8) = 0.69;
+% 
+% wiener_params(9) = 1.59;
+% wiener_params(10) = 1.19;
 
 % Model Wienera ARX
 v = zeros(1, kk/2);
@@ -394,7 +399,7 @@ factor = 1;
 for k = N+delay+1:kk/2
     v(k) = - a * [y_ucz(k-1:-1:k-N)]' + b/dcgain(G_z)*[u_ucz(1, k-(delay+1):-1:k-(delay+N))]' + b*[u_ucz(2, k-1:-1:k-N)]';
     index = round((v(k)-v_start)*n / (v_end-v_start));
-    y_mod_ucz(k) = factor*find_value(wiener_params, v(k), index, R_wiener);
+    y_mod_ucz(k) = factor*find_value(wiener_params, v(k), index, R_wiener, 'nonlinear');
 end
 
 v = zeros(1, kk/2);
@@ -403,7 +408,7 @@ v = zeros(1, kk/2);
 for k = N+delay+1:kk/2
     v(k) =  - a * [y_wer(k-1:-1:k-N)]' + b/dcgain(G_z)*[u_wer(1, k-(delay+1):-1:k-(delay+N))]' + b*[u_wer(2, k-1:-1:k-N)]';
     index = round((v(k)-v_start)*n / (v_end-v_start));
-    y_mod_wer(k) = factor*find_value(wiener_params, v(k), index, R_wiener);
+    y_mod_wer(k) = factor*find_value(wiener_params, v(k), index, R_wiener, 'nonlinear');
 end
 
 E_ucz = sum((y_ucz - y_mod_ucz).^2)/(kk/2);
@@ -441,23 +446,22 @@ grid on;
 % exportgraphics (gcf, file_name);
 
 %% Model Wienera OE
-wiener_params(1) = -1.15;
-wiener_params(2) = 0.8;
-
-wiener_params(3) = 5.8;
-wiener_params(4) = 1.19;
-
-wiener_params(5) = -3.05;
-wiener_params(6) = 1.28;
-
-wiener_params(7) = -0.6;
-wiener_params(8) = 0.81;
-
-wiener_params(9) = 1.6;
-wiener_params(10) = 1.16;
+% wiener_params(1) = -1.15;
+% wiener_params(2) = 0.8;
+% 
+% wiener_params(3) = 5.8;
+% wiener_params(4) = 1.19;
+% 
+% wiener_params(5) = -3.05;
+% wiener_params(6) = 1.28;
+% 
+% wiener_params(7) = -0.6;
+% wiener_params(8) = 0.81;
+% 
+% wiener_params(9) = 1.6;
+% wiener_params(10) = 1.16;
 
 factor = dcgain(G_z);
-% factor = 0.595;
 % factor = 1;
 
 v = zeros(1, kk/2);
@@ -473,7 +477,7 @@ v(1:N+delay) = y_ucz(1:N+delay);
 for k = N+delay+1:kk/2
     v(k) = - a * [v(k-1:-1:k-N)]' + b/dcgain(G_z)*[u_ucz(1, k-(delay+1):-1:k-(delay+N))]' + b*[u_ucz(2, k-1:-1:k-N)]';
     index = round((v(k)-v_start)*n / (v_end-v_start));
-    y_mod_ucz(k) = factor*find_value(wiener_params, v(k), index, R_wiener);
+    y_mod_ucz(k) = factor*find_value(wiener_params, v(k), index, R_wiener, 'nonlinear');
 end
 
 v = zeros(1, kk/2);
@@ -483,7 +487,7 @@ v(1:N+delay) = y_wer(1:N+delay);
 for k = N+delay+1:kk/2
     v(k) =  - a * [v(k-1:-1:k-N)]' + b/dcgain(G_z)*[u_wer(1, k-(delay+1):-1:k-(delay+N))]' + b*[u_wer(2, k-1:-1:k-N)]';
     index = round((v(k)-v_start)*n / (v_end-v_start));
-    y_mod_wer(k) = factor*find_value(wiener_params, v(k), index, R_wiener);
+    y_mod_wer(k) = factor*find_value(wiener_params, v(k), index, R_wiener, 'nonlinear');
 end
 
 E_ucz = sum((y_ucz - y_mod_ucz).^2)/(kk/2);
@@ -503,8 +507,8 @@ plot_title = sprintf('Zbiór uczący - y_{ucz}(k) \n E_{ucz} = %.3f', E_ucz);
 title(plot_title);
 legend('y_{mod}', 'y', 'Location', 'northeast');
 grid on;
-file_name = sprintf('../raport/pictures/oe_wien_ucz_%d%d.pdf', c, d);
-exportgraphics (gcf, file_name);
+% file_name = sprintf('../raport/pictures/oe_wien_ucz_%d%d.pdf', c, d);
+% exportgraphics (gcf, file_name);
 
 figure;
 hold on;
@@ -517,5 +521,5 @@ plot_title = sprintf('Zbiór weryfikujący - y_{wer}(k) \n E_{wer} = %.3f', E_we
 title(plot_title);
 legend('y_{mod}', 'y', 'Location', 'northeast');
 grid on;
-file_name = sprintf('../raport/pictures/oe_wien_wer_%d%d.pdf', c, d);
-exportgraphics (gcf, file_name);
+% file_name = sprintf('../raport/pictures/oe_wien_wer_%d%d.pdf', c, d);
+% exportgraphics (gcf, file_name);

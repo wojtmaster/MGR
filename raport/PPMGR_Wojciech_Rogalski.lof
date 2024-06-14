@@ -20,7 +20,7 @@
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {3.1}{\ignorespaces Reprezentacja graficzna modelu Hammersteina.}}{9}{}%
 \contentsline {figure}{\numberline {3.2}{\ignorespaces Zbiory rozmyte.}}{9}{}%
-\contentsline {figure}{\numberline {3.3}{\ignorespaces Aproksymacja charakterystyki statycznej przez model rozmyty.}}{10}{}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Aproksymacja charakterystyki statycznej przez model rozmyty - następniki liniowe.}}{10}{}%
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{10}{}%
 \contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący}}}{10}{}%
 \contentsline {figure}{\numberline {3.4}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Hammesteina w trybie bez rekurencji.}}{11}{}%
@@ -53,48 +53,83 @@
 \contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący}}}{16}{}%
 \contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{16}{}%
 \contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący}}}{16}{}%
-\addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Reprezentacja graficzna modelu Wienera.}}{18}{}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Zbiory rozmyte.}}{18}{}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces Aproksymacja charakterystyki statycznej przez model rozmyty.}}{19}{}%
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Zbiory rozmyte.}}{17}{}%
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Wykres sinusa hiperbolicznego $\sinh (x)$.}}{17}{}%
+\contentsline {figure}{\numberline {3.12}{\ignorespaces Aproksymacja charakterystyki statycznej przez model rozmyty - następniki hiperboliczne.}}{18}{}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{18}{}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący}}}{18}{}%
+\contentsline {figure}{\numberline {3.13}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Hammesteina w trybie bez rekurencji.}}{19}{}%
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{19}{}%
 \contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący}}}{19}{}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Wienera w trybie bez rekurencji.}}{20}{}%
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{19}{}%
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący}}}{19}{}%
+\contentsline {figure}{\numberline {3.14}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Hammesteina w trybie z rekurencją.}}{20}{}%
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{20}{}%
 \contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący}}}{20}{}%
 \contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{20}{}%
 \contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący}}}{20}{}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces Przebiegu sygnału wyjściowego modelu Wienera w trybie bez rekurencji po dostrojeniu współczynników następników.}}{21}{}%
+\contentsline {figure}{\numberline {3.15}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Hammesteina w trybie bez rekurencji.}}{21}{}%
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{21}{}%
 \contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący}}}{21}{}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Wienera w trybie rekurencyjnym.}}{22}{}%
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{21}{}%
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący}}}{21}{}%
+\contentsline {figure}{\numberline {3.16}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Hammesteina w trybie z rekurencją.}}{22}{}%
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{22}{}%
 \contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący}}}{22}{}%
 \contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{22}{}%
 \contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący}}}{22}{}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces Przebiegu sygnału wyjściowego modelu Wienera w trybie rekurencyjnym po dostrojeniu współczynników następników.}}{23}{}%
+\contentsline {figure}{\numberline {3.17}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Hammesteina w trybie bez rekurencji.}}{23}{}%
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{23}{}%
 \contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący}}}{23}{}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Wienera w trybie bez rekurencji.}}{24}{}%
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{23}{}%
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący}}}{23}{}%
+\contentsline {figure}{\numberline {3.18}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Hammesteina w trybie z rekurencją.}}{24}{}%
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{24}{}%
-\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący.}}}{24}{}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący}}}{24}{}%
 \contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{24}{}%
-\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący.}}}{24}{}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Wienera w trybie rekurencyjnym.}}{25}{}%
-\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{25}{}%
-\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący.}}}{25}{}%
-\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{25}{}%
-\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący.}}}{25}{}%
-\contentsline {figure}{\numberline {4.10}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Wienera w trybie bez rekurencji.}}{26}{}%
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący}}}{24}{}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Reprezentacja graficzna modelu Wienera.}}{25}{}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Zbiory rozmyte.}}{25}{}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Aproksymacja charakterystyki statycznej przez model rozmyty.}}{26}{}%
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{26}{}%
-\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący.}}}{26}{}%
-\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{26}{}%
-\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący.}}}{26}{}%
-\contentsline {figure}{\numberline {4.11}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Wienera w trybie rekurencyjnym.}}{27}{}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący}}}{26}{}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Wienera w trybie bez rekurencji.}}{27}{}%
 \contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{27}{}%
-\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący.}}}{27}{}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący}}}{27}{}%
 \contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{27}{}%
-\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący.}}}{27}{}%
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący}}}{27}{}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Przebiegu sygnału wyjściowego modelu Wienera w trybie bez rekurencji po dostrojeniu współczynników następników.}}{28}{}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{28}{}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący}}}{28}{}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Wienera w trybie rekurencyjnym.}}{29}{}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{29}{}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący}}}{29}{}%
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{29}{}%
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący}}}{29}{}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Przebiegu sygnału wyjściowego modelu Wienera w trybie rekurencyjnym po dostrojeniu współczynników następników.}}{30}{}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{30}{}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący}}}{30}{}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Wienera w trybie bez rekurencji.}}{31}{}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{31}{}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący.}}}{31}{}%
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{31}{}%
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący.}}}{31}{}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Wienera w trybie rekurencyjnym.}}{32}{}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{32}{}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący.}}}{32}{}%
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{32}{}%
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący.}}}{32}{}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Wienera w trybie bez rekurencji.}}{33}{}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{33}{}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący.}}}{33}{}%
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{33}{}%
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący.}}}{33}{}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Wienera w trybie rekurencyjnym.}}{34}{}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Zbiór uczący.}}}{34}{}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Zbiór weryfikujący.}}}{34}{}%
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Zbiór uczący.}}}{34}{}%
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Zbiór weryfikujący.}}}{34}{}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
