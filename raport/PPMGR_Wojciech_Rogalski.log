@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.3.3)  13 JUN 2024 08:47
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.3.3)  13 JUN 2024 23:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -863,7 +863,11 @@ l3backend-pdftex.def
 File: l3backend-pdftex.def 2024-01-04 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count348
 \l__pdf_internal_box=\box83
-) (PPMGR_Wojciech_Rogalski.aux)
+) (PPMGR_Wojciech_Rogalski.aux
+
+LaTeX Warning: Label `hamm_model' multiply defined.
+
+)
 \openout1 = `PPMGR_Wojciech_Rogalski.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 111.
@@ -1026,7 +1030,7 @@ File: pictures/schemat.png Graphic file (type png)
 <use pictures/schemat.png>
 Package pdftex.def Info: pictures/schemat.png  used on input line 28.
 (pdftex.def)             Requested size: 364.19664pt x 310.72092pt.
-) [2
+) (identyfikacja.tex [2
 
 {C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/pl/p
 lme.enc}{C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/enc/dv
@@ -1037,7 +1041,7 @@ Rozdzia\PlPrIeC {\l } 2.
 File: pictures/static_characteristic.pdf Graphic file (type pdf)
 <use pictures/static_characteristic.pdf>
 Package pdftex.def Info: pictures/static_characteristic.pdf  used on input line
- 180.
+ 25.
 (pdftex.def)             Requested size: 364.19664pt x 310.73453pt.
 [3
 
@@ -1045,61 +1049,435 @@ Package pdftex.def Info: pictures/static_characteristic.pdf  used on input line
 <pictures/u_F1.pdf, id=66, 371.3875pt x 299.1175pt>
 File: pictures/u_F1.pdf Graphic file (type pdf)
 <use pictures/u_F1.pdf>
-Package pdftex.def Info: pictures/u_F1.pdf  used on input line 209.
+Package pdftex.def Info: pictures/u_F1.pdf  used on input line 54.
 (pdftex.def)             Requested size: 204.85844pt x 164.99892pt.
 LaTeX Font Info:    External font `plex10' loaded for size
-(Font)              <9> on input line 209.
+(Font)              <9> on input line 54.
 <pictures/y_F1.pdf, id=67, 370.38374pt x 304.13625pt>
 File: pictures/y_F1.pdf Graphic file (type pdf)
 <use pictures/y_F1.pdf>
-Package pdftex.def Info: pictures/y_F1.pdf  used on input line 212.
+Package pdftex.def Info: pictures/y_F1.pdf  used on input line 57.
 (pdftex.def)             Requested size: 204.85844pt x 168.21751pt.
 <pictures/arx_ucz.pdf, id=68, 376.40625pt x 307.1475pt>
 File: pictures/arx_ucz.pdf Graphic file (type pdf)
 <use pictures/arx_ucz.pdf>
-Package pdftex.def Info: pictures/arx_ucz.pdf  used on input line 243.
+Package pdftex.def Info: pictures/arx_ucz.pdf  used on input line 88.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
 <pictures/arx_wer.pdf, id=69, 376.40625pt x 307.1475pt>
 File: pictures/arx_wer.pdf Graphic file (type pdf)
 <use pictures/arx_wer.pdf>
-Package pdftex.def Info: pictures/arx_wer.pdf  used on input line 246.
+Package pdftex.def Info: pictures/arx_wer.pdf  used on input line 91.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
 <pictures/oe_ucz.pdf, id=70, 376.40625pt x 307.1475pt>
 File: pictures/oe_ucz.pdf Graphic file (type pdf)
 <use pictures/oe_ucz.pdf>
-Package pdftex.def Info: pictures/oe_ucz.pdf  used on input line 252.
+Package pdftex.def Info: pictures/oe_ucz.pdf  used on input line 97.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
 <pictures/oe_wer.pdf, id=71, 376.40625pt x 307.1475pt>
 File: pictures/oe_wer.pdf Graphic file (type pdf)
 <use pictures/oe_wer.pdf>
-Package pdftex.def Info: pictures/oe_wer.pdf  used on input line 255.
+Package pdftex.def Info: pictures/oe_wer.pdf  used on input line 100.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
  [4{C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/p
 l/plit.enc} <./pictures/u_F1.pdf> <./pictures/y_F1.pdf>] [5 <./pictures/arx_ucz
 .pdf> <./pictures/arx_wer.pdf> <./pictures/oe_ucz.pdf> <./pictures/oe_wer.pdf>]
- [6]
+<pictures/model_fopdt.pdf, id=286, 421.575pt x 316.18124pt>
+File: pictures/model_fopdt.pdf Graphic file (type pdf)
+<use pictures/model_fopdt.pdf>
+Package pdftex.def Info: pictures/model_fopdt.pdf  used on input line 121.
+(pdftex.def)             Requested size: 455.24408pt x 341.4417pt.
+ [6 <./pictures/model_fopdt.pdf>]
+<pictures/model_sopdt.pdf, id=312, 421.575pt x 316.18124pt>
+File: pictures/model_sopdt.pdf Graphic file (type pdf)
+<use pictures/model_sopdt.pdf>
+Package pdftex.def Info: pictures/model_sopdt.pdf  used on input line 143.
+(pdftex.def)             Requested size: 455.24408pt x 341.4417pt.
+
+[7 <./pictures/model_sopdt.pdf>]
+<pictures/arx_ucz_sopdt.pdf, id=337, 371.3875pt x 307.1475pt>
+File: pictures/arx_ucz_sopdt.pdf Graphic file (type pdf)
+<use pictures/arx_ucz_sopdt.pdf>
+Package pdftex.def Info: pictures/arx_ucz_sopdt.pdf  used on input line 167.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wer_sopdt.pdf, id=338, 371.3875pt x 307.1475pt>
+File: pictures/arx_wer_sopdt.pdf Graphic file (type pdf)
+<use pictures/arx_wer_sopdt.pdf>
+Package pdftex.def Info: pictures/arx_wer_sopdt.pdf  used on input line 170.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_ucz_sopdt.pdf, id=339, 371.3875pt x 307.1475pt>
+File: pictures/oe_ucz_sopdt.pdf Graphic file (type pdf)
+<use pictures/oe_ucz_sopdt.pdf>
+Package pdftex.def Info: pictures/oe_ucz_sopdt.pdf  used on input line 176.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wer_sopdt.pdf, id=340, 371.3875pt x 307.1475pt>
+File: pictures/oe_wer_sopdt.pdf Graphic file (type pdf)
+<use pictures/oe_wer_sopdt.pdf>
+Package pdftex.def Info: pictures/oe_wer_sopdt.pdf  used on input line 179.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+) [8 <./pictures/arx_ucz_sopdt.pdf> <./pictures/arx_wer_sopdt.pdf> <./pictures/
+oe_ucz_sopdt.pdf> <./pictures/oe_wer_sopdt.pdf>]
 Rozdzia\PlPrIeC {\l } 3.
-[7
-
-]
-Rozdzia\PlPrIeC {\l } 4.
-[8
-
-]
-Rozdzia\PlPrIeC {\l } 5.
+<pictures/hamm_model.png, id=482, 358.33875pt x 63.23625pt>
+File: pictures/hamm_model.png Graphic file (type png)
+<use pictures/hamm_model.png>
+Package pdftex.def Info: pictures/hamm_model.png  used on input line 162.
+(pdftex.def)             Requested size: 455.24408pt x 80.34193pt.
+<pictures/fuzzy_set_ham.pdf, id=483, 358.33875pt x 298.11375pt>
+File: pictures/fuzzy_set_ham.pdf Graphic file (type pdf)
+<use pictures/fuzzy_set_ham.pdf>
+Package pdftex.def Info: pictures/fuzzy_set_ham.pdf  used on input line 177.
+(pdftex.def)             Requested size: 227.62204pt x 189.36836pt.
 [9
+
+ <./pictures/hamm_model.png> <./pictures/fuzzy_set_ham.pdf>]
+LaTeX Font Info:    Trying to load font information for OT4+cmtt on input line 
+193.
+
+(C:\Users\HP.LAPTOP-VKB5R2K8\AppData\Local\Programs\MiKTeX\tex/latex/polski\ot4
+cmtt.fd
+File: ot4cmtt.fd 2008/02/24 v1.2.1 Font defs for fonts PL (MW)
+)
+<pictures/static_char_ham_lin_ucz.pdf, id=527, 359.3425pt x 306.14375pt>
+File: pictures/static_char_ham_lin_ucz.pdf Graphic file (type pdf)
+<use pictures/static_char_ham_lin_ucz.pdf>
+Package pdftex.def Info: pictures/static_char_ham_lin_ucz.pdf  used on input li
+ne 198.
+(pdftex.def)             Requested size: 204.85844pt x 174.53644pt.
+<pictures/static_char_ham_lin_wer.pdf, id=528, 361.35pt x 306.14375pt>
+File: pictures/static_char_ham_lin_wer.pdf Graphic file (type pdf)
+<use pictures/static_char_ham_lin_wer.pdf>
+Package pdftex.def Info: pictures/static_char_ham_lin_wer.pdf  used on input li
+ne 201.
+(pdftex.def)             Requested size: 204.85844pt x 173.56012pt.
+<pictures/arx_ucz_1.pdf, id=529, 371.3875pt x 307.1475pt>
+File: pictures/arx_ucz_1.pdf Graphic file (type pdf)
+<use pictures/arx_ucz_1.pdf>
+Package pdftex.def Info: pictures/arx_ucz_1.pdf  used on input line 220.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wer_1.pdf, id=530, 371.3875pt x 307.1475pt>
+File: pictures/arx_wer_1.pdf Graphic file (type pdf)
+<use pictures/arx_wer_1.pdf>
+Package pdftex.def Info: pictures/arx_wer_1.pdf  used on input line 223.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_hamm_ucz_1.pdf, id=531, 376.40625pt x 307.1475pt>
+File: pictures/arx_hamm_ucz_1.pdf Graphic file (type pdf)
+<use pictures/arx_hamm_ucz_1.pdf>
+Package pdftex.def Info: pictures/arx_hamm_ucz_1.pdf  used on input line 230.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/arx_hamm_wer_1.pdf, id=532, 376.40625pt x 307.1475pt>
+File: pictures/arx_hamm_wer_1.pdf Graphic file (type pdf)
+<use pictures/arx_hamm_wer_1.pdf>
+Package pdftex.def Info: pictures/arx_hamm_wer_1.pdf  used on input line 233.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/oe_ucz_1.pdf, id=533, 371.3875pt x 307.1475pt>
+File: pictures/oe_ucz_1.pdf Graphic file (type pdf)
+<use pictures/oe_ucz_1.pdf>
+Package pdftex.def Info: pictures/oe_ucz_1.pdf  used on input line 247.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wer_1.pdf, id=534, 371.3875pt x 307.1475pt>
+File: pictures/oe_wer_1.pdf Graphic file (type pdf)
+<use pictures/oe_wer_1.pdf>
+Package pdftex.def Info: pictures/oe_wer_1.pdf  used on input line 250.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_hamm_ucz_1.pdf, id=535, 376.40625pt x 307.1475pt>
+File: pictures/oe_hamm_ucz_1.pdf Graphic file (type pdf)
+<use pictures/oe_hamm_ucz_1.pdf>
+Package pdftex.def Info: pictures/oe_hamm_ucz_1.pdf  used on input line 257.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/oe_hamm_wer_1.pdf, id=536, 376.40625pt x 307.1475pt>
+File: pictures/oe_hamm_wer_1.pdf Graphic file (type pdf)
+<use pictures/oe_hamm_wer_1.pdf>
+Package pdftex.def Info: pictures/oe_hamm_wer_1.pdf  used on input line 260.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/arx_ucz_2.pdf, id=537, 371.3875pt x 307.1475pt>
+File: pictures/arx_ucz_2.pdf Graphic file (type pdf)
+<use pictures/arx_ucz_2.pdf>
+Package pdftex.def Info: pictures/arx_ucz_2.pdf  used on input line 276.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wer_2.pdf, id=538, 371.3875pt x 307.1475pt>
+File: pictures/arx_wer_2.pdf Graphic file (type pdf)
+<use pictures/arx_wer_2.pdf>
+Package pdftex.def Info: pictures/arx_wer_2.pdf  used on input line 279.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_hamm_ucz_2.pdf, id=539, 376.40625pt x 307.1475pt>
+File: pictures/arx_hamm_ucz_2.pdf Graphic file (type pdf)
+<use pictures/arx_hamm_ucz_2.pdf>
+Package pdftex.def Info: pictures/arx_hamm_ucz_2.pdf  used on input line 286.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/arx_hamm_wer_2.pdf, id=540, 376.40625pt x 307.1475pt>
+File: pictures/arx_hamm_wer_2.pdf Graphic file (type pdf)
+<use pictures/arx_hamm_wer_2.pdf>
+Package pdftex.def Info: pictures/arx_hamm_wer_2.pdf  used on input line 289.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/oe_ucz_2.pdf, id=541, 371.3875pt x 307.1475pt>
+File: pictures/oe_ucz_2.pdf Graphic file (type pdf)
+<use pictures/oe_ucz_2.pdf>
+Package pdftex.def Info: pictures/oe_ucz_2.pdf  used on input line 303.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wer_2.pdf, id=542, 371.3875pt x 307.1475pt>
+File: pictures/oe_wer_2.pdf Graphic file (type pdf)
+<use pictures/oe_wer_2.pdf>
+Package pdftex.def Info: pictures/oe_wer_2.pdf  used on input line 306.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_hamm_ucz_2.pdf, id=543, 376.40625pt x 307.1475pt>
+File: pictures/oe_hamm_ucz_2.pdf Graphic file (type pdf)
+<use pictures/oe_hamm_ucz_2.pdf>
+Package pdftex.def Info: pictures/oe_hamm_ucz_2.pdf  used on input line 313.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/oe_hamm_wer_2.pdf, id=544, 376.40625pt x 307.1475pt>
+File: pictures/oe_hamm_wer_2.pdf Graphic file (type pdf)
+<use pictures/oe_hamm_wer_2.pdf>
+Package pdftex.def Info: pictures/oe_hamm_wer_2.pdf  used on input line 316.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/arx_ucz_3.pdf, id=545, 371.3875pt x 307.1475pt>
+File: pictures/arx_ucz_3.pdf Graphic file (type pdf)
+<use pictures/arx_ucz_3.pdf>
+Package pdftex.def Info: pictures/arx_ucz_3.pdf  used on input line 332.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wer_3.pdf, id=546, 371.3875pt x 307.1475pt>
+File: pictures/arx_wer_3.pdf Graphic file (type pdf)
+<use pictures/arx_wer_3.pdf>
+Package pdftex.def Info: pictures/arx_wer_3.pdf  used on input line 335.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_hamm_ucz_3.pdf, id=547, 376.40625pt x 307.1475pt>
+File: pictures/arx_hamm_ucz_3.pdf Graphic file (type pdf)
+<use pictures/arx_hamm_ucz_3.pdf>
+Package pdftex.def Info: pictures/arx_hamm_ucz_3.pdf  used on input line 342.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/arx_hamm_wer_3.pdf, id=548, 376.40625pt x 307.1475pt>
+File: pictures/arx_hamm_wer_3.pdf Graphic file (type pdf)
+<use pictures/arx_hamm_wer_3.pdf>
+Package pdftex.def Info: pictures/arx_hamm_wer_3.pdf  used on input line 345.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+ [10{C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/
+pl/pltt.enc} <./pictures/static_char_ham_lin_ucz.pdf> <./pictures/static_char_h
+am_lin_wer.pdf>] [11 <./pictures/arx_ucz_1.pdf> <./pictures/arx_wer_1.pdf> <./p
+ictures/arx_hamm_ucz_1.pdf> <./pictures/arx_hamm_wer_1.pdf>] [12 <./pictures/oe
+_ucz_1.pdf> <./pictures/oe_wer_1.pdf> <./pictures/oe_hamm_ucz_1.pdf> <./picture
+s/oe_hamm_wer_1.pdf>] [13 <./pictures/arx_ucz_2.pdf> <./pictures/arx_wer_2.pdf>
+ <./pictures/arx_hamm_ucz_2.pdf> <./pictures/arx_hamm_wer_2.pdf>]
+[14 <./pictures/oe_ucz_2.pdf> <./pictures/oe_wer_2.pdf> <./pictures/oe_hamm_ucz
+_2.pdf> <./pictures/oe_hamm_wer_2.pdf>] [15 <./pictures/arx_ucz_3.pdf> <./pictu
+res/arx_wer_3.pdf> <./pictures/arx_hamm_ucz_3.pdf> <./pictures/arx_hamm_wer_3.p
+df>]
+<pictures/oe_ucz_3.pdf, id=1307, 371.3875pt x 307.1475pt>
+File: pictures/oe_ucz_3.pdf Graphic file (type pdf)
+<use pictures/oe_ucz_3.pdf>
+Package pdftex.def Info: pictures/oe_ucz_3.pdf  used on input line 361.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wer_3.pdf, id=1308, 371.3875pt x 307.1475pt>
+File: pictures/oe_wer_3.pdf Graphic file (type pdf)
+<use pictures/oe_wer_3.pdf>
+Package pdftex.def Info: pictures/oe_wer_3.pdf  used on input line 364.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_hamm_ucz_3.pdf, id=1309, 376.40625pt x 307.1475pt>
+File: pictures/oe_hamm_ucz_3.pdf Graphic file (type pdf)
+<use pictures/oe_hamm_ucz_3.pdf>
+Package pdftex.def Info: pictures/oe_hamm_ucz_3.pdf  used on input line 371.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/oe_hamm_wer_3.pdf, id=1310, 376.40625pt x 307.1475pt>
+File: pictures/oe_hamm_wer_3.pdf Graphic file (type pdf)
+<use pictures/oe_hamm_wer_3.pdf>
+Package pdftex.def Info: pictures/oe_hamm_wer_3.pdf  used on input line 374.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+ [16 <./pictures/oe_ucz_3.pdf> <./pictures/oe_wer_3.pdf> <./pictures/oe_hamm_uc
+z_3.pdf> <./pictures/oe_hamm_wer_3.pdf>] [17]
+Rozdzia\PlPrIeC {\l } 4.
+<pictures/wien_model.png, id=1449, 358.33875pt x 63.23625pt>
+File: pictures/wien_model.png Graphic file (type png)
+<use pictures/wien_model.png>
+Package pdftex.def Info: pictures/wien_model.png  used on input line 389.
+(pdftex.def)             Requested size: 455.24408pt x 80.34193pt.
+<pictures/fuzzy_set_wien.pdf, id=1450, 362.35374pt x 298.11375pt>
+File: pictures/fuzzy_set_wien.pdf Graphic file (type pdf)
+<use pictures/fuzzy_set_wien.pdf>
+Package pdftex.def Info: pictures/fuzzy_set_wien.pdf  used on input line 400.
+(pdftex.def)             Requested size: 273.14922pt x 224.72652pt.
+[18
+
+ <./pictures/wien_model.png> <./pictures/fuzzy_set_wien.pdf>]
+<pictures/static_char_wien_lin_ucz.pdf, id=1497, 363.3575pt x 306.14375pt>
+File: pictures/static_char_wien_lin_ucz.pdf Graphic file (type pdf)
+<use pictures/static_char_wien_lin_ucz.pdf>
+Package pdftex.def Info: pictures/static_char_wien_lin_ucz.pdf  used on input l
+ine 411.
+(pdftex.def)             Requested size: 204.85844pt x 172.60716pt.
+<pictures/static_char_wien_lin_wer.pdf, id=1498, 363.3575pt x 306.14375pt>
+File: pictures/static_char_wien_lin_wer.pdf Graphic file (type pdf)
+<use pictures/static_char_wien_lin_wer.pdf>
+Package pdftex.def Info: pictures/static_char_wien_lin_wer.pdf  used on input l
+ine 414.
+(pdftex.def)             Requested size: 204.85844pt x 172.60716pt.
+ [19 <./pictures/static_char_wien_lin_ucz.pdf> <./pictures/static_char_wien_lin
+_wer.pdf>]
+<pictures/arx_ucz_11.pdf, id=1580, 371.3875pt x 307.1475pt>
+File: pictures/arx_ucz_11.pdf Graphic file (type pdf)
+<use pictures/arx_ucz_11.pdf>
+Package pdftex.def Info: pictures/arx_ucz_11.pdf  used on input line 432.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wer_11.pdf, id=1581, 371.3875pt x 307.1475pt>
+File: pictures/arx_wer_11.pdf Graphic file (type pdf)
+<use pictures/arx_wer_11.pdf>
+Package pdftex.def Info: pictures/arx_wer_11.pdf  used on input line 435.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wien_ucz_11.pdf, id=1582, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_ucz_11.pdf Graphic file (type pdf)
+<use pictures/arx_wien_ucz_11.pdf>
+Package pdftex.def Info: pictures/arx_wien_ucz_11.pdf  used on input line 442.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/arx_wien_wer_11.pdf, id=1583, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_wer_11.pdf Graphic file (type pdf)
+<use pictures/arx_wien_wer_11.pdf>
+Package pdftex.def Info: pictures/arx_wien_wer_11.pdf  used on input line 445.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+
+[20 <./pictures/arx_ucz_11.pdf> <./pictures/arx_wer_11.pdf> <./pictures/arx_wie
+n_ucz_11.pdf> <./pictures/arx_wien_wer_11.pdf>]
+<pictures/arx_wien_ucz_12.pdf, id=1720, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_ucz_12.pdf Graphic file (type pdf)
+<use pictures/arx_wien_ucz_12.pdf>
+Package pdftex.def Info: pictures/arx_wien_ucz_12.pdf  used on input line 456.
+(pdftex.def)             Requested size: 318.66946pt x 260.0549pt.
+<pictures/arx_wien_wer_12.pdf, id=1721, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_wer_12.pdf Graphic file (type pdf)
+<use pictures/arx_wien_wer_12.pdf>
+Package pdftex.def Info: pictures/arx_wien_wer_12.pdf  used on input line 459.
+(pdftex.def)             Requested size: 318.66946pt x 260.0549pt.
+ [21 <./pictures/arx_wien_ucz_12.pdf> <./pictures/arx_wien_wer_12.pdf>]
+<pictures/oe_ucz_11.pdf, id=1791, 371.3875pt x 307.1475pt>
+File: pictures/oe_ucz_11.pdf Graphic file (type pdf)
+<use pictures/oe_ucz_11.pdf>
+Package pdftex.def Info: pictures/oe_ucz_11.pdf  used on input line 478.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wer_11.pdf, id=1792, 371.3875pt x 307.1475pt>
+File: pictures/oe_wer_11.pdf Graphic file (type pdf)
+<use pictures/oe_wer_11.pdf>
+Package pdftex.def Info: pictures/oe_wer_11.pdf  used on input line 481.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wien_ucz_11.pdf, id=1793, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_ucz_11.pdf Graphic file (type pdf)
+<use pictures/oe_wien_ucz_11.pdf>
+Package pdftex.def Info: pictures/oe_wien_ucz_11.pdf  used on input line 488.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/oe_wien_wer_11.pdf, id=1794, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_wer_11.pdf Graphic file (type pdf)
+<use pictures/oe_wien_wer_11.pdf>
+Package pdftex.def Info: pictures/oe_wien_wer_11.pdf  used on input line 491.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+ [22 <./pictures/oe_ucz_11.pdf> <./pictures/oe_wer_11.pdf> <./pictures/oe_wien_
+ucz_11.pdf> <./pictures/oe_wien_wer_11.pdf>]
+<pictures/oe_wien_ucz_12.pdf, id=1929, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_ucz_12.pdf Graphic file (type pdf)
+<use pictures/oe_wien_ucz_12.pdf>
+Package pdftex.def Info: pictures/oe_wien_ucz_12.pdf  used on input line 502.
+(pdftex.def)             Requested size: 318.66946pt x 260.0549pt.
+<pictures/oe_wien_wer_12.pdf, id=1930, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_wer_12.pdf Graphic file (type pdf)
+<use pictures/oe_wien_wer_12.pdf>
+Package pdftex.def Info: pictures/oe_wien_wer_12.pdf  used on input line 505.
+(pdftex.def)             Requested size: 318.66946pt x 260.0549pt.
+<pictures/arx_ucz_22.pdf, id=1931, 371.3875pt x 307.1475pt>
+File: pictures/arx_ucz_22.pdf Graphic file (type pdf)
+<use pictures/arx_ucz_22.pdf>
+Package pdftex.def Info: pictures/arx_ucz_22.pdf  used on input line 524.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wer_22.pdf, id=1932, 371.3875pt x 307.1475pt>
+File: pictures/arx_wer_22.pdf Graphic file (type pdf)
+<use pictures/arx_wer_22.pdf>
+Package pdftex.def Info: pictures/arx_wer_22.pdf  used on input line 527.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wien_ucz_22.pdf, id=1933, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_ucz_22.pdf Graphic file (type pdf)
+<use pictures/arx_wien_ucz_22.pdf>
+Package pdftex.def Info: pictures/arx_wien_ucz_22.pdf  used on input line 534.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/arx_wien_wer_22.pdf, id=1934, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_wer_22.pdf Graphic file (type pdf)
+<use pictures/arx_wien_wer_22.pdf>
+Package pdftex.def Info: pictures/arx_wien_wer_22.pdf  used on input line 537.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/oe_ucz_22.pdf, id=1935, 371.3875pt x 307.1475pt>
+File: pictures/oe_ucz_22.pdf Graphic file (type pdf)
+<use pictures/oe_ucz_22.pdf>
+Package pdftex.def Info: pictures/oe_ucz_22.pdf  used on input line 551.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wer_22.pdf, id=1936, 371.3875pt x 307.1475pt>
+File: pictures/oe_wer_22.pdf Graphic file (type pdf)
+<use pictures/oe_wer_22.pdf>
+Package pdftex.def Info: pictures/oe_wer_22.pdf  used on input line 554.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wien_ucz_22.pdf, id=1937, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_ucz_22.pdf Graphic file (type pdf)
+<use pictures/oe_wien_ucz_22.pdf>
+Package pdftex.def Info: pictures/oe_wien_ucz_22.pdf  used on input line 561.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/oe_wien_wer_22.pdf, id=1938, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_wer_22.pdf Graphic file (type pdf)
+<use pictures/oe_wien_wer_22.pdf>
+Package pdftex.def Info: pictures/oe_wien_wer_22.pdf  used on input line 564.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/arx_ucz_33.pdf, id=1939, 371.3875pt x 307.1475pt>
+File: pictures/arx_ucz_33.pdf Graphic file (type pdf)
+<use pictures/arx_ucz_33.pdf>
+Package pdftex.def Info: pictures/arx_ucz_33.pdf  used on input line 580.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wer_33.pdf, id=1940, 371.3875pt x 307.1475pt>
+File: pictures/arx_wer_33.pdf Graphic file (type pdf)
+<use pictures/arx_wer_33.pdf>
+Package pdftex.def Info: pictures/arx_wer_33.pdf  used on input line 583.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wien_ucz_33.pdf, id=1941, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_ucz_33.pdf Graphic file (type pdf)
+<use pictures/arx_wien_ucz_33.pdf>
+Package pdftex.def Info: pictures/arx_wien_ucz_33.pdf  used on input line 590.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/arx_wien_wer_33.pdf, id=1942, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_wer_33.pdf Graphic file (type pdf)
+<use pictures/arx_wien_wer_33.pdf>
+Package pdftex.def Info: pictures/arx_wien_wer_33.pdf  used on input line 593.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+ [23 <./pictures/oe_wien_ucz_12.pdf> <./pictures/oe_wien_wer_12.pdf>]
+[24 <./pictures/arx_ucz_22.pdf> <./pictures/arx_wer_22.pdf> <./pictures/arx_wie
+n_ucz_22.pdf> <./pictures/arx_wien_wer_22.pdf>] [25 <./pictures/oe_ucz_22.pdf> 
+<./pictures/oe_wer_22.pdf> <./pictures/oe_wien_ucz_22.pdf> <./pictures/oe_wien_
+wer_22.pdf>] [26 <./pictures/arx_ucz_33.pdf> <./pictures/arx_wer_33.pdf> <./pic
+tures/arx_wien_ucz_33.pdf> <./pictures/arx_wien_wer_33.pdf>]
+<pictures/oe_ucz_33.pdf, id=2406, 371.3875pt x 307.1475pt>
+File: pictures/oe_ucz_33.pdf Graphic file (type pdf)
+<use pictures/oe_ucz_33.pdf>
+Package pdftex.def Info: pictures/oe_ucz_33.pdf  used on input line 609.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wer_33.pdf, id=2407, 371.3875pt x 307.1475pt>
+File: pictures/oe_wer_33.pdf Graphic file (type pdf)
+<use pictures/oe_wer_33.pdf>
+Package pdftex.def Info: pictures/oe_wer_33.pdf  used on input line 612.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wien_ucz_33.pdf, id=2408, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_ucz_33.pdf Graphic file (type pdf)
+<use pictures/oe_wien_ucz_33.pdf>
+Package pdftex.def Info: pictures/oe_wien_ucz_33.pdf  used on input line 619.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/oe_wien_wer_33.pdf, id=2409, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_wer_33.pdf Graphic file (type pdf)
+<use pictures/oe_wien_wer_33.pdf>
+Package pdftex.def Info: pictures/oe_wien_wer_33.pdf  used on input line 622.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+ [27 <./pictures/oe_ucz_33.pdf> <./pictures/oe_wer_33.pdf> <./pictures/oe_wien_
+ucz_33.pdf> <./pictures/oe_wien_wer_33.pdf>] [28]
+Rozdzia\PlPrIeC {\l } 5.
+[29
 
 ] (PPMGR_Wojciech_Rogalski.lof)
 \tf@lof=\write5
 \openout5 = `PPMGR_Wojciech_Rogalski.lof'.
 
- [10
+ [30
 
 ] (PPMGR_Wojciech_Rogalski.lot)
 \tf@lot=\write6
 \openout6 = `PPMGR_Wojciech_Rogalski.lot'.
 
- [11
+ [31
 
 ]
 (PPMGR_Wojciech_Rogalski.aux)
@@ -1107,15 +1485,19 @@ Rozdzia\PlPrIeC {\l } 5.
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-04>
  ***********
+
+
+LaTeX Warning: There were multiply-defined labels.
+
  ) 
 Here is how much of TeX's memory you used:
- 24444 strings out of 474485
- 534588 string characters out of 5737599
- 1940542 words of memory out of 5000000
- 46327 multiletter control sequences out of 15000+600000
- 574252 words of font info for 83 fonts, out of 8000000 for 9000
+ 25084 strings out of 474485
+ 555649 string characters out of 5737599
+ 1943542 words of memory out of 5000000
+ 46959 multiletter control sequences out of 15000+600000
+ 575084 words of font info for 85 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 84i,14n,93p,635b,529s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 84i,14n,93p,745b,529s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\HP.LAPTOP-VKB5R2K8\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/e
 c/dpi600\tcrm1095.pk><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX
 /fonts/type1/public/pl/plbx10.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Pr
@@ -1133,10 +1515,11 @@ TOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/type1/public/pl/plr9.pfb><C:/U
 sers/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/type1/public/pl/pls
 y10.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/type1/
 public/pl/plsy8.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/
-fonts/type1/public/pl/plti10.pfb>
-Output written on PPMGR_Wojciech_Rogalski.pdf (12 pages, 775829 bytes).
+fonts/type1/public/pl/plti10.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Pro
+grams/MiKTeX/fonts/type1/public/pl/pltt10.pfb>
+Output written on PPMGR_Wojciech_Rogalski.pdf (32 pages, 6114200 bytes).
 PDF statistics:
- 373 PDF objects out of 1000 (max. 8388607)
+ 2627 PDF objects out of 2984 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 53 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 383 words of extra memory for PDF output out of 10000 (max. 10000000)
 

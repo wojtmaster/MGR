@@ -3,12 +3,13 @@
 \contentsline {section}{\numberline {2.1\relax .\enspace }Charakterystyka statyczna}{3}{}%
 \contentsline {section}{\numberline {2.2\relax .\enspace }Wymuszenia}{4}{}%
 \contentsline {section}{\numberline {2.3\relax .\enspace }Podejście inżynierskie}{6}{}%
-\contentsline {chapter}{\numberline {3\relax .\enspace }Model Hammersteina}{7}{}%
-\contentsline {section}{\numberline {3.1\relax .\enspace }Następniki liniowe}{7}{}%
-\contentsline {section}{\numberline {3.2\relax .\enspace }Następniki hiperboliczne}{7}{}%
-\contentsline {chapter}{\numberline {4\relax .\enspace }Model Wienera}{8}{}%
-\contentsline {section}{\numberline {4.1\relax .\enspace }Następniki liniowe}{8}{}%
-\contentsline {section}{\numberline {4.2\relax .\enspace }Następniki hiperboliczne}{8}{}%
-\contentsline {chapter}{\numberline {5\relax .\enspace }Podsumowanie}{9}{}%
-\contentsline {chapter}{Spis rysunk\'ow}{10}{}%
-\contentsline {chapter}{Spis tabel}{11}{}%
+\contentsline {chapter}{\numberline {3\relax .\enspace }Model Hammersteina}{9}{}%
+\contentsline {section}{\numberline {3.1\relax .\enspace }Nieliniowy blok statyczny}{9}{}%
+\contentsline {section}{\numberline {3.2\relax .\enspace }Następniki liniowe}{9}{}%
+\contentsline {section}{\numberline {3.3\relax .\enspace }Następniki hiperboliczne}{17}{}%
+\contentsline {chapter}{\numberline {4\relax .\enspace }Model Wienera}{18}{}%
+\contentsline {section}{\numberline {4.1\relax .\enspace }Następniki liniowe}{18}{}%
+\contentsline {section}{\numberline {4.2\relax .\enspace }Następniki hiperboliczne}{28}{}%
+\contentsline {chapter}{\numberline {5\relax .\enspace }Podsumowanie}{29}{}%
+\contentsline {chapter}{Spis rysunk\'ow}{30}{}%
+\contentsline {chapter}{Spis tabel}{31}{}%

@@ -28,7 +28,9 @@ function [R, optimal_params] = static_characteristic_y_u(u, u_ucz, u_wer, y_ucz,
     ylabel('y');
     xlim([-45 45]);
     title('Zbiory rozmyte y(u)');
-    
+    % file_name = sprintf('../raport/pictures/fuzzy_set_ham.pdf');
+    % exportgraphics (gcf, file_name);
+
     a = ones(size(R));
     b = ones(size(R));
      
@@ -65,6 +67,8 @@ function [R, optimal_params] = static_characteristic_y_u(u, u_ucz, u_wer, y_ucz,
         plot_title = sprintf('Charakterystyka statyczna y_{ucz}(u_{ucz}) \n Następniki liniowe');
         title(plot_title);
         legend('y(u)', 'y(u) - fuzzy', 'Location', 'northwest');
+        % file_name = sprintf('../raport/pictures/static_char_ham_lin_ucz.pdf');
+        % exportgraphics (gcf, file_name);
     
         % Zbiór weryfikujący
         y_mod_wer = fuzzy_linear_model(optimal_params, u_wer, u_start, u_end, R, n);
@@ -78,6 +82,8 @@ function [R, optimal_params] = static_characteristic_y_u(u, u_ucz, u_wer, y_ucz,
         plot_title = sprintf('Charakterystyka statyczna y_{wer}(u_{wer}) \n Następniki liniowe');
         title(plot_title);
         legend('y(u)', 'y(u) - fuzzy', 'Location', 'northwest');
+        % file_name = sprintf('../raport/pictures/static_char_ham_lin_wer.pdf');
+        % exportgraphics (gcf, file_name);
     else
         % MNK: Minimalizacja sumy kwadratów błędów
         fun = @(params) sum((y_ucz - fuzzy_nonlinear_model(params, u_ucz, u_start, u_end, R, n)).^2);
@@ -100,6 +106,8 @@ function [R, optimal_params] = static_characteristic_y_u(u, u_ucz, u_wer, y_ucz,
         plot_title = sprintf('Charakterystyka statyczna y_{ucz}(u_{ucz}) \n Następniki hiperboliczne');
         title(plot_title);
         legend('y(u)', 'y(u) - fuzzy', 'Location', 'northwest');
+        % file_name = sprintf('../raport/pictures/static_char_ham_nlin_ucz.pdf');
+        % exportgraphics (gcf, file_name);
 
         y_mod_wer = fuzzy_nonlinear_model(optimal_params, u_wer, u_start, u_end, R, n);
         figure(fig_u_wer);
@@ -112,6 +120,8 @@ function [R, optimal_params] = static_characteristic_y_u(u, u_ucz, u_wer, y_ucz,
         plot_title = sprintf('Charakterystyka statyczna y_{wer}(u_{wer}) \n Następniki hiperboliczne');
         title(plot_title);
         legend('y(u)', 'y(u) - fuzzy', 'Location', 'northwest');
+        % file_name = sprintf('../raport/pictures/static_char_ham_nlin_wer.pdf');
+        % exportgraphics (gcf, file_name);
     end
 
     E_ucz = sum((y_ucz - y_mod_ucz).^2)/(n/2);

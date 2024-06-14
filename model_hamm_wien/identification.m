@@ -34,7 +34,7 @@ t = 0:Tp:(kk-1)*Tp;
 F_1_start = 45;
 F_1_end = 135;
 % Liczba podziałów wartości sterowania F_1 (do charakterystyki statycznej)
-n = (F_1_end - F_1_start) * 8;
+n = (F_1_end - F_1_start) * 2;
 
 %% Charakrerystyka statyczna
 [h_2, F_1] = static_characteristic(F_1_start, F_1_end, F_D0, alpha_2, n);
