@@ -55,10 +55,10 @@ v_ucz = v(1:2:end-1);
 v_wer = v(2:2:end);
 
 %% Fuzzy static charaacteristic - Hammerstein
-[R_hammerstein, hammerstein_params] = static_characteristic_y_u(u, u_ucz, u_wer, y_ucz, y_wer, u_start, u_end, n, 'linear');
+[R_hammerstein, hammerstein_params] = static_characteristic_y_u(u, u_ucz, u_wer, y_ucz, y_wer, u_start, u_end, n, 'nonlinear');
 
 %% Fuzzy static charaacteristic - Wiener
-[R_wiener, wiener_params] = static_characteristic_y_v(v, v_ucz, v_wer, y_ucz, y_wer, v_start, v_end, n, 'linear');
+[R_wiener, wiener_params] = static_characteristic_y_v(v, v_ucz, v_wer, y_ucz, y_wer, v_start, v_end, n, 'nonlinear');
 
 %% Wymuszenia + podział na zbiory danych dynamicznych
 u = enforce(kk);

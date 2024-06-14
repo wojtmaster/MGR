@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.3.3)  13 JUN 2024 23:07
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.3.3)  14 JUN 2024 10:02
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1497,7 +1497,7 @@ Here is how much of TeX's memory you used:
  46959 multiletter control sequences out of 15000+600000
  575084 words of font info for 85 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 84i,14n,93p,745b,529s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 84i,14n,93p,785b,529s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\HP.LAPTOP-VKB5R2K8\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/e
 c/dpi600\tcrm1095.pk><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX
 /fonts/type1/public/pl/plbx10.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Pr
@@ -1517,7 +1517,7 @@ y10.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/type1/
 public/pl/plsy8.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/
 fonts/type1/public/pl/plti10.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Pro
 grams/MiKTeX/fonts/type1/public/pl/pltt10.pfb>
-Output written on PPMGR_Wojciech_Rogalski.pdf (32 pages, 6114200 bytes).
+Output written on PPMGR_Wojciech_Rogalski.pdf (32 pages, 6115486 bytes).
 PDF statistics:
  2627 PDF objects out of 2984 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)

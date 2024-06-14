@@ -164,7 +164,7 @@ W przypadku modelu Hammersteina istota polega na rozdzieleniu dynamiki i statyki
 \label{hamm_model}
 \end{figure}
 
-\noindent Zatem sygnał sterujący trafiał na blok nieliniowej statyki, gdzie był przekonwertowany na sygnał $z = f(u)$, który następnie trafiał na liniowy bloczek dynamiczny. 
+\noindent Zatem sygnał sterujący trafia na blok nieliniowej statyki, gdzie jest przekonwertowany na sygnał $z = f(u)$, który następnie trafia na liniowy bloczek dynamiczny. 
 
 \section{Nieliniowy blok statyczny}
 Nieliniowość w charakterystyce statycznej została wprowadzono za pomocą logiki rozmytej (ang. \textit{fuzzy logic}), a konkretnie za pomocą modeli rozmytych Takagi-Sugeno. Zastosowano dwa podejścia, jedno standardowe z następnikami liniowymi, natomiast drugie z następnikami hiperbolicznymi.
@@ -190,7 +190,7 @@ Zaczęto od rozmycia zmiennej wejściowej. Symulacyjnie wyznaczono odpowiednią 
 \label{nastepniki_lin}
 \end{equation}
 
-Współczynniki w pierwszej iteracji dobierane były poprzez rozwiązanie nieliniowego zadania optymalizacji. W tym celu skorzystano z dostępnych funkcji programu MATLAB, tj. \verb+fminsearch()+, gdzie minimalizowaną funkcją był kwadrat różnicy wyjść wyznaczonej analitycznie charakterystyki statycznej i wyznaczanej charakterystyki rozmytej. Dane statyczne podzielono na zbiory uczący i weryfikujący z tą różnicą, że wzięto co drugą próbkę do każdego ze zbiorów. Dokładność aproksymacji charakterystyki statycznej przedstawiono na rys. \ref{static_hamm}, natomiast uzyskane błędy były na poziomie $\num{0.001}$. 
+Współczynniki w pierwszej iteracji dobierane były poprzez rozwiązanie nieliniowego zadania optymalizacji. W tym celu skorzystano z dostępnych funkcji programu MATLAB, tj. \verb+fminsearch()+, gdzie minimalizowaną funkcją był kwadrat różnicy wyjść wyznaczonej analitycznie charakterystyki statycznej i wyznaczanej charakterystyki rozmytej. Dane statyczne podzielono na zbiory uczący i weryfikujący z tą różnicą - w porównaniu do danych dynamicznych - że wzięto co drugą próbkę do każdego ze zbiorów. Dokładność aproksymacji charakterystyki statycznej przedstawiono na rys. \ref{static_hamm}, natomiast uzyskane błędy były na poziomie $\num{0.001}$. 
 
 \begin{figure}[h!]
 \centering
@@ -375,14 +375,14 @@ Następnie korzystając z wcześniej opracowanego modelu dynamicznego wykonano s
 \caption{Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Hammesteina w trybie z rekurencją.}
 \end{figure}
 
-W każdym z otrzymanych przypadków model Hammersteina z rozmytą statyką i następnikami liniowymi okazywał się być lepszy niż standardowy model dynamiczny, zarówno ten testowany w trybie bez rekurencji, jak i z rekurencją. Istotnie, wprowadzenie nieliniowości do obiektu nieliniowego opisanego liniowym modelem dynamicznym powinno poprawić dokładność otrzymywanych wartości. Jako akceptowalną granicę przyjęto błąd na poziomie $E = \num{0.1}$. Model Hammersteina w tej konfiguracji dawał na tyle satysfakcjonujące wyniki, że postanowiono dalej nie ingerować w dostrajanie współczynników modelu. 
+W każdym z otrzymanych przypadków model Hammersteina z rozmytą statyką i następnikami liniowymi okazywał się być lepszy niż standardowy model dynamiczny, zarówno ten testowany w trybie bez rekurencji, jak i z rekurencją. Istotnie, wprowadzenie nieliniowości do obiektu nieliniowego opisanego liniowym modelem dynamicznym poprawia dokładność otrzymywanych wyników. Jako akceptowalną granicę przyjęto błąd na poziomie $E = \num{0.1}$, a kluczowym przypadkiem był model testowany w trybie rekurencyjnym dla zbioru weryfikującego. Model Hammersteina w tej konfiguracji dawał na tyle satysfakcjonujące wyniki, że postanowiono dalej nie ingerować w dostrajanie współczynników modelu. 
 
 \newpage
 
 \section{Następniki hiperboliczne}
 
 \chapter{Model Wienera}
-Istota modelu Wienera jest dokładnie taka sama jak w przypadku modelu Hammersteina z tym, że nieliniową statykę poprzedzono liniową dynamika - odwrotnie niż jak to było w przypadku modelu Hammersteina.
+Istota modelu Wienera jest dokładnie taka sama jak w przypadku modelu Hammersteina z tym, że nieliniową statykę poprzedzono liniową dynamika - odwrotnie niż jak to było w przypadku omówionego modelu.
 
 \begin{figure}[h!]
 \centering
@@ -393,7 +393,7 @@ Istota modelu Wienera jest dokładnie taka sama jak w przypadku modelu Hammerste
 Sygnał wejściowy trafia na liniowy blok dynamiczny, gdzie jest przekonwertowany na sygnał $v = f(u)$, który trafia na nieliniową statykę, której wyjściem jest sygnał $y$. W przypadku dynamiki skorzystano z wyznaczonego wcześniej modelu dynamicznego (\ref{diff_eq}), natomiast zmianie uległa charakterystyka statyczna.
 
 \section{Następniki liniowe}
-W przypadku modelu Wienera aproksymacja charakterystyki statycznej przysporzyła więcej problemów niżeli w przypadku modelu Hammersteina. Przyjęty przedział rozmywania zmiennej $v$ - $[-25;25]$ podzielono na pięć zbiorów.
+W przypadku modelu Wienera aproksymacja charakterystyki statycznej przysporzyła więcej problemów niżeli w przypadku modelu Hammersteina. Przyjęty przedział rozmywania zmiennej $v \in [-25;25]$ podzielono na pięć zbiorów.
 
 \begin{figure}[h!]
 \centering
@@ -415,7 +415,7 @@ W przypadku modelu Wienera aproksymacja charakterystyki statycznej przysporzyła
 \caption{Aproksymacja charakterystyki statycznej przez model rozmyty.}
 \end{figure}
 
-Następniki liniowe reguł przybrały postać zaprezentowaną w \ref{nastepniki_lin}. Ponownie pierwsze przybliżenie zostało wyznaczone w za pomocą funkcji MATLAB, tym razem jednak niezbędne okazało się ręczne dostrajanie otrzymanych współczynników. Ponownie wygenerowano kilka sekwencji sygnału sterującego i porównano zachowanie modelu dynamicznego i modelu Wienera.
+Następniki liniowe reguł przybrały postać zaprezentowaną w \ref{nastepniki_lin}. Ponownie pierwsze przybliżenie zostało wyznaczone w za pomocą funkcji MATLAB, tym razem jednak niezbędne okazało się ręczne dostrajanie otrzymanych współczynników. Do problemu zdecydowano podejść w następujący sposób - starano się minimalizować błąd zbioru uczącego, następnie analizowano zachowanie modelu w przypadku zbiory weryfikującego. Wygenerowano kilka sekwencji sygnału sterującego i porównano zachowanie modelu dynamicznego i modelu Wienera.
 
 \newpage
 
@@ -461,7 +461,7 @@ Jak widać na powyższych rysunkach dokładność osiągnięta przez model Wiene
 \label{wien_arx}
 \end{figure}
 
-Model Wienera po strojeniu ręcznym osiągnął próg akceptowalności w kontekście kryterium jakości - $E = \num{0.1}$. Analogiczne podejście zastosowano w przypadku testowania modelu w trybie rekurencyjnym.
+Model Wienera po ręcznym strojeniu osiągnął próg akceptowalności w kontekście kryterium jakości - $E = \num{0.1}$. Analogiczne podejście zastosowano w przypadku testowania modelu w trybie rekurencyjnym.
 
 \newpage
 
@@ -623,7 +623,13 @@ Jak pokazują powyższe ilustracje osiągnięto satysfakcjonującą dokładnoś�
 \caption{Porównanie przebiegu sygnału wyjściowego modelu dynamicznego i modelu Wienera w trybie rekurencyjnym.}
 \end{figure}
 
-Na podstawie powyższych wykresów, można wysnuć wniosek, że model Wienera został dobrze dostrojony, ponieważ w każdym z testowanych przypadków uzyskano błąd mniejszy niż przyjęty za graniczny $E = \num{0.1}$. 
+Na podstawie powyższych wykresów, można wysnuć wniosek, że model Wienera został dobrze dostrojony, ponieważ w każdym z testowanych przypadków uzyskano błąd mniejszy niż przyjęty za graniczny $E = \num{0.1}$. Co ciekawe, strojąc model dobrano pewny współczynnik, który przemnażał wyjście liniowej dynamiki $v = f(u)$. Najlepszy rezultat uzyskano, gdy ta stała była równa wzmocnieniu statycznemu otrzymanej transmitancji, tj.
+
+\begin{equation}
+K_{stat} = \lim_{z \to 1} G(z)
+\end{equation}
+
+Wcześniej w równaniu różnicowymi zadbano, aby wzmocnienie statyczne wynosiło $1$, jednak mimo to, konieczne okazało się zastosowanie współczynnika regulującego. 
 
 \newpage
 
