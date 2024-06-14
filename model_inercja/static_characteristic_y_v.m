@@ -11,7 +11,7 @@ function [R, optimal_params] = static_characteristic_y_v(v, v_ucz, v_wer, y_ucz,
         end
     else
         R = cell(1,3);
-        sigma = 10;
+        sigma = 15;
         mean = [-20 0 20];
         for i = 1:length(R)
             R{i} = gaussmf(v, [sigma mean(i)]);
@@ -28,11 +28,12 @@ function [R, optimal_params] = static_characteristic_y_v(v, v_ucz, v_wer, y_ucz,
     ylabel('y');
     xlim([v_start v_end]);
     title('Zbiory rozmyte y(v)');
-    % file_name = sprintf('../raport/pictures/fuzzy_set_wien.pdf');
+    % file_name = sprintf('../raport/pictures/fuzzy_set_wien_nlin.pdf');
     % exportgraphics (gcf, file_name);
     
     a = ones(size(R));
     b = ones(size(R));
+    c = ones(size(R));
      
     fig_u_ucz = figure;
     figure(fig_u_ucz);
@@ -87,9 +88,9 @@ function [R, optimal_params] = static_characteristic_y_v(v, v_ucz, v_wer, y_ucz,
     else
         % MNK: Minimalizacja sumy kwadratów błędów
         fun = @(params) sum((y_ucz - fuzzy_nonlinear_model(params, v_ucz, v_start, v_end, R, n)).^2);
-        initial_params = [a(1), b(1)];
+        initial_params = [a(1), b(1) c(1)];
         for i = 2:length(R)
-            initial_params = [initial_params, a(i), b(i)];
+            initial_params = [initial_params, a(i), b(i) c(i)];
         end
         opt = optimset('MaxFunEvals', 10^6, 'MaxIter', 10^6);
         optimal_params = fminsearch(fun, initial_params, opt);
@@ -98,7 +99,7 @@ function [R, optimal_params] = static_characteristic_y_v(v, v_ucz, v_wer, y_ucz,
         y_mod_ucz = fuzzy_nonlinear_model(optimal_params, v_ucz, v_start, v_end, R, n);
         figure(fig_u_ucz);
         plot(v_ucz, y_mod_ucz, 'ro');
-        xlim([-v_start v_end]);
+        xlim([v_start v_end]);
         ylim([-40 40]);
         grid on;
         xlabel('v');
@@ -112,7 +113,7 @@ function [R, optimal_params] = static_characteristic_y_v(v, v_ucz, v_wer, y_ucz,
         y_mod_wer = fuzzy_nonlinear_model(optimal_params, v_wer, v_start, v_end, R, n);
         figure(fig_u_wer);
         plot(v_wer, y_mod_wer, 'ro');
-        xlim([-v_start v_end]);
+        xlim([v_start v_end]);
         ylim([-40 40]);
         grid on;
         xlabel('v');

@@ -10,6 +10,5 @@
 \contentsline {chapter}{\numberline {4\relax .\enspace }Model Wienera}{25}{}%
 \contentsline {section}{\numberline {4.1\relax .\enspace }Następniki liniowe}{25}{}%
 \contentsline {section}{\numberline {4.2\relax .\enspace }Następniki hiperboliczne}{35}{}%
-\contentsline {chapter}{\numberline {5\relax .\enspace }Podsumowanie}{36}{}%
-\contentsline {chapter}{Spis rysunk\'ow}{37}{}%
-\contentsline {chapter}{Spis tabel}{39}{}%
+\contentsline {chapter}{\numberline {5\relax .\enspace }Podsumowanie}{44}{}%
+\contentsline {chapter}{Spis rysunk\'ow}{45}{}%

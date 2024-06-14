@@ -35,5 +35,32 @@ factor = dcgain(G_z);
 
 
 ARX NIELINIOWE
+wiener_params(1) = 5.04;
+wiener_params(2) = 0.0209;
+wiener_params(3) = -2.03;
+
+wiener_params(4) = 2.955;
+wiener_params(5) = 0.103;
+wiener_params(6) = 1.9;
+
+wiener_params(7) = 1.41;
+wiener_params(8) = 0.14;
+wiener_params(9) = -1.92;
+
+factor = 0.86;
+
 
 OE NIELINIOWE
+wiener_params(1) = 5.05;
+wiener_params(2) = 0.014;
+wiener_params(3) = -2.08;
+
+wiener_params(4) = 3.06;
+wiener_params(5) = 0.106;
+wiener_params(6) = 1.87;
+
+wiener_params(7) = 1.4;
+wiener_params(8) = 0.134;
+wiener_params(9) = -1.87;
+
+factor = 0.54;

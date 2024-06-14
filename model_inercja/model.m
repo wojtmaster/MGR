@@ -134,7 +134,7 @@ N = 2;
 delay = 5;
 %%%%%%%%%%%%%%%%%%%%%%%%%% Próbka %%%%%%%%%%%%%%%%%%%%%%%%%%
 c = 6;
-d = 1;
+d = 6;
 
 Y_ucz = y_ucz(N+delay+1:end)';
 M_ucz = u_ucz(1, N:end-(delay+1))';
@@ -171,11 +171,11 @@ hold on;
 stairs(0:kk/2-1, y_ucz, 'r', 'LineWidth', 0.8);
 plot_title = sprintf('Zbiór uczący - y_{ucz}(k) \n N = %d     E_{ucz} = %.3f', N, E_ucz);
 title(plot_title);
-legend('y_{mod}', 'y', 'Location', 'northwest');
+legend('y_{mod}', 'y', 'Location', 'northeast');
 xlabel('k');
 ylabel('y(k)');
 grid on;
-% file_name = sprintf('../raport/pictures/arx_ucz_%d.pdf', c);
+% file_name = sprintf('../raport/pictures/arx_ucz_%d%d.pdf', c, d);
 % exportgraphics (gcf, file_name);
 
 figure;
@@ -184,11 +184,11 @@ hold on;
 stairs(0:kk/2-1, y_wer, 'r', 'LineWidth', 0.8);
 plot_title = sprintf('Zbiór weryfikujący - y_{wer}(k) \n N = %d     E_{wer} = %.3f', N, E_wer);
 title(plot_title);
-legend('y_{mod}', 'y', 'Location', 'northwest');
+legend('y_{mod}', 'y', 'Location', 'northeast');
 xlabel('k');
 ylabel('y(k)');
 grid on;
-% file_name = sprintf('../raport/pictures/arx_wer_%d.pdf', c);
+% file_name = sprintf('../raport/pictures/arx_wer_%d%d.pdf', c, d);
 % exportgraphics (gcf, file_name);
 
 %% OE
@@ -227,11 +227,11 @@ hold on;
 stairs(0:kk/2-1, y_ucz, 'r', 'LineWidth', 0.8);
 plot_title = sprintf('Zbiór uczący - y_{ucz}(k) \n N = %d     E_{ucz} = %.3f', N, E_ucz);
 title(plot_title);
-legend('y_{mod}', 'y', 'Location', 'northwest');
+legend('y_{mod}', 'y', 'Location', 'northeast');
 xlabel('k');
 ylabel('y(k)');
 grid on;
-% file_name = sprintf('../raport/pictures/oe_ucz_%d.pdf', c);
+% file_name = sprintf('../raport/pictures/oe_ucz_%d%d.pdf', c, d);
 % exportgraphics (gcf, file_name);
 
 figure;
@@ -240,11 +240,11 @@ hold on;
 stairs(0:kk/2-1, y_wer, 'r', 'LineWidth', 0.8);
 plot_title = sprintf('Zbiór weryfikujący - y_{wer}(k) \n N = %d     E_{wer} = %.3f', N, E_wer);
 title(plot_title);
-legend('y_{mod}', 'y', 'Location', 'northwest');
+legend('y_{mod}', 'y', 'Location', 'northeast');
 xlabel('k');
 ylabel('y(k)');
 grid on;
-% file_name = sprintf('../raport/pictures/oe_wer_%d.pdf', c);
+% file_name = sprintf('../raport/pictures/oe_wer_%d%d.pdf', c, d);
 % exportgraphics (gcf, file_name);
 
 %% Model Hammersteina ARX
@@ -369,20 +369,20 @@ grid on;
 % close;
 
 %% Model Wienera ARX
-% wiener_params(1) = -1.2;
-% wiener_params(2) = 0.9;
-% 
-% wiener_params(3) = 5.74;
-% wiener_params(4) = 1.18;
-% 
-% wiener_params(5) = -2.96;
-% wiener_params(6) = 1.17;
-% 
-% wiener_params(7) = -0.7;
-% wiener_params(8) = 0.69;
-% 
-% wiener_params(9) = 1.59;
-% wiener_params(10) = 1.19;
+wiener_params(1) = 5.04;
+wiener_params(2) = 0.0209;
+wiener_params(3) = -2.03;
+
+wiener_params(4) = 2.955;
+wiener_params(5) = 0.103;
+wiener_params(6) = 1.9;
+
+wiener_params(7) = 1.41;
+wiener_params(8) = 0.14;
+wiener_params(9) = -1.92;
+
+factor = 0.86;
+% factor = 1;
 
 % Model Wienera ARX
 v = zeros(1, kk/2);
@@ -391,8 +391,6 @@ y_mod_ucz = zeros(1, kk/2);
 y_mod_wer = zeros(1, kk/2);
 y_mod_ucz(1:N+delay) = y_ucz(1:N+delay);
 y_mod_wer(1:N+delay) = y_wer(1:N+delay);
-
-factor = 1;
 
 % Model ARX
 % Zbiór uczący
@@ -430,6 +428,7 @@ legend('y_{mod}', 'y', 'Location', 'northeast');
 grid on;
 % file_name = sprintf('../raport/pictures/arx_wien_ucz_%d%d.pdf', c, d);
 % exportgraphics (gcf, file_name);
+% close;
 
 figure;
 hold on;
@@ -444,24 +443,22 @@ legend('y_{mod}', 'y', 'Location', 'northeast');
 grid on;
 % file_name = sprintf('../raport/pictures/arx_wien_wer_%d%d.pdf', c, d);
 % exportgraphics (gcf, file_name);
+% close;
 
 %% Model Wienera OE
-% wiener_params(1) = -1.15;
-% wiener_params(2) = 0.8;
-% 
-% wiener_params(3) = 5.8;
-% wiener_params(4) = 1.19;
-% 
-% wiener_params(5) = -3.05;
-% wiener_params(6) = 1.28;
-% 
-% wiener_params(7) = -0.6;
-% wiener_params(8) = 0.81;
-% 
-% wiener_params(9) = 1.6;
-% wiener_params(10) = 1.16;
+wiener_params(1) = 5.06;
+wiener_params(2) = 0.0155;
+wiener_params(3) = -2.06;
 
-factor = dcgain(G_z);
+wiener_params(4) = 3.03;
+wiener_params(5) = 0.1059;
+wiener_params(6) = 1.87;
+
+wiener_params(7) = 1.25;
+wiener_params(8) = 0.142;
+wiener_params(9) = -1.868;
+
+factor = 0.54;
 % factor = 1;
 
 v = zeros(1, kk/2);
@@ -509,6 +506,7 @@ legend('y_{mod}', 'y', 'Location', 'northeast');
 grid on;
 % file_name = sprintf('../raport/pictures/oe_wien_ucz_%d%d.pdf', c, d);
 % exportgraphics (gcf, file_name);
+% close;
 
 figure;
 hold on;
@@ -523,3 +521,4 @@ legend('y_{mod}', 'y', 'Location', 'northeast');
 grid on;
 % file_name = sprintf('../raport/pictures/oe_wien_wer_%d%d.pdf', c, d);
 % exportgraphics (gcf, file_name);
+% close;

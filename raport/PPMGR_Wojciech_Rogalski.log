@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.3.3)  14 JUN 2024 20:48
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (MiKTeX 24.1) (preloaded format=pdflatex 2024.3.3)  15 JUN 2024 00:59
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1435,18 +1435,18 @@ File: pictures/oe_hamm_wer_6.pdf Graphic file (type pdf)
 <use pictures/oe_hamm_wer_6.pdf>
 Package pdftex.def Info: pictures/oe_hamm_wer_6.pdf  used on input line 445.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
-) [24 <./pictures/oe_ucz_6.pdf> <./pictures/oe_wer_6.pdf> <./pictures/oe_hamm_u
-cz_6.pdf> <./pictures/oe_hamm_wer_6.pdf>]
+) (wiener.tex [24 <./pictures/oe_ucz_6.pdf> <./pictures/oe_wer_6.pdf> <./pictur
+es/oe_hamm_ucz_6.pdf> <./pictures/oe_hamm_wer_6.pdf>]
 Rozdzia\PlPrIeC {\l } 4.
 <pictures/wien_model.png, id=2417, 358.33875pt x 63.23625pt>
 File: pictures/wien_model.png Graphic file (type png)
 <use pictures/wien_model.png>
-Package pdftex.def Info: pictures/wien_model.png  used on input line 163.
+Package pdftex.def Info: pictures/wien_model.png  used on input line 6.
 (pdftex.def)             Requested size: 455.24408pt x 80.34193pt.
 <pictures/fuzzy_set_wien.pdf, id=2418, 362.35374pt x 298.11375pt>
 File: pictures/fuzzy_set_wien.pdf Graphic file (type pdf)
 <use pictures/fuzzy_set_wien.pdf>
-Package pdftex.def Info: pictures/fuzzy_set_wien.pdf  used on input line 174.
+Package pdftex.def Info: pictures/fuzzy_set_wien.pdf  used on input line 17.
 (pdftex.def)             Requested size: 273.14922pt x 224.72652pt.
 [25
 
@@ -1455,35 +1455,35 @@ Package pdftex.def Info: pictures/fuzzy_set_wien.pdf  used on input line 174.
 File: pictures/static_char_wien_lin_ucz.pdf Graphic file (type pdf)
 <use pictures/static_char_wien_lin_ucz.pdf>
 Package pdftex.def Info: pictures/static_char_wien_lin_ucz.pdf  used on input l
-ine 185.
+ine 28.
 (pdftex.def)             Requested size: 204.85844pt x 172.60716pt.
 <pictures/static_char_wien_lin_wer.pdf, id=2465, 363.3575pt x 306.14375pt>
 File: pictures/static_char_wien_lin_wer.pdf Graphic file (type pdf)
 <use pictures/static_char_wien_lin_wer.pdf>
 Package pdftex.def Info: pictures/static_char_wien_lin_wer.pdf  used on input l
-ine 188.
+ine 31.
 (pdftex.def)             Requested size: 204.85844pt x 172.60716pt.
  [26 <./pictures/static_char_wien_lin_ucz.pdf> <./pictures/static_char_wien_lin
 _wer.pdf>]
 <pictures/arx_ucz_11.pdf, id=2547, 371.3875pt x 307.1475pt>
 File: pictures/arx_ucz_11.pdf Graphic file (type pdf)
 <use pictures/arx_ucz_11.pdf>
-Package pdftex.def Info: pictures/arx_ucz_11.pdf  used on input line 206.
+Package pdftex.def Info: pictures/arx_ucz_11.pdf  used on input line 50.
 (pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
 <pictures/arx_wer_11.pdf, id=2548, 371.3875pt x 307.1475pt>
 File: pictures/arx_wer_11.pdf Graphic file (type pdf)
 <use pictures/arx_wer_11.pdf>
-Package pdftex.def Info: pictures/arx_wer_11.pdf  used on input line 209.
+Package pdftex.def Info: pictures/arx_wer_11.pdf  used on input line 53.
 (pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
 <pictures/arx_wien_ucz_11.pdf, id=2549, 376.40625pt x 307.1475pt>
 File: pictures/arx_wien_ucz_11.pdf Graphic file (type pdf)
 <use pictures/arx_wien_ucz_11.pdf>
-Package pdftex.def Info: pictures/arx_wien_ucz_11.pdf  used on input line 216.
+Package pdftex.def Info: pictures/arx_wien_ucz_11.pdf  used on input line 60.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
 <pictures/arx_wien_wer_11.pdf, id=2550, 376.40625pt x 307.1475pt>
 File: pictures/arx_wien_wer_11.pdf Graphic file (type pdf)
 <use pictures/arx_wien_wer_11.pdf>
-Package pdftex.def Info: pictures/arx_wien_wer_11.pdf  used on input line 219.
+Package pdftex.def Info: pictures/arx_wien_wer_11.pdf  used on input line 63.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
 
 [27 <./pictures/arx_ucz_11.pdf> <./pictures/arx_wer_11.pdf> <./pictures/arx_wie
@@ -1491,105 +1491,105 @@ n_ucz_11.pdf> <./pictures/arx_wien_wer_11.pdf>]
 <pictures/arx_wien_ucz_12.pdf, id=2687, 376.40625pt x 307.1475pt>
 File: pictures/arx_wien_ucz_12.pdf Graphic file (type pdf)
 <use pictures/arx_wien_ucz_12.pdf>
-Package pdftex.def Info: pictures/arx_wien_ucz_12.pdf  used on input line 230.
+Package pdftex.def Info: pictures/arx_wien_ucz_12.pdf  used on input line 74.
 (pdftex.def)             Requested size: 318.66946pt x 260.0549pt.
 <pictures/arx_wien_wer_12.pdf, id=2688, 376.40625pt x 307.1475pt>
 File: pictures/arx_wien_wer_12.pdf Graphic file (type pdf)
 <use pictures/arx_wien_wer_12.pdf>
-Package pdftex.def Info: pictures/arx_wien_wer_12.pdf  used on input line 233.
+Package pdftex.def Info: pictures/arx_wien_wer_12.pdf  used on input line 77.
 (pdftex.def)             Requested size: 318.66946pt x 260.0549pt.
  [28 <./pictures/arx_wien_ucz_12.pdf> <./pictures/arx_wien_wer_12.pdf>]
 <pictures/oe_ucz_11.pdf, id=2758, 371.3875pt x 307.1475pt>
 File: pictures/oe_ucz_11.pdf Graphic file (type pdf)
 <use pictures/oe_ucz_11.pdf>
-Package pdftex.def Info: pictures/oe_ucz_11.pdf  used on input line 252.
+Package pdftex.def Info: pictures/oe_ucz_11.pdf  used on input line 96.
 (pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
 <pictures/oe_wer_11.pdf, id=2759, 371.3875pt x 307.1475pt>
 File: pictures/oe_wer_11.pdf Graphic file (type pdf)
 <use pictures/oe_wer_11.pdf>
-Package pdftex.def Info: pictures/oe_wer_11.pdf  used on input line 255.
+Package pdftex.def Info: pictures/oe_wer_11.pdf  used on input line 99.
 (pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
 <pictures/oe_wien_ucz_11.pdf, id=2760, 376.40625pt x 307.1475pt>
 File: pictures/oe_wien_ucz_11.pdf Graphic file (type pdf)
 <use pictures/oe_wien_ucz_11.pdf>
-Package pdftex.def Info: pictures/oe_wien_ucz_11.pdf  used on input line 262.
+Package pdftex.def Info: pictures/oe_wien_ucz_11.pdf  used on input line 106.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
 <pictures/oe_wien_wer_11.pdf, id=2761, 376.40625pt x 307.1475pt>
 File: pictures/oe_wien_wer_11.pdf Graphic file (type pdf)
 <use pictures/oe_wien_wer_11.pdf>
-Package pdftex.def Info: pictures/oe_wien_wer_11.pdf  used on input line 265.
+Package pdftex.def Info: pictures/oe_wien_wer_11.pdf  used on input line 109.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
  [29 <./pictures/oe_ucz_11.pdf> <./pictures/oe_wer_11.pdf> <./pictures/oe_wien_
 ucz_11.pdf> <./pictures/oe_wien_wer_11.pdf>]
 <pictures/oe_wien_ucz_12.pdf, id=2896, 376.40625pt x 307.1475pt>
 File: pictures/oe_wien_ucz_12.pdf Graphic file (type pdf)
 <use pictures/oe_wien_ucz_12.pdf>
-Package pdftex.def Info: pictures/oe_wien_ucz_12.pdf  used on input line 276.
+Package pdftex.def Info: pictures/oe_wien_ucz_12.pdf  used on input line 120.
 (pdftex.def)             Requested size: 318.66946pt x 260.0549pt.
 <pictures/oe_wien_wer_12.pdf, id=2897, 376.40625pt x 307.1475pt>
 File: pictures/oe_wien_wer_12.pdf Graphic file (type pdf)
 <use pictures/oe_wien_wer_12.pdf>
-Package pdftex.def Info: pictures/oe_wien_wer_12.pdf  used on input line 279.
+Package pdftex.def Info: pictures/oe_wien_wer_12.pdf  used on input line 123.
 (pdftex.def)             Requested size: 318.66946pt x 260.0549pt.
 <pictures/arx_ucz_22.pdf, id=2898, 371.3875pt x 307.1475pt>
 File: pictures/arx_ucz_22.pdf Graphic file (type pdf)
 <use pictures/arx_ucz_22.pdf>
-Package pdftex.def Info: pictures/arx_ucz_22.pdf  used on input line 298.
+Package pdftex.def Info: pictures/arx_ucz_22.pdf  used on input line 142.
 (pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
 <pictures/arx_wer_22.pdf, id=2899, 371.3875pt x 307.1475pt>
 File: pictures/arx_wer_22.pdf Graphic file (type pdf)
 <use pictures/arx_wer_22.pdf>
-Package pdftex.def Info: pictures/arx_wer_22.pdf  used on input line 301.
+Package pdftex.def Info: pictures/arx_wer_22.pdf  used on input line 145.
 (pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
 <pictures/arx_wien_ucz_22.pdf, id=2900, 376.40625pt x 307.1475pt>
 File: pictures/arx_wien_ucz_22.pdf Graphic file (type pdf)
 <use pictures/arx_wien_ucz_22.pdf>
-Package pdftex.def Info: pictures/arx_wien_ucz_22.pdf  used on input line 308.
+Package pdftex.def Info: pictures/arx_wien_ucz_22.pdf  used on input line 152.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
 <pictures/arx_wien_wer_22.pdf, id=2901, 376.40625pt x 307.1475pt>
 File: pictures/arx_wien_wer_22.pdf Graphic file (type pdf)
 <use pictures/arx_wien_wer_22.pdf>
-Package pdftex.def Info: pictures/arx_wien_wer_22.pdf  used on input line 311.
+Package pdftex.def Info: pictures/arx_wien_wer_22.pdf  used on input line 155.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
 <pictures/oe_ucz_22.pdf, id=2902, 371.3875pt x 307.1475pt>
 File: pictures/oe_ucz_22.pdf Graphic file (type pdf)
 <use pictures/oe_ucz_22.pdf>
-Package pdftex.def Info: pictures/oe_ucz_22.pdf  used on input line 325.
+Package pdftex.def Info: pictures/oe_ucz_22.pdf  used on input line 169.
 (pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
 <pictures/oe_wer_22.pdf, id=2903, 371.3875pt x 307.1475pt>
 File: pictures/oe_wer_22.pdf Graphic file (type pdf)
 <use pictures/oe_wer_22.pdf>
-Package pdftex.def Info: pictures/oe_wer_22.pdf  used on input line 328.
+Package pdftex.def Info: pictures/oe_wer_22.pdf  used on input line 172.
 (pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
 <pictures/oe_wien_ucz_22.pdf, id=2904, 376.40625pt x 307.1475pt>
 File: pictures/oe_wien_ucz_22.pdf Graphic file (type pdf)
 <use pictures/oe_wien_ucz_22.pdf>
-Package pdftex.def Info: pictures/oe_wien_ucz_22.pdf  used on input line 335.
+Package pdftex.def Info: pictures/oe_wien_ucz_22.pdf  used on input line 179.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
 <pictures/oe_wien_wer_22.pdf, id=2905, 376.40625pt x 307.1475pt>
 File: pictures/oe_wien_wer_22.pdf Graphic file (type pdf)
 <use pictures/oe_wien_wer_22.pdf>
-Package pdftex.def Info: pictures/oe_wien_wer_22.pdf  used on input line 338.
+Package pdftex.def Info: pictures/oe_wien_wer_22.pdf  used on input line 182.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
 <pictures/arx_ucz_33.pdf, id=2906, 371.3875pt x 307.1475pt>
 File: pictures/arx_ucz_33.pdf Graphic file (type pdf)
 <use pictures/arx_ucz_33.pdf>
-Package pdftex.def Info: pictures/arx_ucz_33.pdf  used on input line 354.
+Package pdftex.def Info: pictures/arx_ucz_33.pdf  used on input line 198.
 (pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
 <pictures/arx_wer_33.pdf, id=2907, 371.3875pt x 307.1475pt>
 File: pictures/arx_wer_33.pdf Graphic file (type pdf)
 <use pictures/arx_wer_33.pdf>
-Package pdftex.def Info: pictures/arx_wer_33.pdf  used on input line 357.
+Package pdftex.def Info: pictures/arx_wer_33.pdf  used on input line 201.
 (pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
 <pictures/arx_wien_ucz_33.pdf, id=2908, 376.40625pt x 307.1475pt>
 File: pictures/arx_wien_ucz_33.pdf Graphic file (type pdf)
 <use pictures/arx_wien_ucz_33.pdf>
-Package pdftex.def Info: pictures/arx_wien_ucz_33.pdf  used on input line 364.
+Package pdftex.def Info: pictures/arx_wien_ucz_33.pdf  used on input line 208.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
 <pictures/arx_wien_wer_33.pdf, id=2909, 376.40625pt x 307.1475pt>
 File: pictures/arx_wien_wer_33.pdf Graphic file (type pdf)
 <use pictures/arx_wien_wer_33.pdf>
-Package pdftex.def Info: pictures/arx_wien_wer_33.pdf  used on input line 367.
+Package pdftex.def Info: pictures/arx_wien_wer_33.pdf  used on input line 211.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
  [30 <./pictures/oe_wien_ucz_12.pdf> <./pictures/oe_wien_wer_12.pdf>]
 [31 <./pictures/arx_ucz_22.pdf> <./pictures/arx_wer_22.pdf> <./pictures/arx_wie
@@ -1600,45 +1600,213 @@ tures/arx_wien_ucz_33.pdf> <./pictures/arx_wien_wer_33.pdf>]
 <pictures/oe_ucz_33.pdf, id=3373, 371.3875pt x 307.1475pt>
 File: pictures/oe_ucz_33.pdf Graphic file (type pdf)
 <use pictures/oe_ucz_33.pdf>
-Package pdftex.def Info: pictures/oe_ucz_33.pdf  used on input line 383.
+Package pdftex.def Info: pictures/oe_ucz_33.pdf  used on input line 227.
 (pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
 <pictures/oe_wer_33.pdf, id=3374, 371.3875pt x 307.1475pt>
 File: pictures/oe_wer_33.pdf Graphic file (type pdf)
 <use pictures/oe_wer_33.pdf>
-Package pdftex.def Info: pictures/oe_wer_33.pdf  used on input line 386.
+Package pdftex.def Info: pictures/oe_wer_33.pdf  used on input line 230.
 (pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
 <pictures/oe_wien_ucz_33.pdf, id=3375, 376.40625pt x 307.1475pt>
 File: pictures/oe_wien_ucz_33.pdf Graphic file (type pdf)
 <use pictures/oe_wien_ucz_33.pdf>
-Package pdftex.def Info: pictures/oe_wien_ucz_33.pdf  used on input line 393.
+Package pdftex.def Info: pictures/oe_wien_ucz_33.pdf  used on input line 237.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
 <pictures/oe_wien_wer_33.pdf, id=3376, 376.40625pt x 307.1475pt>
 File: pictures/oe_wien_wer_33.pdf Graphic file (type pdf)
 <use pictures/oe_wien_wer_33.pdf>
-Package pdftex.def Info: pictures/oe_wien_wer_33.pdf  used on input line 396.
+Package pdftex.def Info: pictures/oe_wien_wer_33.pdf  used on input line 240.
 (pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
  [34 <./pictures/oe_ucz_33.pdf> <./pictures/oe_wer_33.pdf> <./pictures/oe_wien_
-ucz_33.pdf> <./pictures/oe_wien_wer_33.pdf>] [35]
+ucz_33.pdf> <./pictures/oe_wien_wer_33.pdf>]
+<pictures/fuzzy_set_wien_nlin.pdf, id=3508, 362.35374pt x 298.11375pt>
+File: pictures/fuzzy_set_wien_nlin.pdf Graphic file (type pdf)
+<use pictures/fuzzy_set_wien_nlin.pdf>
+Package pdftex.def Info: pictures/fuzzy_set_wien_nlin.pdf  used on input line 2
+65.
+(pdftex.def)             Requested size: 273.14922pt x 224.72652pt.
+<pictures/static_char_wien_nlin_ucz.pdf, id=3509, 363.3575pt x 306.14375pt>
+File: pictures/static_char_wien_nlin_ucz.pdf Graphic file (type pdf)
+<use pictures/static_char_wien_nlin_ucz.pdf>
+Package pdftex.def Info: pictures/static_char_wien_nlin_ucz.pdf  used on input 
+line 274.
+(pdftex.def)             Requested size: 204.85844pt x 172.60716pt.
+<pictures/static_char_wien_nlin_wer.pdf, id=3510, 363.3575pt x 306.14375pt>
+File: pictures/static_char_wien_nlin_wer.pdf Graphic file (type pdf)
+<use pictures/static_char_wien_nlin_wer.pdf>
+Package pdftex.def Info: pictures/static_char_wien_nlin_wer.pdf  used on input 
+line 277.
+(pdftex.def)             Requested size: 204.85844pt x 172.60716pt.
+ [35 <./pictures/fuzzy_set_wien_nlin.pdf> <./pictures/static_char_wien_nlin_ucz
+.pdf> <./pictures/static_char_wien_nlin_wer.pdf>]
+<pictures/arx_ucz_41.pdf, id=3633, 371.3875pt x 307.1475pt>
+File: pictures/arx_ucz_41.pdf Graphic file (type pdf)
+<use pictures/arx_ucz_41.pdf>
+Package pdftex.def Info: pictures/arx_ucz_41.pdf  used on input line 297.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wer_41.pdf, id=3634, 371.3875pt x 307.1475pt>
+File: pictures/arx_wer_41.pdf Graphic file (type pdf)
+<use pictures/arx_wer_41.pdf>
+Package pdftex.def Info: pictures/arx_wer_41.pdf  used on input line 300.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wien_ucz_41.pdf, id=3635, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_ucz_41.pdf Graphic file (type pdf)
+<use pictures/arx_wien_ucz_41.pdf>
+Package pdftex.def Info: pictures/arx_wien_ucz_41.pdf  used on input line 307.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/arx_wien_wer_41.pdf, id=3636, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_wer_41.pdf Graphic file (type pdf)
+<use pictures/arx_wien_wer_41.pdf>
+Package pdftex.def Info: pictures/arx_wien_wer_41.pdf  used on input line 310.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+
+[36 <./pictures/arx_ucz_41.pdf> <./pictures/arx_wer_41.pdf> <./pictures/arx_wie
+n_ucz_41.pdf> <./pictures/arx_wien_wer_41.pdf>]
+<pictures/arx_wien_ucz_42.pdf, id=3769, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_ucz_42.pdf Graphic file (type pdf)
+<use pictures/arx_wien_ucz_42.pdf>
+Package pdftex.def Info: pictures/arx_wien_ucz_42.pdf  used on input line 321.
+(pdftex.def)             Requested size: 318.66946pt x 260.0549pt.
+<pictures/arx_wien_wer_42.pdf, id=3770, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_wer_42.pdf Graphic file (type pdf)
+<use pictures/arx_wien_wer_42.pdf>
+Package pdftex.def Info: pictures/arx_wien_wer_42.pdf  used on input line 324.
+(pdftex.def)             Requested size: 318.66946pt x 260.0549pt.
+ [37 <./pictures/arx_wien_ucz_42.pdf> <./pictures/arx_wien_wer_42.pdf>]
+<pictures/oe_ucz_41.pdf, id=3837, 371.3875pt x 307.1475pt>
+File: pictures/oe_ucz_41.pdf Graphic file (type pdf)
+<use pictures/oe_ucz_41.pdf>
+Package pdftex.def Info: pictures/oe_ucz_41.pdf  used on input line 342.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wer_41.pdf, id=3838, 371.3875pt x 307.1475pt>
+File: pictures/oe_wer_41.pdf Graphic file (type pdf)
+<use pictures/oe_wer_41.pdf>
+Package pdftex.def Info: pictures/oe_wer_41.pdf  used on input line 345.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wien_ucz_41.pdf, id=3839, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_ucz_41.pdf Graphic file (type pdf)
+<use pictures/oe_wien_ucz_41.pdf>
+Package pdftex.def Info: pictures/oe_wien_ucz_41.pdf  used on input line 352.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/oe_wien_wer_41.pdf, id=3840, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_wer_41.pdf Graphic file (type pdf)
+<use pictures/oe_wien_wer_41.pdf>
+Package pdftex.def Info: pictures/oe_wien_wer_41.pdf  used on input line 355.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+ [38 <./pictures/oe_ucz_41.pdf> <./pictures/oe_wer_41.pdf> <./pictures/oe_wien_
+ucz_41.pdf> <./pictures/oe_wien_wer_41.pdf>]
+<pictures/oe_wien_ucz_42.pdf, id=3974, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_ucz_42.pdf Graphic file (type pdf)
+<use pictures/oe_wien_ucz_42.pdf>
+Package pdftex.def Info: pictures/oe_wien_ucz_42.pdf  used on input line 366.
+(pdftex.def)             Requested size: 318.66946pt x 260.0549pt.
+<pictures/oe_wien_wer_42.pdf, id=3975, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_wer_42.pdf Graphic file (type pdf)
+<use pictures/oe_wien_wer_42.pdf>
+Package pdftex.def Info: pictures/oe_wien_wer_42.pdf  used on input line 369.
+(pdftex.def)             Requested size: 318.66946pt x 260.0549pt.
+<pictures/arx_ucz_55.pdf, id=3976, 371.3875pt x 307.1475pt>
+File: pictures/arx_ucz_55.pdf Graphic file (type pdf)
+<use pictures/arx_ucz_55.pdf>
+Package pdftex.def Info: pictures/arx_ucz_55.pdf  used on input line 386.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wer_55.pdf, id=3977, 371.3875pt x 307.1475pt>
+File: pictures/arx_wer_55.pdf Graphic file (type pdf)
+<use pictures/arx_wer_55.pdf>
+Package pdftex.def Info: pictures/arx_wer_55.pdf  used on input line 389.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wien_ucz_55.pdf, id=3978, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_ucz_55.pdf Graphic file (type pdf)
+<use pictures/arx_wien_ucz_55.pdf>
+Package pdftex.def Info: pictures/arx_wien_ucz_55.pdf  used on input line 396.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/arx_wien_wer_55.pdf, id=3979, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_wer_55.pdf Graphic file (type pdf)
+<use pictures/arx_wien_wer_55.pdf>
+Package pdftex.def Info: pictures/arx_wien_wer_55.pdf  used on input line 399.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/oe_ucz_55.pdf, id=3980, 371.3875pt x 307.1475pt>
+File: pictures/oe_ucz_55.pdf Graphic file (type pdf)
+<use pictures/oe_ucz_55.pdf>
+Package pdftex.def Info: pictures/oe_ucz_55.pdf  used on input line 413.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wer_55.pdf, id=3981, 371.3875pt x 307.1475pt>
+File: pictures/oe_wer_55.pdf Graphic file (type pdf)
+<use pictures/oe_wer_55.pdf>
+Package pdftex.def Info: pictures/oe_wer_55.pdf  used on input line 416.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wien_ucz_55.pdf, id=3982, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_ucz_55.pdf Graphic file (type pdf)
+<use pictures/oe_wien_ucz_55.pdf>
+Package pdftex.def Info: pictures/oe_wien_ucz_55.pdf  used on input line 423.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/oe_wien_wer_55.pdf, id=3983, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_wer_55.pdf Graphic file (type pdf)
+<use pictures/oe_wien_wer_55.pdf>
+Package pdftex.def Info: pictures/oe_wien_wer_55.pdf  used on input line 426.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/arx_ucz_66.pdf, id=3984, 371.3875pt x 307.1475pt>
+File: pictures/arx_ucz_66.pdf Graphic file (type pdf)
+<use pictures/arx_ucz_66.pdf>
+Package pdftex.def Info: pictures/arx_ucz_66.pdf  used on input line 441.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wer_66.pdf, id=3985, 371.3875pt x 307.1475pt>
+File: pictures/arx_wer_66.pdf Graphic file (type pdf)
+<use pictures/arx_wer_66.pdf>
+Package pdftex.def Info: pictures/arx_wer_66.pdf  used on input line 444.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/arx_wien_ucz_66.pdf, id=3986, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_ucz_66.pdf Graphic file (type pdf)
+<use pictures/arx_wien_ucz_66.pdf>
+Package pdftex.def Info: pictures/arx_wien_ucz_66.pdf  used on input line 451.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/arx_wien_wer_66.pdf, id=3987, 376.40625pt x 307.1475pt>
+File: pictures/arx_wien_wer_66.pdf Graphic file (type pdf)
+<use pictures/arx_wien_wer_66.pdf>
+Package pdftex.def Info: pictures/arx_wien_wer_66.pdf  used on input line 454.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+ [39 <./pictures/oe_wien_ucz_42.pdf> <./pictures/oe_wien_wer_42.pdf>]
+[40 <./pictures/arx_ucz_55.pdf> <./pictures/arx_wer_55.pdf> <./pictures/arx_wie
+n_ucz_55.pdf> <./pictures/arx_wien_wer_55.pdf>] [41 <./pictures/oe_ucz_55.pdf> 
+<./pictures/oe_wer_55.pdf> <./pictures/oe_wien_ucz_55.pdf> <./pictures/oe_wien_
+wer_55.pdf>] [42 <./pictures/arx_ucz_66.pdf> <./pictures/arx_wer_66.pdf> <./pic
+tures/arx_wien_ucz_66.pdf> <./pictures/arx_wien_wer_66.pdf>]
+<pictures/oe_ucz_66.pdf, id=4470, 371.3875pt x 307.1475pt>
+File: pictures/oe_ucz_66.pdf Graphic file (type pdf)
+<use pictures/oe_ucz_66.pdf>
+Package pdftex.def Info: pictures/oe_ucz_66.pdf  used on input line 470.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wer_66.pdf, id=4471, 371.3875pt x 307.1475pt>
+File: pictures/oe_wer_66.pdf Graphic file (type pdf)
+<use pictures/oe_wer_66.pdf>
+Package pdftex.def Info: pictures/oe_wer_66.pdf  used on input line 473.
+(pdftex.def)             Requested size: 204.85844pt x 169.42842pt.
+<pictures/oe_wien_ucz_66.pdf, id=4472, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_ucz_66.pdf Graphic file (type pdf)
+<use pictures/oe_wien_ucz_66.pdf>
+Package pdftex.def Info: pictures/oe_wien_ucz_66.pdf  used on input line 480.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+<pictures/oe_wien_wer_66.pdf, id=4473, 376.40625pt x 307.1475pt>
+File: pictures/oe_wien_wer_66.pdf Graphic file (type pdf)
+<use pictures/oe_wien_wer_66.pdf>
+Package pdftex.def Info: pictures/oe_wien_wer_66.pdf  used on input line 483.
+(pdftex.def)             Requested size: 204.85844pt x 167.16945pt.
+) (podsumowanie.tex [43 <./pictures/oe_ucz_66.pdf> <./pictures/oe_wer_66.pdf> <
+./pictures/oe_wien_ucz_66.pdf> <./pictures/oe_wien_wer_66.pdf>]
 Rozdzia\PlPrIeC {\l } 5.
-[36
+) [44
 
 ] (PPMGR_Wojciech_Rogalski.lof
 Underfull \vbox (badness 2600) has occurred while \output is active []
 
- [37
+ [45
 
 ])
 \tf@lof=\write5
 \openout5 = `PPMGR_Wojciech_Rogalski.lof'.
 
 
-[38] (PPMGR_Wojciech_Rogalski.lot)
-\tf@lot=\write6
-\openout6 = `PPMGR_Wojciech_Rogalski.lot'.
-
- [39
-
-] (PPMGR_Wojciech_Rogalski.aux)
+[46] (PPMGR_Wojciech_Rogalski.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-04>
@@ -1649,10 +1817,10 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 25346 strings out of 474485
- 564266 string characters out of 5737599
+ 25635 strings out of 474485
+ 574149 string characters out of 5737599
  1943542 words of memory out of 5000000
- 47218 multiletter control sequences out of 15000+600000
+ 47504 multiletter control sequences out of 15000+600000
  575084 words of font info for 85 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,14n,93p,805b,529s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1675,9 +1843,9 @@ y10.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/fonts/type1/
 public/pl/plsy8.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Programs/MiKTeX/
 fonts/type1/public/pl/plti10.pfb><C:/Users/HP.LAPTOP-VKB5R2K8/AppData/Local/Pro
 grams/MiKTeX/fonts/type1/public/pl/pltt10.pfb>
-Output written on PPMGR_Wojciech_Rogalski.pdf (40 pages, 8432879 bytes).
+Output written on PPMGR_Wojciech_Rogalski.pdf (47 pages, 11079305 bytes).
 PDF statistics:
- 3599 PDF objects out of 4296 (max. 8388607)
+ 4691 PDF objects out of 5155 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 523 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 678 words of extra memory for PDF output out of 10000 (max. 10000000)
 
