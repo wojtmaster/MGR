@@ -51,16 +51,16 @@ factor = 0.86;
 
 
 OE NIELINIOWE
-wiener_params(1) = 5.05;
-wiener_params(2) = 0.014;
-wiener_params(3) = -2.08;
+wiener_params(1) = 5.06;
+wiener_params(2) = 0.0155;
+wiener_params(3) = -2.06;
 
-wiener_params(4) = 3.06;
-wiener_params(5) = 0.106;
+wiener_params(4) = 3.03;
+wiener_params(5) = 0.1059;
 wiener_params(6) = 1.87;
 
-wiener_params(7) = 1.4;
-wiener_params(8) = 0.134;
-wiener_params(9) = -1.87;
+wiener_params(7) = 1.25;
+wiener_params(8) = 0.142;
+wiener_params(9) = -1.868;
 
 factor = 0.54;
