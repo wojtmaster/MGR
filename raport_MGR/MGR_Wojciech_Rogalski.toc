@@ -1,0 +1,4 @@
+\contentsline {chapter}{\numberline {1\relax .\enspace }Wstęp}{3}{}%
+\contentsline {chapter}{Bibliografia}{4}{}%
+\contentsline {chapter}{Spis rysunk\'ow}{5}{}%
+\contentsline {chapter}{Spis tabel}{6}{}%
