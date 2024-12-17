@@ -16,9 +16,7 @@ obiekt = obiekt.sopdt();
 % obiekt.show_sopdt();
 
 %% Hammerstein
-hammerstein = Hammerstein(obiekt.F_10-45, obiekt.F_10+45, obiekt.F_10, ...
-                          obiekt.F_D0-20, obiekt.F_D0+20, obiekt.F_D0, ...
-                          obiekt.h_20, obiekt.alpha_2, obiekt.n, obiekt.mode, obiekt.s);
+hammerstein = Hammerstein(obiekt.F_10-45, obiekt.F_10+45, obiekt.F_10, obiekt.F_D0, obiekt.h_20, obiekt.alpha_2, obiekt.n, obiekt.mode, obiekt.s);
 hammerstein = hammerstein.fuzzyfication();
 % hammerstein.show_fuzzy_system();
 
@@ -28,7 +26,7 @@ wiener = wiener.fuzzyfication();
 % wiener.show_fuzzy_system();
 
 %% Wymuszenia
-u = [repelem((rand(1, obiekt.kk/250) * 5 - 2.5) * 10, 250); zeros(1, obiekt.kk)];
+u = [repelem((rand(1, obiekt.kk/250) * 5 - 2.5) * 10, 250); repelem((rand(1, obiekt.kk/500) * 5 - 2.5) * 10, 500)];
 [y, y_L] = obiekt.modified_Euler(u, obiekt.kk);
 % obiekt.show_modified_Euler(u, y, y_L, obiekt.kk);
 

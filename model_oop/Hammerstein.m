@@ -1,4 +1,4 @@
-classdef Hammerstein
+classdef Hammerstein < Base
     properties
         u
         u_ucz
@@ -18,14 +18,10 @@ classdef Hammerstein
     end
 
     methods 
-        function obj = Hammerstein(F_1_start, F_1_end, F_10, F_D0, h_20, alpha_2, n, mode, s)
+        function obj = Hammerstein(F_1_start, F_1_end, F_10, F_D_start, F_D_end, F_D0, h_20, alpha_2, n, mode, s)
             F_1 = linspace(F_1_start, F_1_end, n);
             F_D = F_D0;
             h_2 = ((F_1+F_D)/alpha_2).^2;
-
-            % F_1 = F_10;
-            % F_D = linspace(F_D_start, F_D_end, n);
-            % h_2 = ((F_1+F_D)/alpha_2).^2;
 
             obj.y = h_2 - h_20;
             obj.u = F_1 - F_10;
@@ -40,6 +36,10 @@ classdef Hammerstein
             obj.n = n;
             obj.mode = mode;
             obj.s = s;
+
+            F_1 = F_10;
+            F_D = linspace(F_D_start, F_D_end, n);
+            h_2 = ((F_1+F_D)/alpha_2).^2;
         end
 
         function [obj] = fuzzyfication(obj)
@@ -118,24 +118,24 @@ classdef Hammerstein
             end
         end
         
-        function model(obj, a, b, u, y, K, kk, tau)
+        function model(obj, a, b, u, y, K, kk, delay)
             y_mod = zeros(size(y));
-            y_mod(1:tau+2) = y(1:tau+2);
+            y_mod(1:delay+2) = y(1:delay+2);
 
             z = zeros(1, kk);
-            z(1:tau+2) = u(1, 1:tau+2);
+            z(1:delay+2) = u(1, 1:delay+2);
 
             if strcmp(obj.mode, 'ARX')
-                for k = tau+3:kk
+                for k = delay+3:kk
                     index = round((u(1,k)-obj.u_start)*obj.n / (obj.u_end-obj.u_start));
                     z(k) = obj.find_value(u(1,k), index);
-                    y_mod(k) = - a*[y(k-1:-1:k-2)]' + b/K*[z(k-(tau+1):-1:k-(tau+2))]' + b*[u(2, k-1:-1:k-2)]';
+                    y_mod(k) = - a*[y(k-1:-1:k-2)]' + b/K*[z(k-(delay+1):-1:k-(delay+2))]' + b*[u(2, k-1:-1:k-2)]';
                 end
             else
-                for k = tau+3:kk
+                for k = delay+3:kk
                     index = round((u(1,k)-obj.u_start)*obj.n / (obj.u_end-obj.u_start));
                     z(k) = obj.find_value(u(1,k), index);
-                    y_mod(k) = - a*[y_mod(k-1:-1:k-2)]' + b/K*[z(k-(tau+1):-1:k-(tau+2))]' + b*[u(2, k-1:-1:k-2)]';
+                    y_mod(k) = - a*[y_mod(k-1:-1:k-2)]' + b/K*[z(k-(delay+1):-1:k-(delay+2))]' + b*[u(2, k-1:-1:k-2)]';
                 end
             end
 

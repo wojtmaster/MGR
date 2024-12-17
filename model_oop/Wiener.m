@@ -1,4 +1,4 @@
-classdef Wiener
+classdef Wiener < Base
     properties
         v
         v_ucz
@@ -18,7 +18,10 @@ classdef Wiener
     end
 
     methods 
-        function obj = Wiener(u, y, a, b, K, n, tau, mode, s)
+        function obj = Wiener(a, b, K, n, delay, modified_Euler, mode, s)
+            u = [linspace(-45, 45, n); zeros(1, n)];
+            [y, ~] = modified_Euler(u, n);
+
             obj.y = y;
             obj.y_ucz = y(n/10:2:end-1);
             obj.y_wer = y(n/10+1:2:end);
@@ -26,15 +29,15 @@ classdef Wiener
             obj.mode = mode;
             obj.s = s;
 
-            obj.v(1:tau+2) = obj.y(1:tau+2);
+            obj.v(1:delay+2) = obj.y(1:delay+2);
 
             if strcmp(obj.mode, 'ARX')
-                for k = tau+3:n
-                    obj.v(k) = - a*[y(k-1:-1:k-2)]' + b/K*[u(1,k-(tau+1):-1:k-(tau+2))]' + b*[u(2, k-1:-1:k-2)]';
+                for k = delay+3:n
+                    obj.v(k) = - a*[y(k-1:-1:k-2)]' + b/K*[u(1,k-(delay+1):-1:k-(delay+2))]' + b*[u(2, k-1:-1:k-2)]';
                 end
             else
-                for k = tau+3:n
-                    obj.v(k) = - a*[obj.v(k-1:-1:k-2)]' + b/K*[u(1,k-(tau+1):-1:k-(tau+2))]' + b*[u(2, k-1:-1:k-2)]';
+                for k = delay+3:n
+                    obj.v(k) = - a*[obj.v(k-1:-1:k-2)]' + b/K*[u(1,k-(delay+1):-1:k-(delay+2))]' + b*[u(2, k-1:-1:k-2)]';
                 end
             end
             
@@ -121,22 +124,22 @@ classdef Wiener
             end
         end
 
-        function model(obj, a, b, u, y, K, kk, tau)
+        function model(obj, a, b, u, y, K, kk, delay)
             y_mod = zeros(size(y));
-            y_mod(1:tau+2) = y(1:tau+2);
+            y_mod(1:delay+2) = y(1:delay+2);
 
             v_dynamic = zeros(1, kk);
-            v_dynamic(1:tau+2) = y(1, 1:tau+2);
+            v_dynamic(1:delay+2) = y(1, 1:delay+2);
 
             if strcmp(obj.mode, 'ARX')
-                for k = tau+3:kk
-                    v_dynamic(k) = - a*[y(k-1:-1:k-2)]' + b/K'*[u(1,k-(tau+1):-1:k-(tau+2))]' + b*[u(2, k-1:-1:k-2)]';
+                for k = delay+3:kk
+                    v_dynamic(k) = - a*[y(k-1:-1:k-2)]' + b/K'*[u(1,k-(delay+1):-1:k-(delay+2))]' + b*[u(2, k-1:-1:k-2)]';
                     index = round((v_dynamic(k)-obj.v_start)*obj.n / (obj.v_end-obj.v_start));
                     y_mod(k) = obj.find_value(v_dynamic(k), index);
                 end
             else
-                for k = tau+3:kk
-                    v_dynamic(k) = - a*[v_dynamic(k-1:-1:k-2)]' + b/K'*[u(1,k-(tau+1):-1:k-(tau+2))]' + b*[u(2, k-1:-1:k-2)]';
+                for k = delay+3:kk
+                    v_dynamic(k) = - a*[v_dynamic(k-1:-1:k-2)]' + b/K'*[u(1,k-(delay+1):-1:k-(delay+2))]' + b*[u(2, k-1:-1:k-2)]';
                     index = round((v_dynamic(k)-obj.v_start)*obj.n / (obj.v_end-obj.v_start));
                     y_mod(k) = obj.find_value(v_dynamic(k), index);
                 end
