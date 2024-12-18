@@ -53,7 +53,7 @@ classdef Wiener < Base
             obj.y_wer = obj.y(2:2:end);
             obj.v = obj.v(n/5:end);
             obj.v_ucz = obj.v(1:2:end-1);
-            obj.v_wer = obj.v(2:2:end);
+            obj.v_wer = obj.v(2+1:2:end);
             obj.v_start = obj.v(1);
             obj.v_end = obj.v(end);
 
@@ -92,6 +92,9 @@ classdef Wiener < Base
                 obj.R = cell(1,5);
                 sigma = [12 15 15 15 12];
                 mean = [-40 -20 0 20 40];
+                % obj.R = cell(1,4);
+                % sigma = [15 15 15 15];
+                % mean = [-60 -30 30 60];
                 for i = 1:length(obj.R)
                     obj.R{i} = gaussmf(obj.v, [sigma(i) mean(i)]);
                 end
@@ -221,6 +224,13 @@ classdef Wiener < Base
             else
                 for k = delay+3:kk
                     v_dynamic(k) = - a*[v_dynamic(k-1:-1:k-2)]' + b/K*[u(1,k-(delay+1):-1:k-(delay+2))]';
+                    v_dynamic_disturbance(k) = - a*[v_dynamic_disturbance(k-1:-1:k-2)]' + b*[u(2, k-1:-1:k-2)]';
+
+                    index = round((v_dynamic(k)-obj.v_start)*obj.n / (obj.v_end-obj.v_start));
+                    
+                    y_mod(k) = obj.find_value(v_dynamic(k), index);
+
+                    v_dynamic(k) = - a*[v_dynamic(k-1:-1:k-2)]' + b/K'*[u(1,k-(delay+1):-1:k-(delay+2))]';
                     v_dynamic_disturbance(k) = - a*[v_dynamic_disturbance(k-1:-1:k-2)]' + b/K*[u(2, k-1:-1:k-2)]';
 
                     index = round((v_dynamic(k)-obj.v_start)*obj.n / (obj.v_end-obj.v_start));

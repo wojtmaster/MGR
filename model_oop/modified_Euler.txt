@@ -1,0 +1,65 @@
+        function [y, y_L] = modified_Euler(obj, u, kk)
+
+            %% Alokacja pamięci
+            y = zeros(1, kk);
+            y_L = zeros(1, kk);
+            
+            %% Warunki początkowe
+            V_1 = obj.V_10;
+            V_2 = obj.V_20;
+            V_1e = obj.V_10;
+            V_2e = obj.V_20;
+            V_1L = obj.V_10;
+            V_2L = obj.V_20;
+            V_1eL = obj.V_10;
+            V_2eL = obj.V_20;
+            
+            %% Funkcje
+            fun_1 = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (V_1/obj.A)^(1/2);
+            fun_1L = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (obj.V_10/obj.A)^(1/2) - obj.alpha_1 / (2*obj.V_10^(1/2)*obj.A^(1/2)) * (V_1-obj.V_10);
+            fun_2 = @(V_1, V_2) obj.alpha_1 * (V_1/obj.A)^(1/2) - obj.alpha_2 * (V_2/obj.C)^(1/4); 
+            fun_2L = @(V_1, V_2) obj.alpha_1 * (obj.V_10/obj.A)^(1/2) - obj.alpha_2 * (obj.V_20/obj.C)^(1/4) + ...
+                     obj.alpha_1 / (2*obj.V_10^(1/2)*obj.A^(1/2)) * (V_1-obj.V_10) - obj.alpha_2 / (4*obj.V_20^(3/4)*obj.C^(1/4)) * (V_2-obj.V_20);
+            
+            %% Wymuszenia
+            F_1in = u(1,:) + obj.F_10;
+            F_D = u(2,:) + obj.F_D0;
+            
+            %% Modified Euler 
+            for i = 2:kk
+                if i <= obj.delay+1
+                    V_1 = V_1 + obj.Tp * fun_1(obj.F_10, F_D(i), max(V_1, 0));
+                    V_2 = V_2 + obj.Tp * fun_2(max(V_1, 0), max(V_2, 0));
+            
+                    V_1e = V_1e + 1/2 * obj.Tp * (fun_1(obj.F_10, F_D(i), max(V_1e, 0)) + fun_1(obj.F_10, F_D(i), max(V_1, 0)));
+                    V_2e = V_2e + 1/2 * obj.Tp * (fun_2(max(V_1e, 0), max(V_2e, 0)) + fun_2(max(V_1, 0), max(V_2, 0)));
+            
+                    V_1L = V_1L + obj.Tp * fun_1L(obj.F_10, F_D(i), V_1L);
+                    V_2L = V_2L + obj.Tp * fun_2L(V_1L, V_2L);
+            
+                    V_1eL = V_1eL + 1/2 * obj.Tp * (fun_1L(obj.F_10, F_D(i), V_1eL) + fun_1L(obj.F_10, F_D(i), V_1L));
+                    V_2eL = V_2eL + 1/2 * obj.Tp * (fun_2L(V_1eL, V_2eL) + fun_2L(V_1L, V_2L));
+                else                                      
+                    V_1 = V_1 + obj.Tp * fun_1(F_1in(i - obj.delay), F_D(i), max(V_1, 0));
+                    V_2 = V_2 + obj.Tp * fun_2(max(V_1, 0), max(V_2, 0));
+            
+                    V_1e = V_1e + 1/2 * obj.Tp * (fun_1(F_1in(i - obj.delay), F_D(i), max(V_1e, 0)) + fun_1(F_1in(i - obj.delay), F_D(i), max(V_1, 0)));
+                    V_2e = V_2e + 1/2 * obj.Tp * (fun_2(max(V_1e, 0), max(V_2e, 0)) + fun_2(max(V_1, 0), max(V_2, 0)));
+            
+                    V_1L = V_1L + obj.Tp * fun_1L(F_1in(i - obj.delay), F_D(i), V_1L);
+                    V_2L = V_2L + obj.Tp * fun_2L(V_1L, V_2L);
+            
+                    V_1eL = V_1eL + 1/2 * obj.Tp * (fun_1L(F_1in(i - obj.delay), F_D(i), V_1eL) + fun_1L(F_1in(i - obj.delay), F_D(i), V_1L));
+                    V_2eL = V_2eL + 1/2 * obj.Tp * (fun_2L(V_1eL, V_2eL) + fun_2L(V_1L, V_2L));
+                end
+                    V_2e = max(V_2e, 0);
+                    V_2eL = max(V_2eL, 0);
+
+                    h_2e = sqrt(V_2e / obj.C);
+                    h_2eL = sqrt(obj.V_20 / obj.C) + 1/(2*sqrt(obj.V_20 * obj.C)) * (V_2eL-obj.V_20);
+                    
+                    % Sprowadzenie wartości do punktu pracy
+                    y(i) = h_2e - obj.h_20;
+                    y_L(i) = h_2eL - obj.h_20;
+            end
+        end
