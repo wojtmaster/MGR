@@ -136,7 +136,7 @@ classdef Wiener < Base
             else
                 obj.R_disturbance = cell(1,3);
                 sigma = [15 15 15];
-                mean = [-15 0 15];
+                mean = [-20 0 20];
                 for i = 1:length(obj.R_disturbance)
                     obj.R_disturbance{i} = gaussmf(obj.v_disturbance, [sigma(i) mean(i)]);
                 end

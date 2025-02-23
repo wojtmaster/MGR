@@ -72,14 +72,14 @@ classdef Hammerstein < Base
             if strcmp(obj.s, 'linear')
                 obj.R = cell(1,5);
                 sigma = [12 15 15 15 12];
-                mean = [-40 -20 0 20 40];
+                mean = [-32 -20 0 20 32];
                 for i = 1:length(obj.R)
                     obj.R{i} = gaussmf(obj.u, [sigma(i) mean(i)]);
                 end
             else
                 obj.R = cell(1,3);
                 sigma = [20 20 20];
-                mean = [-25 0 25];
+                mean = [-35 0 35];
                 for i = 1:length(obj.R)
                     obj.R{i} = gaussmf(obj.u, [sigma(i) mean(i)]);
                 end
@@ -140,8 +140,8 @@ classdef Hammerstein < Base
 
             E_ucz = sum((obj.y_ucz_disturbance - obj.y_mod_ucz_disturbance).^2)/(obj.n/2);
             E_wer = sum((obj.y_wer_disturbance - obj.y_mod_wer_disturbance).^2)/(obj.n/2);
-            fprintf('Wartość E_ucz = %.3f \n', E_ucz);
-            fprintf('Wartość E_wer = %.3f \n', E_wer);
+            fprintf('Wartość E_ucz = %.3f (F_D)\n', E_ucz);
+            fprintf('Wartość E_wer = %.3f (F_D)\n', E_wer);
         end
 
         function Y = fuzzy_system(obj, params, u, u_start, u_end, R)
@@ -188,23 +188,27 @@ classdef Hammerstein < Base
             z = zeros(1, kk);
             z_disturbance = zeros(1, kk);
             z(1:delay+2) = u(1, 1:delay+2);
-            z_disturbance = u(2, 1:delay+2);
+            z_disturbance(1:delay+2) = u(2, 1:delay+2);
 
             if strcmp(obj.mode, 'ARX')
                 for k = delay+3:kk
                     index = round((u(1,k)-obj.u_start)*obj.n / (obj.u_end-obj.u_start));
                     index_disturbance = round((u(2,k)-obj.u_start_disturbance)*obj.n / (obj.u_end_disturbance-obj.u_start_disturbance));
                     
-                    z(k) = obj.find_value(u(1,k), obj.R, index);
-                    z_disturbance(k) = obj.find_value(u(2,k), obj.R_disturbance, index_disturbance);
+                    z(k) = obj.find_value(u(1,k), obj.R, obj.params, index);
+                    z_disturbance(k) = obj.find_value(u(2,k), obj.R_disturbance, obj.params_disturbance, index_disturbance);
                     
                     y_mod(k) = - a*[y(k-1:-1:k-2)]' + b/K*[z(k-(delay+1):-1:k-(delay+2))]' + b/K*[z_disturbance(k-1:-1:k-2)]';
                 end
             else
                 for k = delay+3:kk
                     index = round((u(1,k)-obj.u_start)*obj.n / (obj.u_end-obj.u_start));
-                    z(k) = obj.find_value(u(1,k), index);
-                    y_mod(k) = - a*[y_mod(k-1:-1:k-2)]' + b/K*[z(k-(delay+1):-1:k-(delay+2))]' + b*[u(2, k-1:-1:k-2)]';
+                    index_disturbance = round((u(2,k)-obj.u_start_disturbance)*obj.n / (obj.u_end_disturbance-obj.u_start_disturbance));
+                    
+                    z(k) = obj.find_value(u(1,k), obj.R, obj.params, index);
+                    z_disturbance(k) = obj.find_value(u(2,k), obj.R_disturbance, obj.params_disturbance, index_disturbance);
+
+                    y_mod(k) = - a*[y_mod(k-1:-1:k-2)]' + b/K*[z(k-(delay+1):-1:k-(delay+2))]' + b/K*[z_disturbance(k-1:-1:k-2)]';
                 end
             end
 
@@ -219,18 +223,17 @@ classdef Hammerstein < Base
             hold off;
             xlabel('k');
             ylabel('y(k)');
-            plot_title = sprintf('Model %s Hammerstein \n E = %.3f', obj.mode, E);
-            title(plot_title);
+            title(sprintf('Model %s Hammerstein \n E = %.3f', obj.mode, E));
             legend('y_{mod}', 'y');
             grid on;
         end
 
-        function Y = find_value(obj, u, R, index)
+        function Y = find_value(obj, u, R, params, index)
             a = zeros(size(R));
             b = zeros(size(R));
             for i = 1:length(R)
-                a(i) = obj.params(2*i-1);
-                b(i) = obj.params(2*i);
+                a(i) = params(2*i-1);
+                b(i) = params(2*i);
             end
         
             Y = 0;
@@ -258,7 +261,7 @@ classdef Hammerstein < Base
             Y = Y / weight;
         end
 
-        function show_fuzzy_system(~, u, u_ucz, u_wer, y_ucz, y_mod_ucz, y_wer, y_mod_wer, R)
+        function show_fuzzy_system(~, u, u_ucz, u_wer, y_ucz, y_mod_ucz, y_wer, y_mod_wer, R, enforce)
             figure;
             hold on;
             for i = 1:length(R)
@@ -269,7 +272,7 @@ classdef Hammerstein < Base
             xlabel('u');
             ylabel('y');
             xlim([u(1) u(end)]);
-            title('Zbiory rozmyte y(u)');
+            title(sprintf('Zbiory rozmyte y(u) [ %s ]', enforce));
 
             figure;
             hold on;
@@ -281,8 +284,7 @@ classdef Hammerstein < Base
             grid on;
             xlabel('u');
             ylabel('y');
-            plot_title = sprintf('Charakterystyka statyczna y_{ucz}(u_{ucz}) \n Następniki liniowe');
-            title(plot_title);
+            title(sprintf('Charakterystyka statyczna y_{ucz}(u_{ucz}) [ %s ] \n Następniki liniowe', enforce));
             legend('y(u)', 'y(u) - fuzzy', 'Location', 'northwest');
 
             figure;
@@ -295,12 +297,11 @@ classdef Hammerstein < Base
             grid on;
             xlabel('u');
             ylabel('y');
-            plot_title = sprintf('Charakterystyka statyczna y_{wer}(u_{wer}) \n Następniki liniowe');
-            title(plot_title);
+            title(sprintf('Charakterystyka statyczna y_{wer}(u_{wer}) [ %s ] \n Następniki liniowe', enforce));
             legend('y(u)', 'y(u) - fuzzy', 'Location', 'northwest');
         end
 
-        function show_static_characteristic(~, u, y)
+        function show_static_characteristic(~, u, y, enforce)
             figure;
             plot(u, y, 'b', 'LineWidth', 1.2);
             xlabel('u');
@@ -308,7 +309,7 @@ classdef Hammerstein < Base
             xlim([u(1) u(end)]);
             ylim([y(1) y(end)]);
             legend('y(u)', 'Location', 'northwest');
-            title("Charakterystyka statyczna w zależności od u");
+            title(sprintf("Charakterystyka statyczna w zależności od %s", enforce));
             grid on;
         end
     end

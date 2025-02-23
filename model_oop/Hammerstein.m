@@ -72,14 +72,14 @@ classdef Hammerstein < Base
             if strcmp(obj.s, 'linear')
                 obj.R = cell(1,5);
                 sigma = [12 15 15 15 12];
-                mean = [-40 -20 0 20 40];
+                mean = [-32 -20 0 20 32];
                 for i = 1:length(obj.R)
                     obj.R{i} = gaussmf(obj.u, [sigma(i) mean(i)]);
                 end
             else
                 obj.R = cell(1,3);
                 sigma = [20 20 20];
-                mean = [-25 0 25];
+                mean = [-35 0 35];
                 for i = 1:length(obj.R)
                     obj.R{i} = gaussmf(obj.u, [sigma(i) mean(i)]);
                 end
@@ -117,7 +117,7 @@ classdef Hammerstein < Base
             else
                 obj.R_disturbance = cell(1,3);
                 sigma = [15 15 15];
-                mean = [-15 0 15];
+                mean = [-20 0 20];
                 for i = 1:length(obj.R_disturbance)
                     obj.R_disturbance{i} = gaussmf(obj.u_disturbance, [sigma(i) mean(i)]);
                 end

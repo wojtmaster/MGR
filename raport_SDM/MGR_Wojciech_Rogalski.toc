@@ -1,0 +1,12 @@
+\contentsline {chapter}{\numberline {1\relax .\enspace }Wstęp}{3}{}%
+\contentsline {chapter}{\numberline {2\relax .\enspace }Algorytmy regulacji predykcyjnej}{4}{}%
+\contentsline {section}{\numberline {2.1\relax .\enspace }DMC}{6}{}%
+\contentsline {subsection}{\numberline {2.1.1\relax .\enspace }Algorytm DMC w wersji analitycznej}{7}{}%
+\contentsline {subsection}{\numberline {2.1.2\relax .\enspace }Algorytm DMC w wersji numerycznej}{8}{}%
+\contentsline {section}{\numberline {2.2\relax .\enspace }Inne warianty DMC}{9}{}%
+\contentsline {chapter}{\numberline {3\relax .\enspace }Regulacja rozmyta}{10}{}%
+\contentsline {section}{\numberline {3.1\relax .\enspace }Modele Takagi-Sugeno}{12}{}%
+\contentsline {section}{\numberline {3.2\relax .\enspace }Podejście PDC}{13}{}%
+\contentsline {chapter}{\numberline {4\relax .\enspace }Modele Hammersteina i Wienera}{14}{}%
+\contentsline {chapter}{Bibliografia}{15}{}%
+\contentsline {chapter}{Spis rysunk\'ow}{17}{}%
