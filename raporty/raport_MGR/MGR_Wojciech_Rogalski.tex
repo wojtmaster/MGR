@@ -1,0 +1,417 @@
+\documentclass[a4paper,titlepage,11pt,floatssmall]{mwrep}
+\usepackage[left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage[OT1]{fontenc}
+\usepackage{polski}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[hidelinks]{hyperref}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subfig}
+\usepackage{multirow}
+\usepackage{setspace}
+\usepackage{url}
+\usepackage{tikz}
+\usetikzlibrary{arrows,calc,decorations.markings,math,arrows.meta}
+\usepackage{rotating}
+\usepackage[percent]{overpic}
+\usepackage[utf8]{inputenc}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{listings}
+\usepackage{matlab-prettifier}
+\usepackage{enumitem,amssymb}
+\definecolor{szary}{rgb}{0.95,0.95,0.95}
+\usepackage{siunitx}
+\sisetup{detect-weight,exponent-product=\cdot,output-decimal-marker={,},per-mode=symbol,range-phrase={-},range-units=single}
+
+%konfiguracje pakietu listings
+\lstset{
+  literate={ą}{{\k a}}1
+           {Ą}{{\k A}}1
+           {ż}{{\. z}}1
+           {Ż}{{\. Z}}1
+           {ź}{{\' z}}1
+           {Ź}{{\' Z}}1
+           {ć}{{\' c}}1
+           {Ć}{{\' C}}1
+           {ę}{{\k e}}1
+           {Ę}{{\k E}}1
+           {ó}{{\' o}}1
+           {Ó}{{\' O}}1
+           {ń}{{\' n}}1
+           {Ń}{{\' N}}1
+           {ś}{{\' s}}1
+           {Ś}{{\' S}}1
+           {ł}{{\l}}1
+           {Ł}{{\L}}1
+}
+\lstset{
+	backgroundcolor=\color{szary},
+	frame=single,
+	breaklines=true,
+}
+\lstdefinestyle{customlatex}{
+	basicstyle=\footnotesize\ttfamily,
+	%basicstyle=\small\ttfamily,
+}
+\lstdefinestyle{customc}{
+	breaklines=true,
+	frame=tb,
+	language=C,
+	xleftmargin=0pt,
+	showstringspaces=false,
+	basicstyle=\small\ttfamily,
+	keywordstyle=\bfseries\color{green!40!black},
+	commentstyle=\itshape\color{purple!40!black},
+	identifierstyle=\color{blue},
+	stringstyle=\color{orange},
+}
+\lstdefinestyle{custommatlab}{
+	captionpos=t,
+	breaklines=true,
+	frame=tb,
+	xleftmargin=0pt,
+	language=matlab,
+	showstringspaces=false,
+	basicstyle=\small\ttfamily,
+	%basicstyle=\scriptsize\ttfamily,
+	keywordstyle=\bfseries\color{green!40!black},
+	commentstyle=\itshape\color{purple!40!black},
+	identifierstyle=\color{blue},
+	stringstyle=\color{orange},
+}
+\lstdefinestyle{custompython}{
+	captionpos=t,
+	breaklines=true,
+	frame=tb,
+	xleftmargin=0pt,
+	language=python,
+	showstringspaces=false,
+	basicstyle=\small\ttfamily,	
+	keywordstyle=\bfseries\color{green!40!black},
+	commentstyle=\itshape\color{purple!40!black},
+	identifierstyle=\color{blue},
+	stringstyle=\color{orange},
+}
+
+%wymiar tekstu (bez żywej paginy)
+\textwidth 160mm \textheight 247mm
+
+\def\figurename{Rys.}
+\def\tablename{Tab.}
+
+%konfiguracja liczby pływających elementów
+\setcounter{topnumber}{0}%2
+\setcounter{bottomnumber}{3}%1
+\setcounter{totalnumber}{5}%3
+\renewcommand{\textfraction}{0.01}%0.2
+\renewcommand{\topfraction}{0.95}%0.7
+\renewcommand{\bottomfraction}{0.95}%0.3
+\renewcommand{\floatpagefraction}{0.35}%0.5
+
+
+\begin{document}
+\frenchspacing
+\pagestyle{uheadings}
+
+%strona tytułowa
+\title{\bf Zastosowanie modeli statyki typu Takagi-Sugeno z następnikami hiperbolicznymi w algorytmach regulacji predykcyjnej}
+\author{inż. Wojciech Rogalski}
+\date{2025}
+
+\makeatletter
+\renewcommand{\maketitle}{\begin{titlepage}
+\begin{center}{\LARGE {\bf
+Wydział Elektroniki i Technik Informacyjnych}}\\
+\vspace{0.4cm}
+{\LARGE {\bf Politechnika Warszawska}}\\
+\vspace{0.3cm}
+\end{center}
+\vspace{5cm}
+\begin{center}
+{\bf \LARGE Praca magisterska \vskip 0.1cm}
+\end{center}
+\vspace{1cm}
+\begin{center}
+{\bf \LARGE \@title \vskip 0.1cm}
+\end{center}
+\vspace{2cm}
+\begin{center}
+\begin{tabular}{@{}c@{\hspace{2cm}}c@{}}
+\bf \Large Autor: & \bf \Large Promotor: \\
+\@author & dr hab. inż. Piotr Marusak
+\end{tabular}
+\end{center}
+\vspace*{\stretch{6}}
+\begin{center}
+\bf{\large{Warszawa, \@date\vskip 0.1cm}}
+\end{center}
+\end{titlepage}
+}
+\makeatother
+\maketitle
+
+\tableofcontents
+
+\chapter{Streszczenie}
+Tu będzie streszczenie pracy
+
+\chapter{Wstęp}
+Tu będzie wstęp do całej pracy
+
+\include{przeglad_literatury/wstep}
+\include{przeglad_literatury/predictive}
+\include{przeglad_literatury/fuzzy_logic}
+\include{przeglad_literatury/hamm_wien}
+
+\include{zbiorniki/wstep}
+\include{zbiorniki/identyfikacja}
+\include{zbiorniki/hammerstein}
+\include{zbiorniki/wiener}
+
+\section{Regulacja predykcyjna}
+Współczesne systemy sterowania wymagają metod, które potrafią skutecznie przewidywać i reagować na zmieniające się warunki pracy obiektów. Regulacja predykcyjna stanowi jedno z najbardziej zaawansowanych podejść do sterowania, pozwalając na optymalne korygowanie trajektorii sterowania w czasie rzeczywistym. Dzięki wykorzystaniu modeli matematycznych układu oraz przewidywaniu jego przyszłych stanów, MPC, a w szczególności DMC, umożliwia uwzględnienie ograniczeń oraz minimalizację błędów sterowania.
+
+W kontekście systemów nieliniowych szczególnie przydatne okazują się modele Hammersteina i Wienera, które rozdzielając nieliniową statykę od liniowej dynamiki układu ułatwiają implementację algorytmów predykcyjnych, ponieważ liniowa część modelu może być efektywnie analizowana i przewidywana przy użyciu klasycznych technik optymalizacyjnych, podczas gdy nieliniowa statyka może być traktowana jako dodatkowa warstwa przekształcająca sygnały sterowania lub wyjścia. Dzięki temu możliwe jest skuteczne sterowanie szeroką gamą obiektów przemysłowych, od procesów chemicznych po nowoczesne systemy robotyczne i autonomiczne. W niniejszym rozdziale zostaną omówione kluczowe zasady działania regulacji predykcyjnej oraz sposoby jej zastosowania w połączeniu z modelami Hammersteina i Wienera.
+
+\subsection{Regulator DMC}
+Tu coś o DMC, może jakiś schemacik blokowy
+
+\newpage
+
+ 
+\subsection{Porównanie}
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|>{\centering\arraybackslash}m{2.5cm}|>{\centering\arraybackslash}m{2.5cm}|>{\centering\arraybackslash}m{2.5cm}|>{\centering\arraybackslash}m{2.5cm}|>{\centering\arraybackslash}m{2.5cm}|}
+\hline
+\multirow{2}{*}{Regulator} & \multicolumn{2}{c|}{Model Hammersteina} & \multicolumn{2}{c|}{Model Wienera} \\ \cline{2-5}
+ & Następniki liniowe & Następniki nieliniowe & Następniki liniowe & Następniki nieliniowe \\ \hline
+DMC-analitic & $\num{20.6110}$ & $\num{20.4929}$ & $\num{22.3904}$ & $\num{22.4372}$ \\ \hline
+DMC-numeric & $\num{20.6110}$ & $\num{20.4929}$ & $\num{22.3903}$ & $\num{22.4372}$ \\ \hline
+DMC-SL & $\num{20.5775}$ & $\num{20.4629}$ & $\num{22.3721}$ & $\num{22.4176}$ \\ \hline
+DMC-NPL & $\num{20.4963}$ & $\num{20.3846}$ & $\num{22.3008}$ & $\num{22.3467}$ \\ \hline
+FDMC & $\num{19.7474}$ & $\num{19.6734}$ & $\num{21.6466}$ & $\num{21.7162}$ \\ \hline
+\end{tabular}
+\caption{Porównanie modeli.}
+\end{table}
+
+\begin{table}[h!]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|>{\centering\arraybackslash}m{2.5cm}|>{\centering\arraybackslash}m{1.25cm}|>{\centering\arraybackslash}m{1.25cm}|>{\centering\arraybackslash}m{1.25cm}|>{\centering\arraybackslash}m{1.25cm}|>{\centering\arraybackslash}m{1.25cm}|>{\centering\arraybackslash}m{1.25cm}|>{\centering\arraybackslash}m{1.25cm}|
+>{\centering\arraybackslash}m{1.25cm}|}
+\hline
+\multirow{3}{*}{Regulator} & \multicolumn{4}{c|}{Model Hammersteina} & \multicolumn{4}{c|}{Model Wienera} \\ \cline{2-9}
+ & \multicolumn{2}{c|}{\parbox{2.5cm}{\centering Następniki liniowe}} & \multicolumn{2}{c|}{\parbox{2.5cm}{\centering Następniki nieliniowe}} & \multicolumn{2}{c|}{\parbox{2.5cm}{\centering Następniki liniowe}} & \multicolumn{2}{c|}{\parbox{2.5cm}{\centering Następniki nieliniowe}} \\ \cline{2-9}
+ & $\text{E}_\text{y}$ & $\text{E}_\text{u}$ & $\text{E}_\text{y}$ & $\text{E}_\text{u}$ & $\text{E}_\text{y}$ & $\text{E}_\text{u}$ & $\text{E}_\text{y}$ & $\text{E}_\text{u}$ \\ \hline
+DMC-analitic & $\num{19.6366}$ & $\num{0.9743}$ & $\num{19.4785}$ & $\num{1.0144}$ & $\num{21.3817}$ & $\num{1.0087}$ & $\num{21.428}$ & $\num{1.0092}$ \\ \hline
+DMC-numeric & $\num{19.6366}$ & $\num{0.9743}$ & $\num{19.4785}$ & $\num{1.0144}$ & $\num{21.3817}$ & $\num{1.0087}$ & $\num{21.428}$ & $\num{1.0092}$ \\ \hline
+DMC-SL& $\num{19.5959}$ & $\num{0.9816}$ & $\num{19.4414}$ & $\num{1.0215}$ & $\num{21.3607}$ & $\num{1.0114}$ & $\num{21.4057}$ & $\num{1.0119}$ \\ \hline
+DMC-NPL & $\num{19.527}$ & $\num{0.9693}$ & $\num{19.3757}$ & $\num{1.0089}$ & $\num{21.3023}$ & $\num{0.99852}$ & $\num{21.3476}$ & $\num{0.99906}$ \\ \hline
+FDMC& $\num{18.2132}$ & $\num{1.5342}$ & $\num{18.1112}$ & $\num{1.5622}$ & $\num{20.0199}$ & $\num{1.6267}$ & $\num{20.0874}$ & $\num{1.6288}$ \\ \hline
+\end{tabular}
+\caption{Porównanie modeli.}
+\end{table}
+
+%%%%%%%%%%%%%%%%%%%%% ANALITIC %%%%%%%%%%%%%%%%%%%%%
+
+\newgeometry{left=1cm, right=1cm, top=2cm, bottom=2cm}
+\begin{figure}[p]
+\centering
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=1.1\linewidth]{pictures/DMC_analitic_y}
+\end{minipage}
+\hfill
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=1.1\linewidth]{pictures/DMC_analitic_u}
+\end{minipage}
+
+\caption{Porównanie sygnału wyjściowego oraz sterującego poszczególnych modeli.}
+
+\vspace{2cm}
+
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{pictures/DMC_analitic_y_zoom}
+\end{minipage}
+\hfill
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{pictures/DMC_analitic_u_zoom}
+\end{minipage}
+\caption{Wyszczególnienie interesujących fragmentów przebiegów.}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%% NUMERIC %%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[p]
+\centering
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=1.1\linewidth]{pictures/DMC_numeric_y}
+\end{minipage}
+\hfill
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=1.1\linewidth]{pictures/DMC_numeric_u}
+\end{minipage}
+
+\caption{Porównanie sygnału wyjściowego oraz sterującego poszczególnych modeli.}
+
+\vspace{2cm} 
+
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{pictures/DMC_numeric_y_zoom}
+\end{minipage}
+\hfill
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{pictures/DMC_numeric_u_zoom}
+\end{minipage}
+\caption{Wyszczególnienie interesujących fragmentów przebiegów.}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%% SL %%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[p]
+\centering
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=1.1\linewidth]{pictures/DMC_sl_y}
+\end{minipage}
+\hfill
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=1.1\linewidth]{pictures/DMC_sl_u}
+\end{minipage}
+
+\caption{Porównanie sygnału wyjściowego oraz sterującego poszczególnych modeli.}
+
+\vspace{2cm} 
+
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{pictures/DMC_sl_y_zoom}
+\end{minipage}
+\hfill
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{pictures/DMC_sl_u_zoom}
+\end{minipage}
+\caption{Wyszczególnienie interesujących fragmentów przebiegów.}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%% NPL %%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[p]
+\centering
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=1.1\linewidth]{pictures/DMC_npl_y}
+\end{minipage}
+\hfill
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=1.1\linewidth]{pictures/DMC_npl_u}
+\end{minipage}
+
+\caption{Porównanie sygnału wyjściowego oraz sterującego poszczególnych modeli.}
+
+\vspace{2cm} 
+
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{pictures/DMC_npl_y_zoom}
+\end{minipage}
+\hfill
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{pictures/DMC_npl_u_zoom}
+\end{minipage}
+\caption{Wyszczególnienie interesujących fragmentów przebiegów.}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%% FUZZY %%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[p]
+\centering
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=1.1\linewidth]{pictures/DMC_fuzzy_y}
+\end{minipage}
+\hfill
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=1.1\linewidth]{pictures/DMC_fuzzy_u}
+\end{minipage}
+
+\caption{Porównanie sygnału wyjściowego oraz sterującego poszczególnych modeli.}
+
+\vspace{2cm} 
+
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{pictures/DMC_fuzzy_y_zoom}
+\end{minipage}
+\hfill
+\begin{minipage}{0.495\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{pictures/DMC_fuzzy_u_zoom}
+\end{minipage}
+\caption{Wyszczególnienie interesujących fragmentów przebiegów.}
+\end{figure}
+\restoregeometry
+
+\newpage
+
+\section{Podsumowanie}
+
+
+
+
+
+
+
+%\chapter{Obiekt badawczy}
+%\section{Model Hammersteina}
+%\section{Model Wienera}
+%\section{Regulator DMC}
+%\subsection{Postać analityczna}
+%\subsection{Postać numeryczna}
+%\subsection{Regulator z sukcesywną linearyzacją}
+%\subsection{Regulator z nieliniową predykcją i linearyzacją}
+%\subsection{Regulator rozmyty}
+%
+%\chapter{Reaktor pH}
+%\section{Model Hammersteina}
+%\section{Model Wienera}
+%\section{Regulator DMC}
+%\subsection{Postać analityczna}
+%\subsection{Postać numeryczna}
+%\subsection{Regulator z sukcesywną linearyzacją}
+%\subsection{Regulator z nieliniową predykcją i linearyzacją}
+%\subsection{Regulator rozmyty}
+%
+%\chapter{Podsumowanie}
+
+%\input{wstep}
+%\input{identyfikacja}
+%\input{porownanie}
+%\input{dmc}
+%\input{podsumowanie}
+
+\include{przeglad_literatury/bibliografia}
+
+
+\listoffigures
+\listoftables
+\end{document}

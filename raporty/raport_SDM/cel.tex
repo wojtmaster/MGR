@@ -1,0 +1,20 @@
+\chapter{Cel pracy}
+Celem niniejszej pracy jest analiza porównawcza modeli Hammersteina i Wienera w modelach statyki typu Takagi - Sugeno z następnikami hiperbolicznymi w algorytmach regulacji predykcyjnej. Jednym z rozważanych obiektów sterowania były zbiorniki w kaskadzie z dokładnym opisem matematycznym, do którego identyfikacji wykorzystano model hybrydowy, natomiast drugim jest obiekt rzeczywisty, którego budowa i zasada działania została dokładnie ujęta w \cite{20} - identyfikacja z wykorzystaniem modelu empirycznego [Odwołanie do MODI, PODA]. Praca w zależności od obiektu obejmowała różne zagadnienia. W przypadku zbiorników pracowano na danych wygenerowanych, natomiast w przypadku instalacji CO2 - danych zebranych. Jednakże do najważniejszych filarów pracy należała:
+\begin{itemize}
+\item[•] identyfikację modelu
+\item[•] rozdzielenie procesu na część dynamiczną oraz statyczną
+\item[•] zebranie odpowiedzi skokowych
+\item[•] strojenie regulatora predykcyjnego
+\item[•] porównanie jakości regulacji z wykorzystaniem modeli Hammersteina i Wienera
+\item[•] porównanie jakości regulacji z wykorzystaniem hiperbolicznych następników w modelach Takagi - Sugeno
+\end{itemize}
+
+W kwestii algorytmów regulacji predykcyjnej wybrano regulator DMC (\textit{Dynamic Matrix Control}) w różnych wariantach:
+\begin{itemize}
+\item[•] klasyczny liniowy algorytm DMC
+\item[•] rozmyty algorytm DMC
+\item[•] rozmyty algorytm DMC z sukcesywną linearyzacją 
+\item[•] rozmyty algorytm DMC z nieliniowa predykcja i linearyzacja
+\end{itemize}
+
+Wszystkie wymienione algorytmy zostały zaimplementowane na obiekcie symulacyjnym - zbiorniki w kaskadzie - a najlepszy z pośród nich został zaimplementowany również na obiekcie rzeczywistym.s

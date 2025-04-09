@@ -1,0 +1,33 @@
+\chapter{Wstęp}
+Praca zawiera porównanie modeli Hammersteina oraz Wienera w regulacji kaskadowej. Bazą porównania był obiekt opisany równaniami fizycznymi postaci:
+\begin{equation}
+\begin{cases}
+\frac{dV_1}{dt} = F_1 + F_D - F_2(h_1) \\
+\frac{dV_2}{dt} = F_2(h_1) - F_3(h_2) \\
+F_2(h_1) = \alpha_1 \sqrt{h_1}, \quad F_3(h_2) = \alpha_2 \sqrt{h_2}, \quad V_1(h_1) = A_1h_1, \quad V_2(h_2) = C_2h_2^2, \quad F_1(t) = F_{1in}(t-\tau)  
+\end{cases}
+\label{model_fiz}
+\end{equation}
+
+\begin{itemize}
+\item[•] Stałe: 
+\begin{equation}
+A_1 = 540cm^2, \quad C_2 = \num{0.85}, \quad \alpha_1 = 26, \quad \alpha_2 = 20
+\end{equation}
+
+\item[•] Punkt pracy:
+\begin{equation}
+F_1 = 90 \frac{cm^3}{s}, \quad F_D = 30 \frac{cm^3}{s}, \quad \tau = 100, \quad h_2 = 36cm
+\end{equation}
+\end{itemize}
+
+\noindent gdzie użyte oznaczenia odpowiadają tym zastosowanym na rys. \ref{schemat}.
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.8\textwidth]{pictures/schemat}
+\caption{Obiekt regulacji automatycznej.}
+\label{schemat}
+\end{figure}
+
+Wartością sterującą był dopływ $F_{1in}$ natomiast zakłóceniem - $F_D$. Z kolei wyjściem - wartością regulowaną - wysokość cieczy w drugim zbiorniku $h_2$. W pierwszej kolejności dokonano identyfikacji modelu, sprawdzono jego nieliniowość i dobrano odpowiedni rząd dynamiki modelu liniowego.

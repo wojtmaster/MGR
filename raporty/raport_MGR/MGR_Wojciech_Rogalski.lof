@@ -1,0 +1,70 @@
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Warstwowa struktura sterowania \cite {121}.}}{5}{figure.caption.2}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Zasada działania regulacji predykcyjnej \cite {122}.}}{6}{figure.caption.3}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Odpowiedź skokowa \cite {123}.}}{7}{figure.caption.4}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Funkcja przynależności zbioru ostrego.}}{11}{figure.caption.5}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Funkcja przynależności zbioru rozmytego.}}{11}{figure.caption.6}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Przykładowe zbiory rozmyte.}}{12}{figure.caption.7}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Struktura regulatora rozmytego otrzymanego podejściem PDC \cite {171}.}}{14}{figure.caption.8}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Model Hammersteina \cite {21}.}}{15}{figure.caption.9}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Model Wienera \cite {21}.}}{15}{figure.caption.9}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Obiekt regulacji automatycznej.}}{17}{figure.caption.10}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Charakterystyka statyczna.}}{18}{figure.caption.11}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {$h_2(F_1)$}}}{18}{subfigure.2.1}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {$h_2(F_D)$}}}{18}{subfigure.2.2}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Trójwymiarowa charakterystyka statyczna.}}{19}{figure.caption.12}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Porównanie odpowiedzi obiektu nieliniowego i zlinearyzowanego w punkcie pracy na wymuszenia skokowe sygnału $F_1$.}}{20}{figure.caption.13}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Porównanie odpowiedzi obiektu nieliniowego i zlinearyzowanego w punkcie pracy na wymuszenia skokowe sygnału $F_D$.}}{21}{figure.caption.15}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Reprezentacja graficzna modelu Hammersteina.}}{22}{figure.caption.17}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Zbiory rozmyte - następniki liniowe.}}{23}{figure.caption.18}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Zbiory rozmyte - następniki nieliniowe.}}{24}{figure.caption.20}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces Wykres funkcji $\sinh ()$.}}{25}{figure.caption.21}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Porównanie modelu Hammersteina z następnikami liniowymi i nieliniowymi - pierwsza sekwencja.}}{26}{figure.caption.23}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Następniki liniowe}}}{26}{subfigure.10.1}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Następniki nieliniowe}}}{26}{subfigure.10.2}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Porównanie modelu Hammersteina z następnikami liniowymi i nieliniowymi - druga sekwencja.}}{27}{figure.caption.24}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Następniki liniowe}}}{27}{subfigure.11.1}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Następniki nieliniowe}}}{27}{subfigure.11.2}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces Porównanie modelu Hammersteina z następnikami liniowymi i nieliniowymi - trzecia sekwencja.}}{28}{figure.caption.25}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Następniki liniowe}}}{28}{subfigure.12.1}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Następniki nieliniowe}}}{28}{subfigure.12.2}%
+\contentsline {figure}{\numberline {4.13}{\ignorespaces Porównanie modelu Hammersteina z następnikami liniowymi i nieliniowymi - czwarta sekwencja.}}{29}{figure.caption.26}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Następniki liniowe}}}{29}{subfigure.13.1}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Następniki nieliniowe}}}{29}{subfigure.13.2}%
+\contentsline {figure}{\numberline {4.14}{\ignorespaces Porównanie modelu Hammersteina z następnikami liniowymi i nieliniowymi - piąta sekwencja.}}{30}{figure.caption.27}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Następniki liniowe}}}{30}{subfigure.14.1}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Następniki nieliniowe}}}{30}{subfigure.14.2}%
+\contentsline {figure}{\numberline {4.15}{\ignorespaces Reprezentacja graficzna modelu Wienera.}}{32}{figure.caption.29}%
+\contentsline {figure}{\numberline {4.16}{\ignorespaces Zbiory rozmyte - następniki liniowe.}}{33}{figure.caption.30}%
+\contentsline {figure}{\numberline {4.17}{\ignorespaces Zbiory rozmyte - następniki nieliniowe.}}{33}{figure.caption.31}%
+\contentsline {figure}{\numberline {4.18}{\ignorespaces Porównanie modelu Wienera z następnikami liniowymi i nieliniowymi - pierwsza sekwencja.}}{34}{figure.caption.32}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Następniki liniowe}}}{34}{subfigure.18.1}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Następniki nieliniowe}}}{34}{subfigure.18.2}%
+\contentsline {figure}{\numberline {4.19}{\ignorespaces Porównanie modelu Wienera z następnikami liniowymi i nieliniowymi - druga sekwencja.}}{35}{figure.caption.33}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Następniki liniowe}}}{35}{subfigure.19.1}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Następniki nieliniowe}}}{35}{subfigure.19.2}%
+\contentsline {figure}{\numberline {4.20}{\ignorespaces Porównanie modelu Wienera z następnikami liniowymi i nieliniowymi - trzecia sekwencja.}}{36}{figure.caption.34}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Następniki liniowe}}}{36}{subfigure.20.1}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Następniki nieliniowe}}}{36}{subfigure.20.2}%
+\contentsline {figure}{\numberline {4.21}{\ignorespaces Porównanie modelu Wienera z następnikami liniowymi i nieliniowymi - czwarta sekwencja.}}{37}{figure.caption.35}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Następniki liniowe}}}{37}{subfigure.21.1}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Następniki nieliniowe}}}{37}{subfigure.21.2}%
+\contentsline {figure}{\numberline {4.22}{\ignorespaces Porównanie modelu Wienera z następnikami liniowymi i nieliniowymi - piąta sekw encja.}}{38}{figure.caption.36}%
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Następniki liniowe}}}{38}{subfigure.22.1}%
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Następniki nieliniowe}}}{38}{subfigure.22.2}%
+\contentsline {figure}{\numberline {4.23}{\ignorespaces Porównanie sygnału wyjściowego oraz sterującego poszczególnych modeli.}}{42}{figure.caption.40}%
+\contentsline {figure}{\numberline {4.24}{\ignorespaces Wyszczególnienie interesujących fragmentów przebiegów.}}{42}{figure.caption.40}%
+\contentsline {figure}{\numberline {4.25}{\ignorespaces Porównanie sygnału wyjściowego oraz sterującego poszczególnych modeli.}}{43}{figure.caption.41}%
+\contentsline {figure}{\numberline {4.26}{\ignorespaces Wyszczególnienie interesujących fragmentów przebiegów.}}{43}{figure.caption.41}%
+\contentsline {figure}{\numberline {4.27}{\ignorespaces Porównanie sygnału wyjściowego oraz sterującego poszczególnych modeli.}}{44}{figure.caption.42}%
+\contentsline {figure}{\numberline {4.28}{\ignorespaces Wyszczególnienie interesujących fragmentów przebiegów.}}{44}{figure.caption.42}%
+\contentsline {figure}{\numberline {4.29}{\ignorespaces Porównanie sygnału wyjściowego oraz sterującego poszczególnych modeli.}}{45}{figure.caption.43}%
+\contentsline {figure}{\numberline {4.30}{\ignorespaces Wyszczególnienie interesujących fragmentów przebiegów.}}{45}{figure.caption.43}%
+\contentsline {figure}{\numberline {4.31}{\ignorespaces Porównanie sygnału wyjściowego oraz sterującego poszczególnych modeli.}}{46}{figure.caption.44}%
+\contentsline {figure}{\numberline {4.32}{\ignorespaces Wyszczególnienie interesujących fragmentów przebiegów.}}{46}{figure.caption.44}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }

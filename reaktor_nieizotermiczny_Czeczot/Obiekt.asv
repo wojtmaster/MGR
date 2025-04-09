@@ -1,0 +1,313 @@
+classdef Obiekt < handle
+    properties
+        % Stałe
+        V = 10
+        V_C = 5;
+        rho = 1000;
+        rho_C = 1000;
+        c_p = 1;
+        c_pc = 4.2;
+        hA_C = 1300;
+        H_1 = -41800;
+        H_2 = -83600;
+        k_o1 = 4;
+        k_o2 = 172.2;
+        b = 1;
+        d = 1;
+        R = 8.3143;
+        E_1 = 20900;
+        E_2 = 41800;
+        
+        % Okres próbkowania
+        Tp = 1;
+        % Próbki dyskretne
+        kk = 1000;
+
+        % Punkt pracy
+        C_Ain_0;
+        F_0;
+        F_C_0;
+        T_in_0;
+        T_Cin_0;
+        
+        % Do obliczenia
+        C_A0;
+        C_B0;
+        C_D0;
+        T_0;
+        T_C_0;
+
+        % Współczynniki modelu
+        dynamic_horizont = 150
+    end
+
+    methods
+        function obj = Obiekt()
+            
+        end
+
+        function [] = linearization(obj, C_Ain_0, F_0, F_C_0, T_in_0, T_Cin_0, C_A0, C_B0, C_D0, T_0, T_C_0)
+
+            obj.C_Ain_0 = C_Ain_0;
+            obj.F_0 = F_0;
+            obj.F_C_0 = F_C_0;
+            obj.T_in_0 = T_in_0;
+            obj.T_Cin_0 = T_Cin_0;
+
+            obj.C_A0 = C_A0;
+            obj.C_B0 = C_B0;
+            obj.C_D0 = C_D0;
+            obj.T_0 = T_0;
+            obj.T_C_0 = T_C_0;
+
+            % C = obj.V/obj.F_0*(obj.d*obj.k_o2*obj.C_B0*exp(-obj.E_2/(obj.R*obj.T_0)));
+            % fprintf("C_D0 = %.3f\n", C);
+
+            % A = [-obj.alpha_1/(2*obj.V_10^(1/2)*obj.a^(1/2)), 0;
+            %      obj.alpha_1/(2*sqrt(obj.V_10*obj.a)), - obj.alpha_2/(4*obj.V_20^(3/4)*obj.c^(1/4))];
+            % B = [1 1; 0 0];
+            % C = [0 1/(2*sqrt(obj.V_20*obj.c))];
+            % D = [0 0];
+            % 
+            % sys = ss(A,B,C,D);
+            % G_s = tf(sys);
+            % G_s(1) = tf(G_s.Numerator(1), G_s.Denominator(1), 'InputDelay', obj.tau);
+            % G_z = c2d(G_s, obj.Tp, 'zoh');
+            % 
+            % s = step(G_z(1), (0:obj.dynamic_horizont-1) * obj.Tp);
+            % s_disturbance = step(G_z(2), (0:obj.dynamic_horizont-1) * obj.Tp);
+            % a = G_z(1).Denominator{1}(2:end);
+            % b = G_z(1).Numerator{1}(2:end);
+        end
+
+        function [y] = rk4(obj, u)
+
+            %% Alokacja pamięci
+            y = zeros(5, obj.kk);
+            
+            %% Warunki początkowe
+            CA = obj.C_A0;
+            CB = obj.C_B0;
+            CD = obj.C_D0;
+            T = obj.T_0;
+            TC = obj.T_C_0;
+
+            %% Wymuszenia
+            C_Ain = u(1,:) + obj.C_Ain_0;
+            F = u(2,:) + obj.F_0;
+            T_in = u(3,:) + obj.T_in_0;
+
+            F_C = u(4,:) + obj.F_C_0;
+            T_Cin = u(5,:) + obj.T_Cin_0;
+            
+            %% Funkcje
+            fun_1 = @(F, C_Ain, C_A, T) F/obj.V*(C_Ain - C_A) - obj.k_o1*C_A^2*exp(-obj.E_1/(obj.R*T));
+            fun_2 = @(F, C_A, C_B, T) -F/obj.V*C_B + obj.b*obj.k_o1*C_A^2*exp(-obj.E_1/(obj.R*T)) - obj.k_o2*C_B*exp(-obj.E_2/(obj.R*T));
+            fun_3 = @(F, C_B, C_D, T) -F/obj.V*C_D + obj.d*obj.k_o2*C_B*exp(-obj.E_2/(obj.R*T));
+            fun_4 = @(F, C_A, C_B, T_in, T, T_C) -F/obj.V*(T_in-T) - ...
+                1/(obj.rho*obj.c_p)*(obj.H_1*obj.k_o1*C_A^2*exp(-obj.E_1/(obj.R*T)) + (obj.H_2*obj.k_o2*C_B*exp(-obj.E_2/(obj.R*T)))) - ...
+                obj.hA_C*(T-T_C)/(obj.rho*obj.c_p*obj.V);
+            fun_5 = @(F_C, T_Cin, T, T_C) F_C/obj.V_C*(T_Cin - T_C) + obj.hA_C*(T-T_C)/(obj.rho_C*obj.c_pc*obj.V_C);
+            
+            y(1, 1) = 0;
+            y(2, 1) = 0;
+            y(3, 1) = 0;
+            y(4, 1) = 0;
+            y(5, 1) = 0;
+            %% RK4 - Runge-Kutta 4. rzędu
+            for i = 2:obj.kk
+                % RK4 dla nieliniowego układu
+                k1_CA = obj.Tp * fun_1(F(i), C_Ain(i), max(CA, 0), T);
+                k2_CA = obj.Tp * fun_1(F(i), C_Ain(i), max(CA + 0.5 * k1_CA, 0), T);
+                k3_CA = obj.Tp * fun_1(F(i), C_Ain(i), max(CA + 0.5 * k2_CA, 0), T);
+                k4_CA = obj.Tp * fun_1(F(i), C_Ain(i), max(CA + k3_CA, 0), T);
+                CA = CA + (k1_CA + 2*k2_CA + 2*k3_CA + k4_CA) / 6;
+
+                k1_CB = obj.Tp * fun_2(F(i), max(CA, 0), max(CB, 0), T);
+                k2_CB = obj.Tp * fun_2(F(i), max(CA, 0), max(CB + 0.5 * k1_CB, 0), T);
+                k3_CB = obj.Tp * fun_2(F(i), max(CA, 0), max(CB + 0.5 * k2_CB, 0), T);
+                k4_CB = obj.Tp * fun_2(F(i), max(CA, 0), max(CB + k3_CB, 0), T);
+                CB = CB + (k1_CB + 2*k2_CB + 2*k3_CB + k4_CB) / 6;
+
+                k1_CD = obj.Tp * fun_3(F(i), max(CB, 0), max(CD, 0), T);
+                k2_CD = obj.Tp * fun_3(F(i), max(CB, 0), max(CD + 0.5 * k1_CD, 0), T);
+                k3_CD = obj.Tp * fun_3(F(i), max(CB, 0), max(CD + 0.5 * k2_CD, 0), T);
+                k4_CD = obj.Tp * fun_3(F(i), max(CB, 0), max(CD + 0.5 * k3_CD, 0), T);
+                CD = CD + (k1_CD + 2*k2_CD + 2*k3_CD + k4_CD) / 6;
+
+                k1_T = obj.Tp * fun_4(F(i), max(CA, 0), max(CB, 0), T_in(i), T, TC);
+                k2_T = obj.Tp * fun_4(F(i), max(CA, 0), max(CB, 0), T_in(i), T + 0.5 * k1_T, TC);
+                k3_T = obj.Tp * fun_4(F(i), max(CA, 0), max(CB, 0), T_in(i), T + 0.5 * k2_T, TC);
+                k4_T = obj.Tp * fun_4(F(i), max(CA, 0), max(CB, 0), T_in(i), T + 0.5 * k3_T, TC);
+                T = T + (k1_T + 2*k2_T + 2*k3_T + k4_T) / 6;
+
+                k1_TC = obj.Tp * fun_5(F_C(i), T_Cin(i), T, TC);
+                k2_TC = obj.Tp * fun_5(F_C(i), T_Cin(i), T, TC + 0.5 * k1_TC);
+                k3_TC = obj.Tp * fun_5(F_C(i), T_Cin(i), T, TC + 0.5 * k2_TC);
+                k4_TC = obj.Tp * fun_5(F_C(i), T_Cin(i), T, TC + 0.5 * k3_TC);
+                TC = TC + (k1_TC + 2*k2_TC + 2*k3_TC + k4_TC) / 6;
+            
+                % Sprowadzenie wartości do punktu pracy
+                y(1, i) = CD - obj.C_D0;
+                y(2, i) = T - obj.T_0;
+                y(3, i) = CA - obj.C_A0;
+                y(4, i) = CB - obj.C_B0;
+                y(5, i) = TC - obj.T_C_0;
+            end
+        end
+
+        function [y] = modifiedEuler(obj, u)
+
+            %% Alokacja pamięci
+            y = zeros(5, obj.kk);
+            
+            %% Warunki początkowe
+            CA = obj.C_A0;
+            CB = obj.C_B0;
+            CD = obj.C_D0;
+            T = obj.T_0;
+            TC = obj.T_C_0;
+
+            CA_e = obj.C_A0;
+            CB_e = obj.C_B0;
+            CD_e = obj.C_D0;
+            T_e = obj.T_0;
+            TC_e = obj.T_C_0;
+
+            %% Wymuszenia
+            C_Ain = u(1,:) + obj.C_Ain_0;
+            F = u(2,:) + obj.F_0;
+            T_in = u(3,:) + obj.T_in_0;
+
+            F_C = u(4,:) + obj.F_C_0;
+            T_Cin = u(5,:) + obj.T_Cin_0;
+            
+            %% Funkcje
+            fun_1 = @(F, C_Ain, C_A, T) F/obj.V*(C_Ain - C_A) - obj.k_o1*C_A^2*exp(-obj.E_1/(obj.R*T));
+            fun_2 = @(F, C_A, C_B, T) -F/obj.V*C_B + obj.b*obj.k_o1*C_A^2*exp(-obj.E_1/(obj.R*T)) - obj.k_o2*C_B*exp(-obj.E_2/(obj.R*T));
+            fun_3 = @(F, C_B, C_D, T) -F/obj.V*C_D + obj.d*obj.k_o2*C_B*exp(-obj.E_2/(obj.R*T));
+            fun_4 = @(F, C_A, C_B, T_in, T, T_C) -F/obj.V*(T_in-T) - ...
+                1/(obj.rho*obj.c_p)*(obj.H_1*obj.k_o1*C_A^2*exp(-obj.E_1/(obj.R*T)) + (obj.H_2*obj.k_o2*C_B*exp(-obj.E_2/(obj.R*T)))) - ...
+                obj.hA_C*(T-T_C)/(obj.rho*obj.c_p*obj.V);
+            fun_5 = @(F_C, T_Cin, T, T_C) F_C/obj.V_C*(T_Cin - T_C) + obj.hA_C*(T-T_C)/(obj.rho_C*obj.c_pc*obj.V_C);
+            
+            y(1, 1) = 0;
+            y(2, 1) = 0;
+            y(3, 1) = 0;
+            y(4, 1) = 0;
+            y(5, 1) = 0;
+            %% RK4 - Runge-Kutta 4. rzędu
+            for i = 2:obj.kk
+                % RK4 dla nieliniowego układu
+                CA = CA + obj.Tp * fun_1(F(i), C_Ain(i), max(CA, 0), T);
+                CB = CB + obj.Tp * fun_2(F(i), max(CA, 0), max(CB, 0), T);
+                CD = CD + obj.Tp * fun_3(F(i), max(CB, 0), max(CD, 0), T);
+                T = T + obj.Tp * fun_4(F(i), max(CA, 0), max(CB, 0), T_in(i), T, TC);
+                TC = obj.Tp * fun_5(F_C(i), T_Cin(i), T, TC);
+
+                CA_e = CA_e + 1/2 * obj.Tp * (fun_1(F(i), C_Ain(i), max(CA_e, 0), T_e) + fun_1(F(i), C_Ain(i), max(CA, 0), T));
+                CB_e = CB_e + 1/2 * obj.Tp * (fun_2(F(i), max(CA_e, 0), max(CB_e, 0), T_e) + fun_2(F(i), max(CA, 0), max(CB, 0), T));
+                CD_e = CD_e + 1/2 * obj.Tp * (fun_3(F(i), max(CB_e, 0), max(CD_e, 0), T_e) + fun_3(F(i), max(CB, 0), max(CD, 0), T));
+                T_e = T_e + 1/2 * obj.Tp * (fun_4(F(i), max(CA_e, 0), max(CB_e, 0), T_in(i), T_e, TC_e) + fun_4(F(i), max(CA, 0), max(CB, 0), T_in(i), T, TC));
+                TC_e = TC_e + 1/2 * obj.Tp * (fun_5(F_C(i), T_Cin(i), T_e, TC_e) + fun_5(F_C(i), T_Cin(i), T, TC));
+            
+                % Sprowadzenie wartości do punktu pracy
+                y(1, i) = CD_e - obj.C_D0;
+                y(2, i) = T_e - obj.T_0;
+                y(3, i) = CA_e - obj.C_A0;
+                y(4, i) = CB_e - obj.C_B0;
+                y(5, i) = TC_e - obj.T_C_0;
+            end
+        end
+
+        function [fis_trained] = fuzzyfication(obj)
+            U = zeros(2, obj.kk);
+            U(1,:) =  repelem([0, -22.5, -45, 22.5, 45], 400);
+            U(2,:) = repelem([0 -5, 0, 5], 500);
+            
+            [Y, ~] = obj.rk4(U, obj.kk);
+            Y = Y';
+            U = U';
+            
+            X = [Y(1:end-1), [zeros(obj.delay,1); U(1:end-(obj.delay+1), 1)], U(1:end-1, 2)];
+            Y = Y(2:end);
+            
+            options = genfisOptions('GridPartition'); 
+            options.NumMembershipFunctions = [2, 2, 2]; % Liczba funkcji przynależności
+            options.InputMembershipFunctionType = 'gaussmf'; % Typ funkcji przynależności
+            fis = genfis(X, Y, options);
+            
+            options = anfisOptions('InitialFIS', fis, 'EpochNumber', 100, 'DisplayErrorValues', false);
+            fis_trained = anfis([X Y], options);
+            % % Symulacja modelu na danych testowych
+            % Y_pred = evalfis(fis_trained, X);
+            
+            % figure;
+            % plotmf(fis_trained, 'input', 2);
+            % title('Funkcje przynależności dla F_1');
+            % grid on;
+
+            % figure;
+            % plotmf(fis_trained, 'input', 3);
+            % title('Funkcje przynależności dla F_D');
+            % grid on;
+            
+            % Wizualizacja wyników
+            % figure;
+            % plot(1:length(Y), Y, 'b', 'LineWidth', 1.5); hold on;
+            % plot(1:length(Y_pred), Y_pred, 'r--', 'LineWidth', 1.5);
+            % legend('Rzeczywiste wyjście', 'Model TS');
+            % xlabel('Próbki');
+            % ylabel('Wartość wyjściowa');
+            % title('Porównanie rzeczywistego wyjścia z modelem Takagi-Sugeno');
+            % grid on;
+            
+            % % Liczba reguł w FIS
+            % numRules = length(fis.Rules);
+            % 
+            % % Wyświetlenie szczegółów następników dla każdej reguły
+            % for i = 1:numRules
+            %     fprintf('Reguła %d:\n', i);
+            %     fprintf('   Opis: %s\n', fis_trained.Rules(i).Description);
+            % 
+            %     % Współczynniki następników są w właściwości Outputs.MembershipFunctions
+            %     coeffs = fis_trained.Outputs.MembershipFunctions(i).Parameters;
+            %     fprintf('   Następnik: y = ');
+            %     fprintf('%f*x + ', coeffs(1:end-1)); % Współczynniki wejściowe
+            %     fprintf('%f\n', coeffs(end)); % Wyraz wolny
+            % end
+        end
+
+        function show_rk4(obj, u, y)
+            figure;
+            stairs(0:obj.kk-1, u(1,:), 'r-', 'LineWidth', 1.2);
+            hold on;
+            stairs(0:obj.kk-1, u(2,:), 'b--', 'LineWidth', 1.2);
+            stairs(0:obj.kk-1, u(3,:), 'g--', 'LineWidth', 1.2);
+            stairs(0:obj.kk-1, u(4,:), 'y--', 'LineWidth', 1.2);
+            stairs(0:obj.kk-1, u(5,:), 'k--', 'LineWidth', 1.2);
+            hold off;
+            xlabel('k');
+            ylabel('u(k)');
+            title('Wartości sygnałów sterujących oraz zakłóceń');
+            legend('C_Ain(k)', 'F(k)', 'F_C(k)', 'T_in(k)', 'T_Cin(k)');
+            grid on;
+
+            %% Prezentacja wyników
+            % y_figure = figure;
+            figure(y_figure);
+            yyaxis left
+            plot(0:obj.Tp:(obj.kk-1)*obj.Tp, y(1,:), 'b.','LineWidth',2);
+            ylabel('C_D');
+            
+            yyaxis right
+            plot(0:obj.Tp:(obj.kk-1)*obj.Tp, y(2,:), 'r-','LineWidth',2);
+            ylabel('T');
+            
+            title('Wartości sygnałów wyjściowych y(k)');
+            xlabel('t [s]');
+            legend('C_D', 'T');
+            grid on;
+        end
+    end
+end

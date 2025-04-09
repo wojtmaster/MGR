@@ -1,0 +1,10 @@
+\chapter{Podsumowanie}
+W trakcie wykonywania projektu oraz identyfikując dany obiekt regulacji automatycznej nasunęło się kilka wniosków, które postarano się opisać poniżej.
+
+Modele Hammersteina składają się z nieliniowego bloku wejściowego, który jest połączony szeregowo z liniowym dynamicznym blokiem. Nieliniowość jest zazwyczaj statyczna i jest aplikowana do sygnału wejściowego przed jego przetworzeniem przez liniowy system dynamiczny. Ten rodzaj modelu jest używany do opisu systemów, gdzie nieliniowość występuje na wejściu, a reszta systemu zachowuje się liniowo. Modele Hammersteina są użyteczne w identyfikacji systemów i projektowaniu regulatorów.
+
+Modele Wienera, odwrotnie do modeli Hammersteina, mają liniowy dynamiczny blok na wejściu, który jest połączony szeregowo z nieliniowym blokiem wyjściowym. Liniowy blok dynamiczny przetwarza sygnał wejściowy, który następnie przechodzi przez nieliniowy blok. Modele te są stosowane, gdy nieliniowość występuje na wyjściu systemu, po przetworzeniu przez liniowy system dynamiczny. Modele Wienera są przydatne w analizie systemów z nieliniowymi elementami wyjściowymi.
+
+Stosowanie modeli Hammersteina i Wienera w obiektach regulacji automatycznej jest ważne, ponieważ pozwalają one na dokładniejsze modelowanie rzeczywistych systemów, które często zawierają zarówno elementy liniowe, jak i nieliniowe. Dzięki nim można lepiej zrozumieć zachowanie takich systemów i opracować bardziej precyzyjne i skuteczne strategie regulacji. To z kolei prowadzi do poprawy wydajności, stabilności i niezawodności systemów automatyki. Integracja tych modeli w procesie projektowania systemów automatyki umożliwia także lepsze przewidywanie i kompensowanie nieliniowych efektów w działaniu systemów.
+
+Jak można było zauważyć na zaprezentowanych wykresach, zaimplementowanie nieliniowej statyki, którą poprzedzała, bądź występowała po niej, liniowa dynamika diametralnie poprawiała jakość opisu obiektu. W każdym z rozpatrywanych przypadków udało się osiągnąć założone kryterium jakości, którym był błąd średnio kwadratowy, nie większy niż $\num{0.1}$. 

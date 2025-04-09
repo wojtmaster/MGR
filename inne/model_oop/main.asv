@@ -1,0 +1,231 @@
+%% MGR
+% Autor: Wojciech Rogalski
+% Data: 15.12.2024r.
+% Tytuł: Porównanie modeli Hammersteina i Winera w regulacji rozmytej
+clear all;
+set(groot, 'DefaultTextFontName', 'Arial');
+set(groot, 'DefaultAxesFontName', 'Arial');
+set(groot, 'DefaultTextFontSize', 12);
+set(groot, 'DefaultAxesFontSize', 10);
+
+%% Dane
+obiekt = Obiekt('OE', 'nonlinear');
+
+%% Odpowiedź skokowa na wymuszenie F_1
+u = [ones(1, obiekt.kk); zeros(1, obiekt.kk)];
+[y, ~] = obiekt.rk4(u, obiekt.kk);
+[a, b, K, G_z] = obiekt.sopdt(0.6025, obiekt.tau, 200, 10);
+% obiekt.show_sopdt(y, G_z);
+s = step(G_z, (0:obiekt.n-1)' * obiekt.Tp);
+
+%% Odpowiedź skokowa na zakłócenie F_D
+u = [zeros(1, obiekt.kk); ones(1, obiekt.kk)];
+[y, ~] = obiekt.rk4(u, obiekt.kk);
+[a_disturbance, b_disturbance, K_disturbance, G_z_disturbance] = obiekt.sopdt(0.6025, 0, 200, 10);
+% obiekt.show_sopdt(y, G_z_disturbance);
+s_disturbance = step(G_z_disturbance, (0:obiekt.n-1)' * obiekt.Tp);
+
+% Z racji na to, że 
+% a = a_disturbance
+% b = b_disturbance 
+% K = K_disturbance
+% dalej przyjęto jednolitą nomenklaturę a, b, K
+
+%%
+clear fis
+clear fis_trained
+clear anfisOptions
+
+% Generowanie danych wejściowych i wyjściowych
+F_1 = linspace(30, 150, obiekt.n); % Dane wejściowe
+F_D = obiekt.F_D0;
+h_2 = ((F_1 + F_D) / obiekt.alpha_2).^2;
+
+% Wyliczanie zmiennych wejściowych (u) i wyjściowych (y)
+y = h_2 - obiekt.h_20; % Wyjścia
+u = F_1 - obiekt.F_10; % Wejścia
+
+% Konwersja danych na macierze zgodne z wymaganiami genfis
+X_in = u(:);      % Konwersja u na wektor kolumnowy
+X_out = y(:);     % Konwersja y na wektor kolumnowy
+
+% Tworzenie opcji do generowania FIS z Subtractive Clustering
+options = genfisOptions('SubtractiveClustering'); % Metoda Subtractive Clustering
+options.Verbose = true; % Włączenie informacji o przebiegu generacji
+
+% Tworzenie Sugeno FIS
+fis = genfis(X_in, X_out, options);
+
+% Wyświetlenie wygenerowanego modelu FIS
+disp(fis);
+
+% Wizualizacja funkcji przynależności dla wejścia
+figure;
+plotmf(fis, 'input', 1);
+title('Funkcje przynależności dla wejścia');
+
+% Trening modelu Takagi-Sugeno (ANFIS) z liniowymi następnikami
+data = [X_in X_out]; % Połączenie danych wejściowych i wyjściowych
+anfisOptions = anfisOptions('InitialFIS', fis, 'EpochNumber', 200);
+anfisOptions.DisplayANFISInformation = true;
+anfisOptions.DisplayErrorValues = true;
+
+[fis_trained, trainError] = anfis(data, anfisOptions);
+
+% Wyświetlenie wyników treningu
+figure;
+plot(trainError);
+xlabel('Epoka');
+ylabel('Błąd treningowy');
+title('Błąd treningowy podczas uczenia ANFIS');
+
+% Sprawdzenie wyników wyjściowych
+output = evalfis(X_in, fis_trained);
+
+% Wizualizacja wyników modelu
+figure;
+plot(X_in, X_out, '-', X_in, output, 'o');
+legend('Dane rzeczywiste', 'Wyjście FIS');
+title('Porównanie danych rzeczywistych i wyjścia FIS');
+
+% Liczba reguł w FIS
+numRules = length(fis.Rules);
+
+% Wyświetlenie szczegółów następników dla każdej reguły
+for i = 1:numRules
+    fprintf('Reguła %d:\n', i);
+    fprintf('   Opis: %s\n', fis.Rules(i).Description);
+    
+    % Współczynniki następników są w właściwości Outputs.MembershipFunctions
+    coeffs = fis.Outputs.MembershipFunctions(i).Parameters;
+    fprintf('   Następnik: y = ');
+    fprintf('%f*x + ', coeffs(1:end-1)); % Współczynniki wejściowe
+    fprintf('%f\n', coeffs(end)); % Wyraz wolny
+end
+
+%%
+clear fis
+clear fis_trained
+clear anfisOptions
+
+% Generowanie danych wejściowych i wyjściowych
+F_1 = linspace(30, 150, obiekt.n); % Dane wejściowe
+F_D = obiekt.F_D0;
+h_2 = ((F_1 + F_D) / obiekt.alpha_2).^2;
+
+% Wyliczanie zmiennych wejściowych (u) i wyjściowych (y)
+y = h_2 - obiekt.h_20; % Wyjścia
+u = F_1 - obiekt.F_10; % Wejścia
+
+% Konwersja danych na macierze zgodne z wymaganiami genfis
+X_in = normalize(u(:), 'range', [-1, 1]);      % Konwersja u na wektor kolumnowy
+X_out = normalize(y(:), 'range', [-10 10];     % Konwersja y na wektor kolumnowy
+X_in_train = tanh(X_in);
+
+% Tworzenie opcji do generowania FIS z Subtractive Clustering
+% options = genfisOptions('GridPartition');
+% options.NumMembershipFunctions = 3; % Dokładnie 3 funkcje przynależności
+% options.InputMembershipFunctionType = 'gaussmf'; % Typ funkcji przynależności (np. gaussowska)
+options = genfisOptions('SubtractiveClustering'); % Metoda Subtractive Clustering
+fis = genfis(X_in, X_out, options);
+
+% Wyświetlenie wygenerowanego modelu FIS
+disp(fis);
+
+% Wizualizacja funkcji przynależności dla wejścia
+figure;
+plotmf(fis, 'input', 1);
+title('Funkcje przynależności dla wejścia');
+
+% Trening modelu Takagi-Sugeno (ANFIS) z liniowymi następnikami
+data = [X_in_train X_out]; % Połączenie danych wejściowych i wyjściowych
+anfisOptions = anfisOptions('InitialFIS', fis, 'EpochNumber', 70);
+anfisOptions.DisplayANFISInformation = true;
+anfisOptions.DisplayErrorValues = true;
+
+[fis_trained, trainError] = anfis(data, anfisOptions);
+
+% Wyświetlenie wyników treningu
+figure;
+plot(trainError);
+xlabel('Epoka');
+ylabel('Błąd treningowy');
+title('Błąd treningowy podczas uczenia ANFIS');
+
+% Sprawdzenie wyników wyjściowych
+output = evalfis(X_in_train, fis_trained);
+
+% Wizualizacja wyników modelu
+figure;
+plot(X_in, X_out, '-', X_in, output, 'o');
+legend('Dane rzeczywiste', 'Wyjście FIS');
+title('Porównanie danych rzeczywistych i wyjścia FIS');
+
+% Liczba reguł w FIS
+numRules = length(fis.Rules);
+
+% Wyświetlenie szczegółów następników dla każdej reguły
+for i = 1:numRules
+    fprintf('Reguła %d:\n', i);
+    fprintf('   Opis: %s\n', fis_trained.Rules(i).Description);
+    
+    % Współczynniki następników są w właściwości Outputs.MembershipFunctions
+    coeffs = fis_trained.Outputs.MembershipFunctions(i).Parameters;
+    fprintf('   Następnik: y = ');
+    fprintf('%f*x + ', coeffs(1:end-1)); % Współczynniki wejściowe
+    fprintf('%f\n', coeffs(end)); % Wyraz wolny
+end
+
+
+%% Hammerstein
+hammerstein = Hammerstein(obiekt.F_10-60, obiekt.F_10+60, obiekt.F_10, ...
+                          obiekt.F_D0-20, obiekt.F_D0+20, obiekt.F_D0, ...
+                          obiekt.h_20, obiekt.alpha_2, obiekt.n, obiekt.mode, obiekt.s);
+hammerstein = hammerstein.fuzzyfication();
+hammerstein = hammerstein.fuzzyfication_disturbance();
+
+% hammerstein.show_fuzzy_system(hammerstein.u, hammerstein.u_ucz, hammerstein.u_wer, hammerstein.y_ucz, hammerstein.y_mod_ucz, hammerstein.y_wer, hammerstein.y_mod_wer, hammerstein.R, 'F_{1}');
+% hammerstein.show_fuzzy_system(hammerstein.u_disturbance, hammerstein.u_ucz_disturbance, hammerstein.u_wer_disturbance, hammerstein.y_ucz_disturbance, hammerstein.y_mod_ucz_disturbance, hammerstein.y_wer_disturbance, hammerstein.y_mod_wer_disturbance, hammerstein.R_disturbance, 'F_{D}');
+% hammerstein.show_static_characteristic(hammerstein.u, hammerstein.y, 'F_{1}');
+% hammerstein.show_static_characteristic(hammerstein.u_disturbance, hammerstein.y_disturbance, 'F_{D}');
+
+%% Wiener
+wiener = Wiener(a, b, K, obiekt.n, obiekt.delay, @obiekt.rk4, obiekt.mode, obiekt.s);
+wiener = wiener.fuzzyfication();
+wiener = wiener.fuzzyfication_disturbance();
+
+% wiener.show_fuzzy_system(wiener.v, wiener.v_ucz, wiener.v_wer, wiener.y_ucz, wiener.y_mod_ucz, wiener.y_wer, wiener.y_mod_wer, wiener.R, 'F_{1}');
+% wiener.show_fuzzy_system(wiener.v_disturbance, wiener.v_ucz_disturbance, wiener.v_wer_disturbance, wiener.y_ucz_disturbance, wiener.y_mod_ucz_disturbance, wiener.y_wer_disturbance, wiener.y_mod_wer_disturbance, wiener.R_disturbance, 'F_{D}');
+% wiener.show_static_characteristic(wiener.v, wiener.y, 'F_{1}');
+% wiener.show_static_characteristic(wiener.v_disturbance, wiener.y_disturbance, 'F_{D}');
+
+%% Wymuszenia
+clear u
+u(1,:) = [repelem((rand(1, obiekt.kk/500) * 100 - 50), 500)];
+% u(2,:) = u(1,:)*0.1;
+u(2,:) = zeros(1, obiekt.kk);
+[y, y_L] = obiekt.rk4(u, obiekt.kk);
+% obiekt.show_rk4(u, y, y_L, obiekt.kk);
+
+%%
+output = evalfis(tanh(normalize(u(1,:), 'range', [-1, 1])), fis_trained);
+
+% Wizualizacja wyników modelu
+figure;
+stairs(0:obiekt.kk-1, y, '-');
+hold on;
+stairs(0:obiekt.kk-1, output, '-');
+hold off;
+legend('Dane rzeczywiste', 'Wyjście FIS');
+title('Porównanie danych rzeczywistych i wyjścia FIS');
+%% Testowanie
+obiekt.diff_eq(a, b, u, y)
+hammerstein.model(a, b, K, u, y, obiekt.kk, obiekt.delay);
+wiener.model(a, b, K, u, y, obiekt.kk, obiekt.delay);
+
+%% DMC
+dmc = DMC(s, s_disturbance);
+
+y_zad = [repelem((rand(1, obiekt.kk/1000) * 40 - 10), 1000)];
+dmc.dmc_analitic(y_zad, a, b, obiekt.delay, obiekt.kk);
+dmc.dmc_numeric(y_zad, a, b, obiekt.delay, obiekt.kk);
