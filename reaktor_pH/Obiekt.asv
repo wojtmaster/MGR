@@ -17,7 +17,7 @@ classdef Obiekt < handle
         % Okres próbkowania
         Tp = 10;
         % Próbki dyskretne
-        kk = 2100;  % 1200
+        kk = 1200;
 
         % Punkt pracy
         % Q_1, Q_3 - wartości sterujące
@@ -98,6 +98,7 @@ classdef Obiekt < handle
             W_a4eL = zeros(1, kk);
             W_b4eL = zeros(1, kk);
 
+            
             %% Warunki początkowe
             W_a4(1) = obj.W_a40;
             W_b4(1) = obj.W_b40;
@@ -115,6 +116,16 @@ classdef Obiekt < handle
             h_L = obj.h_0;
             h_eL = obj.h_0;
 
+            y_h = zeros(2, obj.kk);
+            h_Q1 = obj.h_0;
+            h_Q2 = obj.h_0;
+            h_Q3 = obj.h_0;
+            h_Q4 = obj.h_0;
+            h_Q1e = obj.h_0;
+            h_Q2e = obj.h_0;
+            h_Q3e = obj.h_0;
+            h_Q4e = obj.h_0;
+
             %% Funkcje
             fun_1 = @(Q_1, Q_2, Q_3, h) (Q_1 + Q_2 + Q_3 - obj.C_V*sqrt(h)) / obj.A;
             fun_1L = @(Q_1, Q_2, Q_3, h) (Q_1 + Q_2 + Q_3 - obj.C_V*sqrt(obj.h_0)) / obj.A - obj.C_V/(2*sqrt(obj.h_0)*obj.A) * (h - obj.h_0);
@@ -126,6 +137,11 @@ classdef Obiekt < handle
             fun_3L = @(Q_1, Q_2, Q_3, h, W_b4) ((obj.W_b1-obj.W_b40)*Q_1 + (obj.W_b2-obj.W_b40)*Q_2 + (obj.W_b3-obj.W_b40)*Q_3) / (obj.A * obj.h_0) ...
                 - (obj.Q_10 + obj.Q_20 + obj.Q_30) / (obj.A*obj.h_0) * (W_b4 - obj.W_b40) ...
                 + ((obj.W_b1-obj.W_b40)*obj.Q_10 + (obj.W_b2-obj.W_b40)*obj.Q_20 + (obj.W_b3-obj.W_b40)*obj.Q_30) / (obj.A * obj.h_0^2) * (h - obj.h_0);
+
+            fun_1Q1 = @(Q_1) (Q_1) / obj.A;
+            fun_1Q2 = @(Q_2) (Q_2) / obj.A;
+            fun_1Q3 = @(Q_3) (Q_3) / obj.A;
+            fun_1Q4 = @(h) ( - obj.C_V*sqrt(h)) / obj.A;
             
             %% Wymuszenia
             Q_1 = u(1,:) + obj.Q_10;
@@ -171,6 +187,24 @@ classdef Obiekt < handle
                 % Sprowadzenie wartości do punktu pracy
                 y_L(1, k) = h_eL - obj.h_0;
                 y_L(2, k) = pH - obj.pH_0;
+            end
+
+            for k = 2:kk
+                h_Q1 = h_Q1 + obj.Tp * fun_1Q1(Q_1(k));
+                h_Q2 = h_Q2 + obj.Tp * fun_1Q2(Q_2(k));
+                h_Q3 = h_Q3 + obj.Tp * fun_1Q3(Q_3(k));
+                h_Q4 = h_Q1 + h_Q2 + h_Q3;
+                h_Q4 = h_Q4 + obj.Tp * fun_1Q4(h_Q4);
+
+                h_Q1e = h_Q1e + 1/2 * obj.Tp * (fun_1Q1(Q_1(k)) + fun_1Q1(Q_1(k)));
+                h_Q2e = h_Q2e + 1/2 * obj.Tp * (fun_1Q2(Q_2(k)) + fun_1Q2(Q_2(k)));
+                h_Q3e = h_Q3e + 1/2 * obj.Tp * (fun_1Q3(Q_3(k)) + fun_1Q3(Q_3(k)));
+                h_Q4e = h_Q1e + h_Q2e + h_Q3e;
+                h_Q4e = h_Q4e + 1/2 * obj.Tp * (fun_1Q4(h_Q4e) + fun_1Q4(h_Q4));
+
+                % Sprowadzenie wartości do punktu pracy
+                y_h(1, k) = h_Q1e - obj.h_0;
+                y_h(2, k) = Q - obj.pH_0;
             end
 
             E_h = sum((y(1,:)-y_L(1,:)).^2) / kk;

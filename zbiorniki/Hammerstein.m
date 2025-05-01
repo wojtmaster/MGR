@@ -3,6 +3,7 @@ classdef Hammerstein < handle
     properties
         U_min = -45;
         U_max = 45;
+        U_threeCenter;
 
         linear_fis
         nonlinear_fis
@@ -14,20 +15,21 @@ classdef Hammerstein < handle
 
         function linearFuzzy(obj)
             U_center = linspace(obj.U_min, obj.U_max, 5);
-            obj.linear_fis = sugfis('Name', 'Linear_Hammerstein', 'Type', 'sugeno');
-            obj.linear_fis = addInput(obj.linear_fis, [obj.U_min obj.U_max], 'Name', 'U_linear');
+            obj.linear_fis = sugfis('Name', 'Hammerstein', 'Type', 'sugeno');
+            obj.linear_fis = addInput(obj.linear_fis, [obj.U_min obj.U_max], 'Name', 'U');
             
             % Definiowanie funkcji przynależności (gaussmf)
-            for i = 1:length(U_center)
-                obj.linear_fis = addMF(obj.linear_fis, 'U_linear', 'gaussmf', [12, U_center(i)]);
+            for i = 1:length(U_center) 
+                obj.linear_fis = addMF(obj.linear_fis, 'U', 'gaussmf', [12, U_center(i)]);
             end
             
             % Definiowanie wyjścia i początkowych następników (a_i * u + b_i)
             obj.linear_fis = addOutput(obj.linear_fis, [obj.U_min obj.U_max], 'Name', 'U_fuzzy');
             
-            % Współczynniki (a_i, b_i) następników
-            a_param = [0.7895 0.8982 1.0933 1.0489 1.2034];
-            b_param = [0.0001 0.0002 0.0001 0 0.001];
+            % Optymalne parametry a: 
+            a_param = [0.3647    0.4227    0.4844    0.5657    0.6796];
+            % Optymalne parametry b: 
+            b_param = [30.4365   33.2982   36.0644   38.2423   38.0915];
             
             % Dodanie reguł TS w postaci liniowej
             for i = 1:length(U_center)
@@ -35,111 +37,126 @@ classdef Hammerstein < handle
             end
             
             % Reguły Takagi-Sugeno: [inputMF, outputMF, weight]
-            ruleList = [1 1 1 1;  % Reguła 1: wejście MF1 -> wyjście Out1
-                        2 2 1 1;  % Reguła 2: wejście MF2 -> wyjście Out2
-                        3 3 1 1;  % Reguła 3: wejście MF3 -> wyjście Out3
-                        4 4 1 1;  % Reguła 4: wejście MF4 -> wyjście Out4
-                        5 5 1 1]; % Reguła 5: wejście MF5 -> wyjście Out5
+            ruleList = [1 1 1 1;
+                        2 2 1 1;
+                        3 3 1 1;
+                        4 4 1 1;
+                        5 5 1 1];
             
             % Dodanie reguł do systemu
             obj.linear_fis = addRule(obj.linear_fis, ruleList);
         end
 
         function nonlinearFuzzy(obj)
-            U_center = linspace(obj.U_min, obj.U_max, 3);
-            obj.nonlinear_fis = sugfis('Name', 'Nonlinear_Hammerstein', 'Type', 'sugeno');
-            obj.nonlinear_fis = addInput(obj.nonlinear_fis, [obj.U_min obj.U_max], 'Name', 'U_linear');
-            
-            % Definiowanie funkcji przynależności (gaussmf)
-            for i = 1:length(U_center)
-                obj.nonlinear_fis = addMF(obj.nonlinear_fis, 'U_linear', 'gaussmf', [20, U_center(i)]);
-            end
-            
-            % Definiowanie wyjścia i początkowych następników (a_i * u + b_i)
-            obj.nonlinear_fis = addOutput(obj.nonlinear_fis, [obj.U_min obj.U_max], 'Name', 'U_fuzzy');
-
-            % Początkowe współczynniki (a_i, b_i)
-            % a_param = [60.5 50.7 83.5]; % Można dobrać inaczej
-            % b_param = [80 50 75];
-            a_param = [46.4941   36.2347  110.4841]; % Można dobrać inaczej
-            b_param = [62.8862   36.2592   98.7690];
-            % a_param = [77 69 65.2];
-            % b_param = [100 67 60];
-            
-            % Dodanie reguł TS w postaci liniowej
-            for i = 1:length(U_center)
-                obj.nonlinear_fis = addMF(obj.nonlinear_fis, 'U_fuzzy', 'linear', [a_param(i), b_param(i)]);
-            end
-            
-            % Reguły Takagi-Sugeno: [inputMF, outputMF, weight]
-            ruleList = [1 1 1 1;  % Reguła 1: wejście MF1 -> wyjście Out1
-                        2 2 1 1;  % Reguła 2: wejście MF2 -> wyjście Out2
-                        3 3 1 1];  % Reguła 3: wejście MF3 -> wyjście Out3
-            
-            % Dodanie reguł do systemu
-            obj.nonlinear_fis = addRule(obj.nonlinear_fis, ruleList);
+            obj.U_threeCenter = linspace(obj.U_min, obj.U_max, 3);
+            obj.nonlinear_fis.sigma = 25;
+            % Optymalne parametry a: 
+            obj.nonlinear_fis.a_param = [0.4039    1.3416    0.3739];
+            % Optymalne parametry b: 
+            obj.nonlinear_fis.b_param = [17.1217   22.6325   11.9320];
+            % Optymalne parametry c: 
+            obj.nonlinear_fis.c_param = [13.8112   34.3922   65.9774];
         end
 
-        function testLinearModel(obj, U, a, b, delay, kk, Tp, rk4, index)
-            % U = [repelem((rand(1, kk/400) * 90 - 45), 400); repelem((rand(1, kk/250) * 10 - 5), 250)];
-            [Y_real, Y_lin] = rk4(U, kk); % Symulacja rzeczywistego układu
-
-            U_fuzzy = evalfis(obj.linear_fis, U(1,:)'); % Przepuszczenie przez model TS
-            Y_out = zeros(1, kk);
-            for k = delay+3:kk
-                Y_out(k) = - a*[Y_out(k-1:-1:k-2)]' + b*[U_fuzzy(k-(delay+1):-1:k-(delay+2))] + b*[U(2, k-1:-1:k-2)]';
+        function testLinearModel(obj, U, a, b, obiekt, index)
+            [Y_real, Y_lin] = obiekt.rk4(U, obiekt.kk);
+            t = 0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp;
+            
+            Y_fuzzy = evalfis(obj.linear_fis, U(1,:));
+            Y_0 = evalfis(obj.linear_fis, -10);
+            Y_out = zeros(1,obiekt.kk);
+            
+            for k = 8:obiekt.kk
+                if(U(1,k-(obiekt.delay+2)) ~= 0)
+                    K = (Y_fuzzy(k-(obiekt.delay+2)) - Y_0) / U(1,k-(obiekt.delay+2));
+                else
+                    K = 1;
+                end
+                Y_out(k) = -a * Y_out(k-1:-1:k-2)' + K * b * U(1, k-(obiekt.delay+1):-1:k-(obiekt.delay+2))' + K * b * U(2, k-1:-1:k-2)';
             end
 
-            E_lin = sum((Y_real - Y_lin).^2) / kk;
-            E_out = sum((Y_real - Y_out).^2) / kk;
+            E_lin = sum((Y_real - Y_lin).^2) / obiekt.kk;
+            E_out = sum((Y_real - Y_out).^2) / obiekt.kk;
+
             fprintf("\nHAMMERSTEIN LINEAR MODEL\n");
             fprintf("E_lin = %.3f\n", E_lin);
             fprintf("E_out = %.3f\n", E_out);
-
-            t = 0:Tp:(kk-1)*Tp;
-            figure;
-            plot(t, Y_real, 'b', t, Y_lin, 'g', t, Y_out, 'r', 'LineWidth', 1.5);
-            
-            legend({'model nieliniowy', ...
-                    ['model liniowy' blanks(17) sprintf('E = %.3f', E_lin)], ...
-                    ['model Hammersteina' blanks(5) sprintf('E = %.3f', E_out)]}, ...
-                    'Location', 'best');
-
-            title('Porównanie wyjścia obiektu testowego i jego modeli');
-            ylabel('y [cm]');
-            xlabel('t [s]');
-            grid on;
+    
+            % figure;
+            % plot(t, Y_real, 'b', t, Y_lin, 'g', t, Y_out, 'r', 'LineWidth', 1.5);
+            % 
+            % legend({'model nieliniowy', ...
+            %         ['model liniowy' blanks(17) sprintf('E = %.3f', E_lin)], ...
+            %         ['model Hammersteina' blanks(5) sprintf('E = %.3f', E_out)]}, ...
+            %         'Location', 'best');
+            % 
+            % title('Porównanie wyjścia obiektu testowego i jego modeli');
+            % ylabel('y [cm]');
+            % xlabel('t [s]');
+            % grid on;
 
             % saveas(gcf, sprintf('D:/EiTI/MGR/raporty/raport_MGR/pictures/HammersteinLinearModel_%d.png', index));  % Zapisuje jako plik PNG
         end
 
-        function testNonlinearModel(obj, U, a, b, delay, kk, Tp, rk4, index)
-            U_fuzzy = zeros(1, kk);
+        function testNonlinearModel(obj, U, a, b, obiekt, index)
+            gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
 
-            [Y_real, Y_lin] = rk4(U, kk); % Symulacja rzeczywistego układu
-            Y_out = zeros(1, kk);
-
-            for k = 1:kk
-                [~, degrees] = evalfis(obj.nonlinear_fis, U(1, k));
+            [Y_real, Y_lin] = obiekt.rk4(U, obiekt.kk);
+            t = 0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp;
+            
+            Y_out = zeros(1,obiekt.kk);
+            Y_fuzzy = zeros(1,obiekt.kk);
+            
+            output = 0;
+            w = 0;
+            degrees = [gaussmf_val(0, obj.nonlinear_fis.sigma, obj.U_threeCenter(1)), ...
+                       gaussmf_val(0, obj.nonlinear_fis.sigma, obj.U_threeCenter(2)), ...
+                       gaussmf_val(0, obj.nonlinear_fis.sigma, obj.U_threeCenter(3))];
+            for i = 1:length(degrees)
+                output = output +  degrees(i) * (obj.nonlinear_fis.a_param(i)*sinh(0/obj.nonlinear_fis.b_param(i)) + obj.nonlinear_fis.c_param(i));
+                w = w + degrees(i);
+            end
+            Y_0 = output / w;
+            
+            for k = 1:7
                 output = 0;
-                for i = 1:length(obj.nonlinear_fis.Rules)
-                    output = output + degrees(i) * (obj.nonlinear_fis.Outputs.MembershipFunctions(i).Parameters(1)*sinh(U(1,k)/obj.nonlinear_fis.Outputs.MembershipFunctions(i).Parameters(2)));
+                w = 0;
+                degrees = [gaussmf_val(U(1,k), obj.nonlinear_fis.sigma, obj.U_threeCenter(1)), ...
+                           gaussmf_val(U(1,k), obj.nonlinear_fis.sigma, obj.U_threeCenter(2)), ...
+                           gaussmf_val(U(1,k), obj.nonlinear_fis.sigma, obj.U_threeCenter(3))];
+                for i = 1:length(degrees)
+                    output = output +  degrees(i) * (obj.nonlinear_fis.a_param(i)*sinh(U(1,k)/obj.nonlinear_fis.b_param(i)) + obj.nonlinear_fis.c_param(i));
+                    w = w + degrees(i);
                 end
-                U_fuzzy(k) = output / sum(degrees);
-                if k < delay+3
-                    Y_out(k) = 0;
+                Y_fuzzy(k) = output / w;
+            end
+            
+            for k = 8:obiekt.kk
+                output = 0;
+                w = 0;
+                degrees = [gaussmf_val(U(1,k), obj.nonlinear_fis.sigma, obj.U_threeCenter(1)), ...
+                           gaussmf_val(U(1,k), obj.nonlinear_fis.sigma, obj.U_threeCenter(2)), ...
+                           gaussmf_val(U(1,k), obj.nonlinear_fis.sigma, obj.U_threeCenter(3))];
+                for i = 1:length(degrees)
+                    output = output +  degrees(i) * (obj.nonlinear_fis.a_param(i)*sinh(U(1,k)/obj.nonlinear_fis.b_param(i)) + obj.nonlinear_fis.c_param(i));
+                    w = w + degrees(i);
+                end
+                Y_fuzzy(k) = output / w;
+            
+                if(U(1,k-(obiekt.delay+2)) ~= 0)
+                    K = (Y_fuzzy(k-(obiekt.delay+2)) - Y_0) / U(1,k-(obiekt.delay+2));
                 else
-                    Y_out(k) = - a*[Y_out(k-1:-1:k-2)]' + b*[U_fuzzy(k-(delay+1):-1:k-(delay+2))]' + b*[U(2, k-1:-1:k-2)]';
+                    K = 1;
                 end
+                Y_out(k) = -a * Y_out(k-1:-1:k-2)' + K * b * U(1, k-(obiekt.delay+1):-1:k-(obiekt.delay+2))' + K * b * U(2, k-1:-1:k-2)';
             end
 
-            E_lin = sum((Y_real - Y_lin).^2) / kk;
-            E_out = sum((Y_real - Y_out).^2) / kk;
+            E_lin = sum((Y_real - Y_lin).^2) / obiekt.kk;
+            E_out = sum((Y_real - Y_out).^2) / obiekt.kk;
             fprintf("\nHAMMERSTEIN NONLINEAR MODEL\n");
             fprintf("E_lin = %.3f\n", E_lin);
             fprintf("E_out = %.3f\n", E_out);
 
-            t = 0:Tp:(kk-1)*Tp;
             figure;
             plot(t, Y_real, 'b', t, Y_lin, 'g', t, Y_out, 'r', 'LineWidth', 1.5);
             legend({'model nieliniowy', ...

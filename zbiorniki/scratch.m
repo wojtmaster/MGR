@@ -74,3 +74,40 @@ title('Trzecia kolumna - Aproksymacja i Wypłaszczenie');
 xlabel('Indeks czasu');
 ylabel('Wartość');
 grid on;
+
+%% Rysowanie wykresów
+% u = [linspace(-45, 45, 250)
+%     linspace(-15, 15, 250)*0];
+% y = obiekt.static_charakteristic(u);
+
+% u = [ones(1, obiekt.kk)*0
+%     ones(1, obiekt.kk)*0];
+% [y, y_L, E] = obiekt.rk4(u, obiekt.kk);
+% 
+% if ~exist('y_figure', 'var') || ~isvalid(y_figure)
+%     y_figure = figure;
+% else
+%     figure(y_figure); % Jeśli istnieje, przełącz na nią
+% end
+% 
+% plot(0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp, y, 'b-', 'LineWidth', 2);
+% hold on;
+% plot(0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp, y_L, 'r-', 'LineWidth', 2);
+% xlabel('t [s]');
+% ylabel('h_2 [cm]');
+% title('Wartość sygnału wyjściowego h_2 - wymuszenie F_D');
+% legend('h_2 (nieliniowe)', 'h_2 (liniowe)', 'Location', 'northeast');
+% grid on;
+
+% file = fopen('errors.txt', 'a'); % Otwórz plik do zapisu (tryb 'w' nadpisuje plik)
+% fprintf(file, '%d\t%.3f\n', u(2,1), E);
+% fclose(file); % Zamknij plik
+
+% plot(u(1,:) + obiekt.F_10, y, 'b-', 'LineWidth', 2);
+% title('Charakterystyka statyczna h_2 (F_1)');
+% xlabel('F_1 [cm^3/s]');
+% ylabel('h_2 [cm]');
+% xlim([45 135]);
+% grid on;
+
+% saveas(gcf, 'D:/EiTI/MGR/raporty/raport_MGR/pictures/wymuszenie_FD.png');  % Zapisuje jako plik PNG

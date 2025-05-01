@@ -14,9 +14,9 @@ obiekt = Obiekt();
 %  pH_0, h_0, Q_10, Q_20, Q_30
 [s, a, b] = obiekt.linearization(16.6, 0.55, 15.6);
 
-u = [ones(1, obiekt.kk)*0
+u = [ones(1, obiekt.kk)*-15
     ones(1, obiekt.kk)*0
-    ones(1, obiekt.kk)*0];
+    ones(1, obiekt.kk)*-15];
 [y, y_L, E_h, E_pH] = obiekt.modifiedEuler(u, obiekt.kk);
 
 if ~exist('ph_figure', 'var') || ~isvalid(ph_figure)

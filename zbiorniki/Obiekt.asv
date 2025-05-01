@@ -58,26 +58,8 @@ classdef Obiekt < handle
         end
 
         function [a, b] = sopdt(obj, obiekt)
-            U = [ones(1,100); zeros(1,100)];
-            Y = obiekt.rk4(U, 100);
-            Y = Y / Y(end);
-
-            % Funkcja celu (error)
-            fun = @(T) model_error(T, U, Y, obiekt);
-            
-            % Startowa wartość (70)
-            T0 = [193, 36];
-            % Optymalna stała czasowa T = 193.4125      36.78401
-            
-            % Szukanie optymalnej stałej czasowej
-            options = optimset('Display', 'iter', ...
-                   'MaxFunEvals', 200, ...
-                   'MaxIter', 100, ...
-                   'TolX', 1e-3, ...
-                   'TolFun', 1e-6);
-            T_opt = fminsearch(fun, T0, options);
-
-            % T_opt = [193.4125      36.78401];
+            Y = obiekt.rk4([ones(1,100), zeros(1,)])
+            T_opt = [193.4125      36.78401];
             G = tf(1, conv([T_opt(1), 1], [T_opt(2), 1]));
             
             G.InputDelay = obj.tau;
@@ -86,27 +68,6 @@ classdef Obiekt < handle
 
             a = G_z.Denominator{1}(2:end);
             b = G_z.Numerator{1}(2:end);
-
-            function E = model_error(T, U, Y_step, obiekt)
-                % Tworzenie nowej transmitancji z aktualnym T
-                G = tf(1, conv([T(1), 1], [T(2), 1]));
-                G.InputDelay = obiekt.tau;
-                
-                % Dyskretyzacja
-                G_z = c2d(G, obiekt.Tp, 'zoh');
-                G_z.Variable = 'z^-1';
-                
-                % Symulacja wyjścia Y
-                Y = zeros(size(Y_step));
-                Y(1:7) = Y_step(1:7); % załadowanie początkowych wartości (warunki początkowe)
-                for k = 8:length(U)
-                    Y(k) = - G_z.Denominator{1}(2)*Y(k-1) - G_z.Denominator{1}(3)*Y(k-2) ...
-                        + G_z.Numerator{1}(2)*U(1, k-6) + G_z.Numerator{1}(3)*U(1, k-7) ...
-                        + G_z.Numerator{1}(2)*U(2, k-1) + G_z.Numerator{1}(3)*U(2, k-2);
-                end
-                
-                E = sum((Y - Y_step).^2);
-            end
         end
 
          function [y, y_L, E] = modifiedEuler(obj, u)
@@ -267,8 +228,8 @@ classdef Obiekt < handle
                     V_2L = V_2L + (k1_V2L + 2*k2_V2L + 2*k3_V2L + k4_V2L) / 6;
                 end
             
-                V_2 = max(V_2, 0);
-                V_2L = max(V_2L, 0);
+                % V_2 = max(V_2, 0);
+                % V_2L = max(V_2L, 0);
 
                 h_2 = sqrt(V_2 / obj.c);
                 h_2L = sqrt(obj.V_20 / obj.c) + 1/(2*sqrt(obj.V_20 * obj.c)) * (V_2L - obj.V_20);
@@ -363,21 +324,11 @@ classdef Obiekt < handle
             grid on;
         end
 
-        function y = static_charakteristic(obj)
-            F_1 = linspace(45, 135, obj.kk);
-            F_D = linspace(15, 45, obj.kk);
+        function y = static_charakteristic(obj, u)
+            F_1 = obj.F_10 + u(1,:);
+            F_D = obj.F_D0 + u(2,:);
 
-            [F1_grid, FD_grid] = meshgrid(F_1, F_D);
-        
-            y = ((F1_grid + FD_grid) / obj.alpha_2).^2;
-        
-            figure;
-            surf(F1_grid, FD_grid, y);
-            xlabel('F_1');
-            ylabel('F_D');
-            zlabel('y');
-            title('Static Characteristic in 3D');
-            shading interp; % opcjonalne: wygładzenie powierzchni
+            y = ((F_1+F_D)/(obj.alpha_2)).^2;
         end
     end
 end

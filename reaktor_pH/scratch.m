@@ -1,76 +1,239 @@
-%%
-% Wczytanie danych
-data = readmatrix('samplingData_11_02_2025_11_59_44.txt');
-Y1 = data(:,2); % Druga kolumna
-Y2 = data(:,3);
-t = 1:5:5*length(Y1);
-plot(t, Y1);
-hold on;
-plot(t, Y2);
-legend('Temperatura komory', 'Temperatura grzałki', 'Location', 'best');
-xlabel('t[s]');
-ylabel('[C]');
-grid on;
-
-saveas(gcf, 'D:/EiTI/MGR/raporty/raport_luty/pictures/step_response.png');  % Zapisuje jako plik PNG
-
-%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-% Pobranie drugiej i trzeciej kolumny
-x = (1:length(data(:,2))-500)';  % Indeksy czasowe
-y1 = data(1:end-500,2); % Druga kolumna
-y2 = data(1:end-500,3); % Trzecia kolumna
 
-% --- Regresja wielomianowa i ekstrapolacja ---
-poly_order = 5; % Stopień wielomianu (można dostosować)
-p1 = polyfit(x, y1, poly_order); % Dopasowanie do drugiej kolumny
-p2 = polyfit(x, y2, poly_order); % Dopasowanie do trzeciej kolumny
 
-% Tworzymy nowe punkty x do ekstrapolacji
-x_new = (1:max(x) + 500)'; % Wydłużamy o 200 punktów
-y1_extrap = polyval(p1, x_new);
-y2_extrap = polyval(p2, x);
+%% NONLINEAR HAMMERSTEIN MODEL
+clear all;
+obiekt = Obiekt();
+[a_1, a_2, a_3, b_1, b_2, b_3, G_z] = obiekt.linearization(16.6, 0.55, 15.6);
 
-% --- Filtr Savitzky-Golay dla wygładzenia ---
-window_size = 11; % Długość okna
-poly_order_sg = 3; % Stopień wielomianu dla filtru
+% Zakres sterowania
+U_min = -15;
+U_max = 15;
+U_center = linspace(U_min, U_max, 3); % Środek zbiorów
 
-y1_smooth = sgolayfilt(y1_extrap, poly_order_sg, window_size);
-y2_smooth = sgolayfilt(y2_extrap, poly_order_sg, window_size);
+for i = 1:50
+    U_tmp = [repelem((rand(1, obiekt.kk/400) * 30 - 15), 400);
+             zeros(1, obiekt.kk);
+             repelem((rand(1, obiekt.kk/400) * 30 - 15), 400)];
+    [Y_tmp, ~] = obiekt.modifiedEuler(U_tmp, obiekt.kk);
 
-% --- Znalezienie miejsca wypłaszczenia ---
-tolerance = 0.001; % Próg zmian wartości do uznania za wypłaszczenie
+    U_Q1(i, :) = U_tmp(1, :);
+    U_Q3(i, :) = U_tmp(3, :);
+    Y_train(i, :) = Y_tmp(1, :);
+end
+t = (0:length(U_Q1(1,:))-1) * obiekt.Tp;
 
-idx1 = find(abs(diff(y1_smooth)) < tolerance, 1); % Pierwszy punkt stabilizacji
-idx2 = find(abs(diff(y2_smooth)) < tolerance, 1);
+%% FMINSEARCH
+close all;
+fis = sugfis('Name', 'Hammerstein', 'Type', 'sugeno');
+rules_number = 6;
 
-flat_point_x1 = x_new(idx1);
-flat_point_x2 = x_new(idx2);
+fis = addInput(fis, [U_min U_max], 'Name', 'u1');
+fis = addInput(fis, [U_min U_max], 'Name', 'u2');
 
-flat_point_y1 = y1_smooth(idx1);
-flat_point_y2 = y2_smooth(idx2);
+% Definiowanie funkcji przynależności (gaussmf)
+for i = 1:length(U_center) 
+    fis = addMF(fis, 'u1', 'gaussmf', [6, U_center(i)]);
+    fis = addMF(fis, 'u2', 'gaussmf', [6, U_center(i)]);
+end
 
-% --- Wizualizacja wyników ---
+% Definiowanie wyjścia i początkowych następników (a_i * u + b_i)
+fis = addOutput(fis, [U_min U_max], 'Name', 'u_fuzzy');
+
+% Początkowe współczynniki (a_i, b_i, c_i)
+a_param = ones(1,rules_number)*0.01;
+b_param = ones(1,rules_number)*15;
+c_param = ones(1,rules_number)*15;
+% a_param = [0.2773    0.9531  -0.0001    0.9504    0.3924    0.0766];
+% b_param = [3.8845    4.7977    1.4201    3.7108    3.5950    0.0135];
+% c_param = [3.5019    5.0929    3.1197    4.6958    3.5080  -20.5576];
+
+% Dodanie reguł TS w postaci liniowej
+for i = 1:rules_number
+    fis = addMF(fis, 'u_fuzzy', 'linear', [a_param(i), b_param(i), c_param(i)]);
+end
+
+% Reguły Takagi-Sugeno: [inputMF, outputMF, weight]
+ruleList = [1 1 1 1 1;  
+            1 2 2 1 1;
+            2 1 2 1 1;
+            1 3 3 1 1;
+            3 1 3 1 1;
+            2 2 4 1 1;
+            2 3 5 1 1;
+            3 2 5 1 1;
+            3 3 6 1 1];
+
+% Dodanie reguł do systemu
+fis = addRule(fis, ruleList);
+
+% Optymalizacja przy pomocy fminsearch
+initial_params = [a_param, b_param c_param];  % Początkowe wartości a_param i b_param
+options = optimset('Display', 'iter', 'MaxFunEvals', 2500, 'MaxIter', 2500); % Opcje optymalizacji
+optimal_params = fminsearch(@(params) nonlinearCoeff(params, fis, U_Q1, U_Q3, Y_train, U_center, rules_number, a_1, b_1.Q_1, b_1.Q_3), initial_params, options);
+
+% Po optymalizacji
+a_optimal = optimal_params(1:rules_number);
+b_optimal = optimal_params(rules_number+1:2*rules_number);
+c_optimal = optimal_params(2*rules_number+1:end);
+
+% Wyświetlanie wyników optymalizacji
+fprintf('Optymalne parametry a: \n');
+disp(a_optimal);
+fprintf('Optymalne parametry b: \n');
+disp(b_optimal);
+fprintf('Optymalne parametry c: \n');
+disp(c_optimal);
+
+%% 2. Tworzenie początkowego systemu rozmytego TS
+% a_optimal = [0.0035    0.0013    0.0211    0.0469   -0.0046    3.1275];
+% b_optimal = [134.4978  473.1631  178.4632   94.5173  10.0297   25.2278];
+% c_optimal = [130.9950  165.6131  327.5411   89.8189   48.8507 -15.9479];
+for i = 1:rules_number
+    fis.Outputs.MembershipFunctions(i).Parameters(1) = a_optimal(i);
+    fis.Outputs.MembershipFunctions(i).Parameters(2) = b_optimal(i);
+    fis.Outputs.MembershipFunctions(i).Parameters(3) = c_optimal(i);
+end
+
+% Symulacja modelu Hammersteina
+U_fuzzy = zeros(1, obiekt.kk); % Przepuszczenie przez model TS
+Y_out = zeros(1, obiekt.kk);
+rule_to_param = [1 2 2 3 3 1 5 5 4];
+
+U = [repelem((rand(1, obiekt.kk/400) * 30 - 15), 400);
+    zeros(1, obiekt.kk);
+    repelem((rand(1, obiekt.kk/400) * 30 - 15), 400)];
+[Y_real, Y_lin] = obiekt.modifiedEuler(U, obiekt.kk); % Symulacja rzeczywistego układu
+
+for k = 2:obiekt.kk
+    [~, degrees] = evalfis(fis, [U(1,k), U(3,k)]);
+    output = 0;
+    w = 0;
+    for i = 1:length(fis.Rules)
+        index = rule_to_param(i);
+        output = output + (degrees(i,1)*degrees(i,2))*fis.Outputs.MembershipFunctions(index).Parameters(1)*...
+            (sinh(U(1,k)/fis.Outputs.MembershipFunctions(index).Parameters(2)) + sinh(U(3,k)/fis.Outputs.MembershipFunctions(index).Parameters(3)));
+        w = w + (degrees(i,1)*degrees(i,2));
+    end
+    U_fuzzy(k) = output / w;
+    Y_out(k) = - a_1*Y_out(k-1) + b_1.Q_1 * U_fuzzy(k-1) + b_1.Q_2 * U(2, k-1) + b_1.Q_3 * U_fuzzy(k-1);
+end
+
+% Wizualizacja wyników
 figure;
-subplot(2,1,1);
-plot(x, y1, 'r--', 'LineWidth', 1.2); hold on;
-plot(x_new, y1_extrap, 'g-', 'LineWidth', 1.5); % Regresja wielomianowa + ekstrapolacja
-plot(x_new, y1_smooth, 'b-', 'LineWidth', 1.5); % Savitzky-Golay
-plot(flat_point_x1, flat_point_y1, 'ko', 'MarkerSize', 10, 'MarkerFaceColor', 'k'); % Punkt wypłaszczenia
-legend('Oryginalne dane', 'Ekstrapolacja', 'Savitzky-Golay', 'Punkt wypłaszczenia');
-title('Druga kolumna - Aproksymacja i Wypłaszczenie');
-xlabel('Indeks czasu');
-ylabel('Wartość');
+plot(t, Y_real(1,:), 'b', t, Y_lin(1,:), 'g', t, Y_out, 'r');
+legend('Euler', 'Euler liniowy', 'Hammerstein (optymalny TS)', 'Location', 'southwest');
+title('Porównanie wyjścia układu rzeczywistego i modelu');
 grid on;
 
-subplot(2,1,2);
-plot(x, y2, 'r--', 'LineWidth', 1.2); hold on;
-plot(x, y2_extrap, 'g-', 'LineWidth', 1.5);
-plot(x, y2_smooth, 'b-', 'LineWidth', 1.5);
-plot(flat_point_x2, flat_point_y2, 'ko', 'MarkerSize', 10, 'MarkerFaceColor', 'k');
-legend('Oryginalne dane', 'Ekstrapolacja', 'Savitzky-Golay', 'Punkt wypłaszczenia');
-title('Trzecia kolumna - Aproksymacja i Wypłaszczenie');
-xlabel('Indeks czasu');
-ylabel('Wartość');
+E_lin = sum((Y_real(1,:) - Y_lin(1,:)).^2);
+E_out = sum((Y_real(1,:) - Y_out).^2);
+fprintf("\nE_lin = %.3f\n", E_lin);
+fprintf("E_out = %.3f\n", E_out);
+
+%% 
+%% 2. Tworzenie początkowego systemu rozmytego TS
+close all;
+fis_2 = sugfis('Name', 'F1_Hammerstein', 'Type', 'sugeno');
+fis_2 = addInput(fis_2, [U_min U_max], 'Name', 'U');
+
+% Definiowanie funkcji przynależności (gaussmf)
+fis_2 = addMF(fis_2, 'U', 'gaussmf', [20, U_center(1)]);
+fis_2 = addMF(fis_2, 'U', 'gaussmf', [20, U_center(2)]);
+fis_2 = addMF(fis_2, 'U', 'gaussmf', [20, U_center(3)]);
+
+% Definiowanie wyjścia i początkowych następników (a_i * u + b_i)
+fis_2 = addOutput(fis_2, [U_min U_max], 'Name', 'F1');
+
+% Początkowe współczynniki (a_i, b_i)
+a_param = [76.4472   72.8656  100.0000]; % Można dobrać inaczej
+b_param = [100.0000   71.1456   88.1261];
+
+% Dodanie reguł TS w postaci liniowej
+for i = 1:length(U_center)
+    fis_2 = addMF(fis_2, 'F1', 'linear', [a_param(i), b_param(i)]);
+end
+
+% Reguły Takagi-Sugeno: [inputMF, outputMF, weight]
+ruleList = [1 1 1 1;  % Reguła 1: wejście MF1 -> wyjście Out1
+            2 2 1 1;
+            3 3 1 1];  % Reguła 2: wejście MF2 -> wyjście Out2  % Reguła 3: wejście MF3 -> wyjście Out3
+
+% Dodanie reguł do systemu
+fis_2 = addRule(fis_2, ruleList);
+
+% Symulacja modelu Hammersteina
+U_fuzzy = zeros(obiekt.kk, 1); % Przepuszczenie przez model TS
+Y_out = zeros(1, obiekt.kk);
+
+% U = [repelem((rand(1, obiekt.kk/250) * 40 - 20), 250)];
+% [Y_real, Y_lin] = obiekt.rk4([U; zeros(1, obiekt.kk)], obiekt.kk); % Symulacja rzeczywistego układu
+
+for k = 1:obiekt.kk
+    [~, degrees] = evalfis(fis_2, U(1, k));
+    output = 0;
+    for i = 1:length(a_param)
+        output = output + degrees(i) * (a_param(i)*sinh(U(1, k)/b_param(i)));
+    end
+    U_fuzzy(k) = output / sum(degrees);
+
+    if k<obiekt.delay+3
+        Y_out(k) = 0;
+    else
+        Y_out(k) = - a*[Y_out(k-1:-1:k-2)]' + b*[U_fuzzy(k-(obiekt.delay+1):-1:k-(obiekt.delay+2))];
+    end
+end
+
+% Wizualizacja wyników
+figure;
+plot(t, Y_real, 'b', t, Y_lin, 'g', t, Y_out, 'r');
+% legend('RK4', 'RK4 liniowy', 'Hammerstein (optymalny TS)', 'Location', 'southwest');
+title('Porównanie wyjścia układu rzeczywistego i modelu');
 grid on;
+
+E_lin = sum((Y_real - Y_lin).^2);
+E_out = sum((Y_real - Y_out).^2);
+fprintf("\nE_lin = %.3f\n", E_lin);
+fprintf("E_out = %.3f\n", E_out);
+
+%% Losowość
+for j = 1:5
+    U = [repelem((rand(1, obiekt.kk/250) * 90 - 45), 250)];
+    [Y_real, Y_lin] = obiekt.rk4([U; zeros(1, obiekt.kk)], obiekt.kk); % Symulacja rzeczywistego układu
+    
+    % Symulacja modelu Hammersteina
+    U_fuzzy = zeros(obiekt.kk, 1); % Przepuszczenie przez model TS
+    U_fuzzy_2 = zeros(obiekt.kk, 1); % Przepuszczenie przez model TS
+    Y_out = zeros(1, obiekt.kk);
+    Y_out_2 = zeros(1, obiekt.kk);
+    
+    for k = obiekt.delay+3:obiekt.kk
+        [~, degrees] = evalfis(fis, U(k));
+        [~, degrees_2] = evalfis(fis_2, U(k));
+        output = 0;
+        output_2 = 0;
+        for i = 1:length(a_param)
+            output = output + degrees(i) * (fis.Outputs.MembershipFunctions(i).Parameters(1)*sinh(U(k)/fis.Outputs.MembershipFunctions(i).Parameters(2)));
+            output_2 = output_2 + degrees_2(i) * (fis_2.Outputs.MembershipFunctions(i).Parameters(1)*sinh(U(k)/fis_2.Outputs.MembershipFunctions(i).Parameters(2)));
+        end
+        U_fuzzy(k) = output / sum(degrees);
+        U_fuzzy_2(k) = output_2 / sum(degrees_2);
+        Y_out(k) = - a*[Y_out(k-1:-1:k-2)]' + b*[U_fuzzy(k-(obiekt.delay+1):-1:k-(obiekt.delay+2))];
+        Y_out_2(k) = - a*[Y_out_2(k-1:-1:k-2)]' + b*[U_fuzzy_2(k-(obiekt.delay+1):-1:k-(obiekt.delay+2))];
+    end
+    
+    % figure;
+    % plot(t, Y_real, 'b', t, Y_lin, 'g', t, Y_out, 'r');
+    % % legend('RK4', 'RK4 liniowy', 'Hammerstein (optymalny TS)');
+    % title('Porównanie wyjścia układu rzeczywistego i modelu');
+    % grid on;
+    
+    E_lin = sum((Y_real - Y_lin).^2);
+    E_out = sum((Y_real - Y_out).^2);
+    E_out_2 = sum((Y_real - Y_out_2).^2);
+    fprintf("\n%d. E_lin = %.3f\n", j, E_lin);
+    fprintf("%d. E_out = %.3f\n", j, E_out);
+    fprintf("%d. E_out_2 = %.3f\n", j, E_out_2);
+end

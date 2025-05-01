@@ -2,7 +2,8 @@
 % Autor: Wojciech Rogalski
 % Data: 15.12.2024r.
 % Tytuł: Porównanie modeli Hammersteina i Winera w regulacji rozmytej
-clear all;
+clear;
+close;
 clc;
 set(groot, 'DefaultTextFontName', 'Arial');
 set(groot, 'DefaultAxesFontName', 'Arial');
@@ -11,43 +12,10 @@ set(groot, 'DefaultAxesFontSize', 10);
 
 %% Inicjalizacja obiektu oraz linearyzacja
 obiekt = Obiekt();
-[s, s_disturbance, a, b, ~] = obiekt.linearization(90, 30);
-[fis] = obiekt.fuzzyfication();
-% u = [linspace(-45, 45, 250)
-%     linspace(-15, 15, 250)*0];
-% y = obiekt.static_charakteristic(u);
-
-% u = [ones(1, obiekt.kk)*0
-%     ones(1, obiekt.kk)*0];
-% [y, y_L, E] = obiekt.rk4(u, obiekt.kk);
-% 
-% if ~exist('y_figure', 'var') || ~isvalid(y_figure)
-%     y_figure = figure;
-% else
-%     figure(y_figure); % Jeśli istnieje, przełącz na nią
-% end
-% 
-% plot(0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp, y, 'b-', 'LineWidth', 2);
-% hold on;
-% plot(0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp, y_L, 'r-', 'LineWidth', 2);
-% xlabel('t [s]');
-% ylabel('h_2 [cm]');
-% title('Wartość sygnału wyjściowego h_2 - wymuszenie F_D');
-% legend('h_2 (nieliniowe)', 'h_2 (liniowe)', 'Location', 'northeast');
-% grid on;
-
-% file = fopen('errors.txt', 'a'); % Otwórz plik do zapisu (tryb 'w' nadpisuje plik)
-% fprintf(file, '%d\t%.3f\n', u(2,1), E);
-% fclose(file); % Zamknij plik
-
-% plot(u(1,:) + obiekt.F_10, y, 'b-', 'LineWidth', 2);
-% title('Charakterystyka statyczna h_2 (F_1)');
-% xlabel('F_1 [cm^3/s]');
-% ylabel('h_2 [cm]');
-% xlim([45 135]);
-% grid on;
-
-% saveas(gcf, 'D:/EiTI/MGR/raporty/raport_MGR/pictures/wymuszenie_FD.png');  % Zapisuje jako plik PNG
+[s, s_disturbance] = obiekt.linearization(90, 30);
+% [a, b] = obiekt.sopdt(obiekt);
+% [fis] = obiekt.fuzzyfication();
+obiekt.static_charakteristic();
 
 %% Hammerstein
 hammerstein = Hammerstein();
@@ -58,7 +26,7 @@ hammerstein.nonlinearFuzzy();
 % hammerstein.show_fuzzy(hammerstein.nonlinear_fis, 'nieliniowe');
 
 %% Wiener
-wiener = Wiener();
+wiener = Wiener(obiekt, a, b);
 wiener.linearFuzzy();
 wiener.nonlinearFuzzy();
 
@@ -66,15 +34,16 @@ wiener.nonlinearFuzzy();
 % wiener.show_fuzzy(wiener.nonlinear_fis, 'nieliniowe');
 
 %% Testing 
-for index = 1:5
+for index = 1:1
     % i = 1;
-    U = [repelem((rand(1, obiekt.kk/250) * 90 - 45), 250); zeros(1, obiekt.kk)];
+    % U = [repelem((rand(1, obiekt.kk/250) * 90 - 45), 250); 
+    %      zeros(1, obiekt.kk)];
 
-    hammerstein.testLinearModel(U, a, b, obiekt.delay, obiekt.kk, obiekt.Tp, @(x, y) obiekt.rk4(x, y), index);
-    hammerstein.testNonlinearModel(U, a, b, obiekt.delay, obiekt.kk, obiekt.Tp, @(x, y) obiekt.rk4(x, y), index);
+    hammerstein.testLinearModel(U, a, b, obiekt, index);
+    % hammerstein.testNonlinearModel(U, a, b, obiekt, index);
     
-    wiener.testLinearModel(U, a, b, obiekt.delay, obiekt.kk, obiekt.Tp, @(x, y) obiekt.rk4(x, y), index);
-    wiener.testNonlinearModel(U, a, b, obiekt.delay, obiekt.kk, obiekt.Tp, @(x, y) obiekt.rk4(x, y), index);
+    % wiener.testLinearModel(U, a, b, obiekt, index);
+    % wiener.testNonlinearModel(U, a, b, obiekt, index);
 end
 
 %% DMC(N, Nu, D, D_disturbance, lambda)
