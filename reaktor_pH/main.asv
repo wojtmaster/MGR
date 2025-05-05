@@ -51,7 +51,7 @@ view(135, 0);
 % saveas(gcf, 'D:/EiTI/MGR/raporty/raport_MGR/pictures/ph-_staticCharacteristic.png');  % Zapisuje jako plik PNG
 
 figure;
-surf(Q1_grid, Q3_grid, h);
+surf(U_1, U_3, h);
 xlabel('Q_1 [ml/s]');
 ylabel('Q_3 [ml/s]');
 zlabel('h [cm]');

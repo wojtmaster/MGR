@@ -10,23 +10,26 @@ classdef Wiener < handle
 
     methods
 
-        function obj = Wiener(obiekt, a, b)
+        function obj = Wiener(a, b)
             %Generacja danych sterujących i RK4
-            U = linspace(-45, 45, obiekt.kk);
+            U = [linspace(-45, 45, 100);
+                linspace(-15, 15, 100)];
             
-            h = zeros(1, obiekt.kk);
+            h = zeros(100, 100);
             y = zeros(1, 100);
-            for i = 1:obiekt.kk
-                u = [ones(1,100) * U(i);
-                    zeros(1,100)];
-                for k = 8:length(u)
-                    y(k) = -a * y(k-1:-1:k-2)' + b * u(1, k-(obiekt.delay+1):-1:k-(obiekt.delay+2))' + b * u(2, k-1:-1:k-2)';
+            for i = 1:100
+                for j = 1:100
+                    u = [ones(1,100) * U(1,j);
+                        ones(1,100) * U(2,i)];
+                    for k = 8:length(u)
+                        y(k) = -a * y(k-1:-1:k-2)' + b * u(1, k-6) + b * u(2, k-1);
+                    end
+                    h(i,j) = y(end);
                 end
-                h(i) = y(end);
             end
 
-            obj.Y_min = min(h);
-            obj.Y_max = max(h);
+            obj.Y_min = min(min(h));
+            obj.Y_max = max(max(h));
         end
 
         function linearFuzzy(obj)
@@ -43,10 +46,11 @@ classdef Wiener < handle
             % Definiowanie wyjścia i początkowych następników (a_i * u + b_i)
             obj.linear_fis = addOutput(obj.linear_fis, [obj.Y_min obj.Y_max], 'Name', 'Y_fuzzy');
             
-            % Optymalne parametry a: 
-            a_param = [0.3647    0.4227    0.4844    0.5657    0.6796];
-            % Optymalne parametry b: 
-            b_param = [30.4365   33.2982   36.0644   38.2423   38.0915];
+            a_param = [	0.5079	0.5508	0.5985	0.6438	0.6801];
+            b_param = [	3.5118	0.5148	-0.1804	0.6402	4.2028];
+
+            % a_param = [0.5409    0.5918    0.6604    0.7429    0.8309];
+            % b_param = [41.5737   37.8453   36.0261   34.0338   31.3233];
             
             % Dodanie reguł TS w postaci liniowej
             for i = 1:length(Y_center)
@@ -65,26 +69,28 @@ classdef Wiener < handle
         end
 
         function nonlinearFuzzy(obj)
-            obj.Y_threeCenter = linspace(obj.Y_min, obj.Y_max, 3);
-            obj.nonlinear_fis.sigma = 25;
-            % Optymalne parametry a: 
-            obj.nonlinear_fis.a_param = [0.4039    1.3416    0.3739];
-            % Optymalne parametry b: 
-            obj.nonlinear_fis.b_param = [17.1217   22.6325   11.9320];
-            % Optymalne parametry c: 
-            obj.nonlinear_fis.c_param = [13.8112   34.3922   65.9774];
+            obj.nonlinear_fis.Y_center = linspace(obj.Y_min, obj.Y_max, 3);
+            obj.nonlinear_fis.sigma = 30;
+            obj.nonlinear_fis.rules_number = 3;
+            obj.nonlinear_fis.sigma = 30;
+
+            obj.nonlinear_fis.a_param = [5.7627	16.2006	12.0295];
+            obj.nonlinear_fis.b_param = [-10.9354 -0.5527 15.2669];
+            
+            % obj.nonlinear_fis.a_param = [3.6419   13.1436    7.7333];
+            % obj.nonlinear_fis.b_param = [24.4050   35.2421   53.3554];
         end
 
         function testLinearModel(obj, U, a, b, obiekt, index)
-            [Y_real, Y_lin] = obiekt.rk4(U, obiekt.kk);
+            [Y_real, Y_lin] = obiekt.modifiedEuler(U, obiekt.kk);
             t = 0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp;
            
-            Y_out= zeros(1,obiekt.kk);
+            Y_out = zeros(1,obiekt.kk);
             Y_fuzzy = zeros(1,obiekt.kk);
             
-            for k = 8:obiekt.kk
-                Y_out(k) = -a * Y_out(k-1:-1:k-2)' + b * U(1, k-(obiekt.delay+1):-1:k-(obiekt.delay+2))' + b * U(2, k-1:-1:k-2)';
-                Y_fuzzy(k) = evalfis(obj.linear_fis, Y_out(k)) - obiekt.h_20;
+            for k = obiekt.delay+2:obiekt.kk
+                Y_out(k) = -a * Y_out(k-1:-1:k-2)' + b * U(1, k-(obiekt.delay+1)) + b * U(2, k-1);
+                Y_fuzzy(k) = evalfis(obj.linear_fis, Y_out(k));
             end
 
             E_lin = sum((Y_real - Y_lin).^2) / obiekt.kk;
@@ -109,24 +115,24 @@ classdef Wiener < handle
         function testNonlinearModel(obj, U, a, b, obiekt, index)
             gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
 
-            [Y_real, Y_lin] = obiekt.rk4(U, obiekt.kk);
-            t = 0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp;
-
-            Y_out = zeros(1,obiekt.kk);
-            Y_fuzzy = zeros(1,obiekt.kk);
+            [Y_real, Y_lin] = obiekt.modifiedEuler(U, obiekt.kk);
+            t = (0:length(U)-1) * obiekt.Tp; % Czas w sekundach (próbkowanie = 20s)
             
-            for k = 8:obiekt.kk
-                Y_out(k) = -a * Y_out(k-1:-1:k-2)' + b * U(1, k-(obiekt.delay+1):-1:k-(obiekt.delay+2))' + b * U(2, k-1:-1:k-2)';
-                output = 0;
+            Y_out = zeros(1, obiekt.kk);
+            Y_fuzzy = zeros(1, obiekt.kk);
+            
+            for k = obiekt.delay+2:obiekt.kk
+                Y_out(k) = -a * Y_out(k-1:-1:k-2)' + b * U(1, k-(obiekt.delay+1)) + b * U(2, k-1);
                 w = 0;
-                degrees = [gaussmf_val(Y_out(k), obj.nonlinear_fis.sigma, obj.Y_threeCenter(1)), ...
-                           gaussmf_val(Y_out(k), obj.nonlinear_fis.sigma, obj.Y_threeCenter(2)), ...
-                           gaussmf_val(Y_out(k), obj.nonlinear_fis.sigma, obj.Y_threeCenter(3))];
-                for i = 1:length(degrees)
-                    output = output +  degrees(i) * (obj.nonlinear_fis.a_param(i)*sinh(Y_out(k)/obj.nonlinear_fis.b_param(i)) + obj.nonlinear_fis.c_param(i));
+                output = 0;
+                degrees = [gaussmf_val(Y_out(k), obj.nonlinear_fis.sigma, obj.nonlinear_fis.Y_center(1)), ...
+                           gaussmf_val(Y_out(k), obj.nonlinear_fis.sigma, obj.nonlinear_fis.Y_center(2)), ...
+                           gaussmf_val(Y_out(k), obj.nonlinear_fis.sigma, obj.nonlinear_fis.Y_center(3))];
+                for i = 1:obj.nonlinear_fis.rules_number
+                    output = output +  degrees(i) * (obj.nonlinear_fis.a_param(i)*sinh(Y_out(k)/36) + obj.nonlinear_fis.b_param(i));
                     w = w + degrees(i);
                 end
-                Y_fuzzy(k) = output / w - obiekt.h_20;
+                Y_fuzzy(k) = output / w;
             end
             
             E_lin = sum((Y_real - Y_lin).^2) / obiekt.kk;

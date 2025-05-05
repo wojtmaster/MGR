@@ -1,8 +1,8 @@
 classdef Obiekt < handle
     properties
         % Stałe
-        a = 540;
-        c = 0.85;
+        A = 540;
+        C = 0.85;
         alpha_1 = 26;
         alpha_2 = 20;
         
@@ -33,88 +33,52 @@ classdef Obiekt < handle
             obj.delay = obj.tau/obj.Tp;
         end
 
-        function [s, s_disturbance] = linearization(obj, F_10, F_D0)
+        function linearization(obj, F_10, F_D0)
             obj.F_10 = F_10;
             obj.F_D0 = F_D0;
 
             obj.h_10 = ((F_10+F_D0)/obj.alpha_1)^2;
             obj.h_20 = ((F_10+F_D0)/obj.alpha_2)^2;
-            obj.V_10 = obj.a * obj.h_10;
-            obj.V_20 = obj.c * obj.h_20^2;
-
-            A = [-obj.alpha_1/(2*obj.V_10^(1/2)*obj.a^(1/2)), 0;
-                 obj.alpha_1/(2*sqrt(obj.V_10*obj.a)), - obj.alpha_2/(4*obj.V_20^(3/4)*obj.c^(1/4))];
-            B = [1 1; 0 0];
-            C = [0 1/(2*sqrt(obj.V_20*obj.c))];
-            D = [0 0];
-
-            sys = ss(A,B,C,D);
-            G_s = tf(sys);
-            G_s(1) = tf(G_s.Numerator(1), G_s.Denominator(1), 'InputDelay', obj.tau);
-            G_z = c2d(G_s, obj.Tp, 'zoh');
-
-            s = step(G_z(1), (0:obj.dynamic_horizont-1) * obj.Tp);
-            s_disturbance = step(G_z(2), (0:obj.dynamic_horizont-1) * obj.Tp);
+            obj.V_10 = obj.A * obj.h_10;
+            obj.V_20 = obj.C * obj.h_20^2;
         end
 
-        function [a, b] = sopdt(obj, obiekt)
-            U = [ones(1,100); zeros(1,100)];
-            Y = obiekt.rk4(U, 100);
-            Y = Y / Y(end);
+        function [a, b, s, s_D] = mse(obj)
+            u = [ones(1,obj.dynamic_horizont)
+                zeros(1,obj.dynamic_horizont)];
+            [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+            y = s / s(end);
 
-            % Funkcja celu (error)
-            fun = @(T) model_error(T, U, Y, obiekt);
-            
-            % Startowa wartość (70)
-            T0 = [193, 36];
-            % Optymalna stała czasowa T = 193.4125      36.78401
-            
-            % Szukanie optymalnej stałej czasowej
-            options = optimset('Display', 'iter', ...
-                   'MaxFunEvals', 200, ...
-                   'MaxIter', 100, ...
-                   'TolX', 1e-3, ...
-                   'TolFun', 1e-6);
-            T_opt = fminsearch(fun, T0, options);
+            Y = y(8:end)';
+            M = [y(7:end-1)' y(6:end-2)' u(1,2:end-6)'];
+            % M = [y(7:end-1)' y(6:end-2)' u(2,7:end-1)'];
+            w = M \ Y;
 
-            % T_opt = [193.4125      36.78401];
-            G = tf(1, conv([T_opt(1), 1], [T_opt(2), 1]));
-            
-            G.InputDelay = obj.tau;
-            G_z = c2d(G, obj.Tp, 'zoh');
-            G_z.Variable = 'z^-1';
+            a = -w(1:2)';
+            b = w(3);
 
-            a = G_z.Denominator{1}(2:end);
-            b = G_z.Numerator{1}(2:end);
-
-            function E = model_error(T, U, Y_step, obiekt)
-                % Tworzenie nowej transmitancji z aktualnym T
-                G = tf(1, conv([T(1), 1], [T(2), 1]));
-                G.InputDelay = obiekt.tau;
-                
-                % Dyskretyzacja
-                G_z = c2d(G, obiekt.Tp, 'zoh');
-                G_z.Variable = 'z^-1';
-                
-                % Symulacja wyjścia Y
-                Y = zeros(size(Y_step));
-                Y(1:7) = Y_step(1:7); % załadowanie początkowych wartości (warunki początkowe)
-                for k = 8:length(U)
-                    Y(k) = - G_z.Denominator{1}(2)*Y(k-1) - G_z.Denominator{1}(3)*Y(k-2) ...
-                        + G_z.Numerator{1}(2)*U(1, k-6) + G_z.Numerator{1}(3)*U(1, k-7) ...
-                        + G_z.Numerator{1}(2)*U(2, k-1) + G_z.Numerator{1}(3)*U(2, k-2);
-                end
-                
-                E = sum((Y - Y_step).^2);
+            y_test = zeros(size(y));
+            y_test(1:obj.delay+1) = y(1:obj.delay+1);
+            for k = obj.delay+2:obj.dynamic_horizont
+                y_test(k) = -a*y_test(k-1:-1:k-2)' + b*u(1, k-(obj.delay+1));
+                % y_test(k) = a*y_test(k-1:-1:k-2)' + b*u(2, k-1);
             end
+
+            u = [zeros(1,obj.dynamic_horizont)
+                ones(1,obj.dynamic_horizont)];
+            [s_D, ~] = obj.rk4(u, obj.dynamic_horizont);
+            
+            % t = (0:length(u)-1) * obj.Tp; % Czas w sekundach (próbkowanie = 20s)
+            % figure; 
+            % plot(t, y, 'b', t, y_lin, 'r', t, y_test, 'g');
         end
 
-         function [y, y_L, E] = modifiedEuler(obj, u)
+         function [y, y_L, E] = modifiedEuler(obj, u, kk)
 
             %% Alokacja pamięci
-            y = zeros(1, obj.kk);
-            y_L = zeros(1, obj.kk);
-            
+            y = zeros(1, kk);
+            y_L = zeros(1, kk);
+
             %% Warunki początkowe
             V_1 = obj.V_10;
             V_2 = obj.V_20;
@@ -126,60 +90,55 @@ classdef Obiekt < handle
             V_2eL = obj.V_20;
             y(1) = 0;
             y_L(1) = 0;
-            
+
             %% Funkcje
-            fun_1 = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (V_1/obj.a)^(1/2);
-            fun_1L = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (obj.V_10/obj.a)^(1/2) - obj.alpha_1 / (2*obj.V_10^(1/2)*obj.a^(1/2)) * (V_1-obj.V_10);
-            fun_2 = @(V_1, V_2) obj.alpha_1 * (V_1/obj.a)^(1/2) - obj.alpha_2 * (V_2/obj.c)^(1/4); 
-            fun_2L = @(V_1, V_2) obj.alpha_1 * (obj.V_10/obj.a)^(1/2) - obj.alpha_2 * (obj.V_20/obj.c)^(1/4) + ...
-                     obj.alpha_1 / (2*obj.V_10^(1/2)*obj.a^(1/2)) * (V_1-obj.V_10) - obj.alpha_2 / (4*obj.V_20^(3/4)*obj.c^(1/4)) * (V_2-obj.V_20);
-            
+            fun_1 = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (V_1/obj.A)^(1/2);
+            fun_1L = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (obj.V_10/obj.A)^(1/2) - obj.alpha_1 / (2*obj.V_10^(1/2)*obj.A^(1/2)) * (V_1-obj.V_10);
+            fun_2 = @(V_1, V_2) obj.alpha_1 * (V_1/obj.A)^(1/2) - obj.alpha_2 * (V_2/obj.C)^(1/4); 
+            fun_2L = @(V_1, V_2) obj.alpha_1 * (obj.V_10/obj.A)^(1/2) - obj.alpha_2 * (obj.V_20/obj.C)^(1/4) + ...
+                     obj.alpha_1 / (2*obj.V_10^(1/2)*obj.A^(1/2)) * (V_1-obj.V_10) - obj.alpha_2 / (4*obj.V_20^(3/4)*obj.C^(1/4)) * (V_2-obj.V_20);
+
             %% Wymuszenia
             F_1in = u(1,:) + obj.F_10;
             F_D = u(2,:) + obj.F_D0;
-            
+
             %% Modified Euler
-            for i = 2:obj.kk
+            for i = 2:kk
                 if i <= obj.delay + 1
                     V_1 = V_1 + obj.Tp * fun_1(obj.F_10, F_D(i), V_1);
                     V_2 = V_2 + obj.Tp * fun_2(V_1, V_2);
-            
+
                     V_1e = V_1e + 1/2 * obj.Tp * (fun_1(obj.F_10, F_D(i), V_1e) + fun_1(obj.F_10, F_D(i), V_1));
                     V_2e = V_2e + 1/2 * obj.Tp * (fun_2(V_1e, V_2e) + fun_2(V_1, V_2));
 
                     V_1L = V_1L + obj.Tp * fun_1L(obj.F_10, F_D(i), V_1L);
                     V_2L = V_2L + obj.Tp * fun_2L(V_1L, V_2L);
-            
+
                     V_1eL = V_1eL + 1/2 * obj.Tp * (fun_1L(obj.F_10, F_D(i), V_1eL) + fun_1L(obj.F_10, F_D(i), V_1L));
                     V_2eL = V_2eL + 1/2 * obj.Tp * (fun_2L(V_1eL, V_2eL) + fun_2L(V_1L, V_2L));
                 else            
                     V_1 = V_1 + obj.Tp * fun_1(F_1in(i - obj.delay), F_D(i), V_1);
                     V_2 = V_2 + obj.Tp * fun_2(V_1, V_2);
-            
+
                     V_1e = V_1e + 1/2 * obj.Tp * (fun_1(F_1in(i - obj.delay), F_D(i), V_1e) + fun_1(F_1in(i - obj.delay), F_D(i), V_1));
                     V_2e = V_2e + 1/2 * obj.Tp * (fun_2(V_1e, V_2e) + fun_2(V_1, V_2));
 
                     V_1L = V_1L + obj.Tp * fun_1L(F_1in(i - obj.delay), F_D(i), V_1L);
                     V_2L = V_2L + obj.Tp * fun_2L(V_1L, V_2L);
-            
+
                     V_1eL = V_1eL + 1/2 * obj.Tp * (fun_1L(F_1in(i - obj.delay), F_D(i), V_1eL) + fun_1L(F_1in(i - obj.delay), F_D(i), V_1L));
                     V_2eL = V_2eL + 1/2 * obj.Tp * (fun_2L(V_1eL, V_2eL) + fun_2L(V_1L, V_2L));
                 end
-            
-                V_2 = max(V_2, 0);
-                V_2L = max(V_2L, 0);
-                V_2e = max(V_2e, 0);
-                V_2eL = max(V_2eL, 0);
 
-                h_2 = sqrt(V_2e / obj.c);
-                h_2L = sqrt(obj.V_20 / obj.c) + 1/(2*sqrt(obj.V_20 * obj.c)) * (V_2eL - obj.V_20);
-            
+                h_2 = sqrt(V_2e / obj.C);
+                h_2L = sqrt(obj.V_20 / obj.C) + 1/(2*sqrt(obj.V_20 * obj.C)) * (V_2eL - obj.V_20);
+
                 % Sprowadzenie wartości do punktu pracy
                 y(i) = h_2 - obj.h_20;
                 y_L(i) = h_2L - obj.h_20;
             end
-            E = sum((y-y_L).^2) / obj.kk;
-        end
+            E = sum((y-y_L).^2) / kk;
+         end
 
         function [y, y_L, E] = rk4(obj, u, kk)
 
@@ -196,11 +155,11 @@ classdef Obiekt < handle
             y_L(1) = 0;
             
             %% Funkcje
-            fun_1 = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (V_1/obj.a)^(1/2);
-            fun_1L = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (obj.V_10/obj.a)^(1/2) - obj.alpha_1 / (2*obj.V_10^(1/2)*obj.a^(1/2)) * (V_1-obj.V_10);
-            fun_2 = @(V_1, V_2) obj.alpha_1 * (V_1/obj.a)^(1/2) - obj.alpha_2 * (V_2/obj.c)^(1/4); 
-            fun_2L = @(V_1, V_2) obj.alpha_1 * (obj.V_10/obj.a)^(1/2) - obj.alpha_2 * (obj.V_20/obj.c)^(1/4) + ...
-                     obj.alpha_1 / (2*obj.V_10^(1/2)*obj.a^(1/2)) * (V_1-obj.V_10) - obj.alpha_2 / (4*obj.V_20^(3/4)*obj.c^(1/4)) * (V_2-obj.V_20);
+            fun_1 = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (V_1/obj.A)^(1/2);
+            fun_1L = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (obj.V_10/obj.A)^(1/2) - obj.alpha_1 / (2*obj.V_10^(1/2)*obj.A^(1/2)) * (V_1-obj.V_10);
+            fun_2 = @(V_1, V_2) obj.alpha_1 * (V_1/obj.A)^(1/2) - obj.alpha_2 * (V_2/obj.C)^(1/4); 
+            fun_2L = @(V_1, V_2) obj.alpha_1 * (obj.V_10/obj.A)^(1/2) - obj.alpha_2 * (obj.V_20/obj.C)^(1/4) + ...
+                     obj.alpha_1 / (2*obj.V_10^(1/2)*obj.A^(1/2)) * (V_1-obj.V_10) - obj.alpha_2 / (4*obj.V_20^(3/4)*obj.C^(1/4)) * (V_2-obj.V_20);
             
             %% Wymuszenia
             F_1in = u(1,:) + obj.F_10;
@@ -270,8 +229,8 @@ classdef Obiekt < handle
                 V_2 = max(V_2, 0);
                 V_2L = max(V_2L, 0);
 
-                h_2 = sqrt(V_2 / obj.c);
-                h_2L = sqrt(obj.V_20 / obj.c) + 1/(2*sqrt(obj.V_20 * obj.c)) * (V_2L - obj.V_20);
+                h_2 = sqrt(V_2 / obj.C);
+                h_2L = sqrt(obj.V_20 / obj.C) + 1/(2*sqrt(obj.V_20 * obj.C)) * (V_2L - obj.V_20);
             
                 % Sprowadzenie wartości do punktu pracy
                 y(i) = h_2 - obj.h_20;

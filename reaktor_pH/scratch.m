@@ -237,3 +237,46 @@ for j = 1:5
     fprintf("%d. E_out = %.3f\n", j, E_out);
     fprintf("%d. E_out_2 = %.3f\n", j, E_out_2);
 end
+
+%% Rysowanie wykresów
+u = [ones(1, obiekt.kk)*-15
+    ones(1, obiekt.kk)*0
+    ones(1, obiekt.kk)*-15];
+[y, y_L, E_h, E_pH] = obiekt.modifiedEuler(u, obiekt.kk);
+
+if ~exist('ph_figure', 'var') || ~isvalid(ph_figure)
+    ph_figure = figure;
+else
+    figure(ph_figure); % Jeśli istnieje, przełącz na nią
+end
+
+plot(0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp, y(1,:), 'g-', 'LineWidth', 2);
+hold on;
+plot(0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp, y_L(1,:), 'm-', 'LineWidth', 2);
+xlabel('t [s]');
+ylabel('h [cm]');
+title('Wartość sygnału wyjściowego h - wymuszenie Q_1');
+legend('h (nieliniowe)', 'h (liniowe)', 'Location', 'northeast');
+grid on;
+% saveas(gcf, 'D:/EiTI/MGR/raporty/raport_MGR/pictures/wymuszenie_Q1h.png');  % Zapisuje jako plik PNG
+
+% file = fopen('errors.txt', 'a'); % Otwórz plik do zapisu (tryb 'w' nadpisuje plik)
+% fprintf(file, '%.2f\t%.3f\t%.3f\n', u(1,1), E_h, E_pH);
+% fclose(file); % Zamknij plik
+
+if ~exist('h_figure', 'var') || ~isvalid(h_figure)
+    h_figure = figure;
+else
+    figure(h_figure); % Jeśli istnieje, przełącz na nią
+end
+
+plot(0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp, y(2,:), 'b-', 'LineWidth', 2);
+hold on;
+plot(0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp, y_L(2,:), 'r-', 'LineWidth', 2);
+xlabel('t [s]');
+ylabel('pH');
+title('Wartość sygnału wyjściowego pH - wymuszenie Q_1');
+legend('pH (nieliniowe)', 'pH (liniowe)', 'Location', 'northeast');
+grid on;
+
+% saveas(gcf, 'D:/EiTI/MGR/raporty/raport_MGR/pictures/wymuszenie_Q1pH.png');  % Zapisuje jako plik PNG

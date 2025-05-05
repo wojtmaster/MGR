@@ -143,7 +143,7 @@ classdef Obiekt < handle
                 W_b4e(k) = W_b4e(k-1) + 1/2 * obj.Tp * (fun_3(Q_1(k), Q_2(k), Q_3(k), h_e, W_b4e(k-1)) + fun_3(Q_1(k), Q_2(k), Q_3(k), h, W_b4(k)));
                 
                 if (k < obj.delay + 1)
-                    pH = obj.pH_calc(W_a4e(1), W_b4e(1));
+                    pH = obj.pH_calc(obj.W_a40, obj.W_b40);
                 else
                     pH = obj.pH_calc(W_a4e(k - obj.delay), W_b4e(k - obj.delay));
                 end
