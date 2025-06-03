@@ -34,7 +34,7 @@ sigma_FD = 8;
 
 % Definiowanie funkcji przynależności (gaussmf)
 for i = 1:length(F1_center) 
-    fis = addMF(fis, 'F1', 'gaussmf', [sigma_F1, F1_center(i)]);
+    fis = addMF(fis, 'F1', 'gaussmf', [sigma_F1(i), F1_center(i)]);
 end
 for i = 1:length(FD_center) 
     fis = addMF(fis, 'FD', 'gaussmf', [sigma_FD, FD_center(i)]);

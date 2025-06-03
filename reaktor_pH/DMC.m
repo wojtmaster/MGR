@@ -13,9 +13,9 @@ classdef DMC < handle
         kz
         lambda
 
-        u_max = 35;
+        u_max = 15;
         delta_uk_max = 2.5;
-        y_max = 25;
+        y_max = 10;
     end
 
     methods
@@ -28,60 +28,84 @@ classdef DMC < handle
         end
 
         function [] = dynamic_matrix(obj, s)
-            obj.M = zeros(obj.N, obj.Nu);
-            
+            obj.M = cell(obj.N, obj.Nu);
+
             % Implementacja macierzy M
             for i = 1:obj.N
                 for j = 1:obj.Nu
                     if(i >= j)
-                        obj.M(i,j) = s(i-j+1);
+                        obj.M{i,j} = s{i-j+1};
+                    else
+                        obj.M{i,j} = zeros(2,2);
                     end
                 end
             end
+
+            M_matrix = cell2mat(obj.M);
+            I = eye(obj.Nu*2) * obj.lambda;
+
+            % [nRows, nCols] = size(obj.K);
+            % 
+            % % Sprawdzenie, czy da się podzielić na bloki 2x2
+            % if mod(nRows,2) ~= 0 || mod(nCols,2) ~= 0
+            %     error('Wymiary macierzy muszą być podzielne przez 2.');
+            % end
+            % 
+            % % Wektory rozmiarów bloków
+            % rowBlocks = repmat(2, 1, nRows/2);  % np. [2 2 2 2]
+            % colBlocks = repmat(2, 1, nCols/2);  % np. [2 2 ... x100]
+            % 
+            % % Podział na komórki 2x2
+            % K_cell = mat2cell(obj.K, rowBlocks, colBlocks);
         
             % Macierz K
-            obj.K = ((obj.M' * obj.M + obj.lambda * eye(obj.Nu))^(-1)) * obj.M';
-            obj.ke = sum(obj.K(1, :));
-            
+            obj.K = ((M_matrix' * M_matrix + I)^(-1)) * M_matrix';
+            for i = 1:2
+                for j = 1:2
+                    obj.ke(i,j) = sum(obj.K(i, j:2:end));
+                end
+            end
         end
 
         function [] = past_matrix(obj, s)
-            obj.M_p = zeros(obj.N, obj.D-1);
+            obj.M_p = cell(obj.N, obj.D-1);
         
             % Implementacja macierzy M_p
             for i = 1:obj.N
                 for j = 1:obj.D-1
                     if(i+j <= obj.D)
-                        obj.M_p(i,j) = s(i+j) - s(j);
+                        obj.M_p{i,j} = s{i+j} - s{j};
                     else 
-                        obj.M_p(i,j) = s(obj.D) - s(j);
+                        obj.M_p{i,j} = s{obj.D} - s{j};
                     end
                 end
             end
-            obj.ku = obj.K(1, :) * obj.M_p;
+            Mp_matrix = cell2mat(obj.M_p);
+            obj.ku = obj.K(1:2, :) * Mp_matrix;
         end
 
         function [] = matrix_disturbance(obj, s)
-            obj.M_zP = zeros(obj.N, obj.D_disturbance-1);
+            obj.M_zP = cell(obj.N, obj.D_disturbance-1);
 
             % Implementacja macierzy M_zP
             for i = 1:obj.N
                 for j = 1:obj.D_disturbance-1
                     if(i+j <= obj.D_disturbance)
-                        obj.M_zP(i,j) = s(i+j) - s(j);
+                        obj.M_zP{i,j} = s{i+j} - s{j};
                     else 
-                        obj.M_zP(i,j) = s(obj.D_disturbance) - s(j);
+                        obj.M_zP{i,j} = s{obj.D_disturbance} - s{j};
                     end
                 end
             end
 
-            obj.M_zP = [s(1:obj.N), obj.M_zP];
-            obj.kz = obj.K(1, :) * obj.M_zP;
+            obj.M_zP = [s(1:obj.N)', obj.M_zP];
+            MzP_matrix = cell2mat(obj.M_zP);
+            obj.kz = obj.K(1:2, :) * MzP_matrix;
         end
     
         function [y_mod, u, E] = dmc_analitic(obj, y_zad, u_D, a, b, delay, kk)
             %% Alokacja pamięci
-            u = zeros(2, kk);
+            u = zeros(3, kk);
             u(2,:) = u_D;
 
             delta_up = zeros(1, obj.D-1);
@@ -568,7 +592,7 @@ classdef DMC < handle
             y_mod = zeros(size(y_zad));
             y_mod(1:delay+2) = y_zad(1:delay+2);
             for k = delay+3:kk
-                y_mod(k) = - a*[y_mod(k-1:-1:k-2)]' + b*[u_fuzzy(k-(delay+1):-1:k-(delay+2))]' + b*[u(2, k-1:-1:k-2)]';
+                y_mod(k) = - a*[y_mod(k-1:-1:k-2)]' + b*u_fuzzy(k-(delay+1))' + b*[u(2, k-1:-1:k-2)]';
 
                 % Ograniczenia wartości sygnału wyjściowego, tj. wysokości h_2
                 y_mod(k) = min(y_mod(k), obj.y_max);

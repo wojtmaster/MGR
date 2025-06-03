@@ -1,61 +1,395 @@
-%%
-% Wczytanie danych
-data = readmatrix('samplingData_11_02_2025_11_59_44.txt');
+        function [y_mod, u, E, E_u, E_y] = dmc_analitic(obj, y_zad, u_D, a, b, delay, kk)
+            %% Alokacja pamięci
+            u = zeros(2, kk);
+            u(2,:) = u_D;
 
-% Pobranie drugiej i trzeciej kolumny
-x = (1:length(data(:,2))-500)';  % Indeksy czasowe
-y1 = data(1:end-500,2); % Druga kolumna
-y2 = data(1:end-500,3); % Trzecia kolumna
+            delta_up = zeros(1, obj.D-1);
+            delta_uz = zeros(1, obj.D_disturbance);
+            delta_uk = 0;
+            delta_u = zeros(1, kk);
+            
+            %% Sterowanie DMC
+            y_mod = zeros(size(y_zad));
+            y_mod(1:delay+2) = y_zad(1:delay+2);
+            for k = delay+3:kk
+                y_mod(k) = - a*[y_mod(k-1:-1:k-2)]' + b*[u(1, k-(delay+1):-1:k-(delay+2))]' + b*[u(2, k-1:-1:k-2)]';
 
-% --- Regresja wielomianowa i ekstrapolacja ---
-poly_order = 5; % Stopień wielomianu (można dostosować)
-p1 = polyfit(x, y1, poly_order); % Dopasowanie do drugiej kolumny
-p2 = polyfit(x, y2, poly_order); % Dopasowanie do trzeciej kolumny
+                % Ograniczenia wartości sygnału wyjściowego, tj. wysokości h_2
+                y_mod(k) = min(y_mod(k), obj.y_max);
+                y_mod(k) = max(y_mod(k), -obj.y_max);
 
-% Tworzymy nowe punkty x do ekstrapolacji
-x_new = (1:max(x) + 500)'; % Wydłużamy o 200 punktów
-y1_extrap = polyval(p1, x_new);
-y2_extrap = polyval(p2, x);
+                % Przepisanie sterowań do wektora przeszłych sterowań
+                delta_up = [delta_uk, delta_up(1:end-1)];
+                delta_uz = [u(2, k) - u(2, k-1) , delta_uz(1:end-1)];
 
-% --- Filtr Savitzky-Golay dla wygładzenia ---
-window_size = 11; % Długość okna
-poly_order_sg = 3; % Stopień wielomianu dla filtru
+                % Oblicznie uchybu    
+                e = y_zad(k) - y_mod(k);
+            
+                % Obliczenie przyrostu sterowania dla chwili (i+1) w chwili i-tej
+                delta_uk = obj.ke * e - obj.ku * delta_up' - obj.kz * delta_uz';
+                
+                % Ograniczenie wartości przyrostu sterowania
+                delta_uk = min(delta_uk, obj.delta_uk_max);
+                delta_uk = max(delta_uk, -obj.delta_uk_max);
+                delta_u(k) = delta_uk;
+                
+                % Obliczenie sterowania dla chwili (i+1) w chwili i-tej
+                u(1, k) = u(1, k-1) + delta_uk;
+                
+                % Ograniczenie sterowania
+                u(1, k) = min(u(1, k), obj.u_max);
+                u(1, k) = max(u(1, k), -obj.u_max);
+            end
+            E_u = obj.lambda .* sum(delta_u.^2)/kk;
+            E_y = sum((y_zad - y_mod).^2)/kk;
+            E =  E_u + E_y;
+        end
+    
+        function [y_mod, u, E] = dmc_numeric(obj, y_zad, u_D, a, b, delay, kk)
+            % Alokacja pamięci
+            u = zeros(2, kk);
+            u(2,:) = u_D;
+            
+            delta_up = zeros(obj.D-1,1);
+            delta_uk = zeros(obj.Nu,1);
+            delta_uz = zeros(obj.D_disturbance, 1);
+            delta_u = zeros(1, kk);
 
-y1_smooth = sgolayfilt(y1_extrap, poly_order_sg, window_size);
-y2_smooth = sgolayfilt(y2_extrap, poly_order_sg, window_size);
+            Y_max = ones(obj.N,1)*obj.y_max;
+            Y_min = ones(obj.N,1)*(-obj.y_max);
+            
+            U_max = ones(obj.Nu,1)*obj.u_max;
+            U_min = ones(obj.Nu,1)*(-obj.u_max);
+            delta_U_max = ones(obj.Nu,1)*obj.delta_uk_max;
+            delta_U_min = ones(obj.Nu,1)*(-obj.delta_uk_max);
+            
+            J = tril(ones(obj.Nu));
+            A = [-J; J; -obj.M; obj.M];
+            H = 2*(obj.M'*obj.M + obj.lambda*eye(obj.Nu));
+            
+            y_mod = zeros(size(y_zad));
+            y_mod(1:delay+2) = y_zad(1:delay+2);
+            for k = delay+3:kk
+                y_mod(k) = - a*[y_mod(k-1:-1:k-2)]' + b*[u(1, k-(delay+1):-1:k-(delay+2))]' + b*[u(2, k-1:-1:k-2)]';
+                   
+                % Przepisanie sterowań do wektora przeszłych sterowań
+                delta_up = [delta_uk(1); delta_up(1:end-1)];
+                delta_uz = [u(2, k) - u(2, k-1); delta_uz(1:end-1)];
+            
+                U_k_1 = ones(obj.Nu,1)*u(1,k-1);
+                Y = ones(obj.N,1)*y_mod(k);
+                Y_0 = Y + obj.M_p*delta_up + obj.M_zP*delta_uz;
+                Y_zad = ones(obj.N,1)*y_zad(k);
+                B = [-U_min + U_k_1;
+                    U_max - U_k_1;
+                    -Y_min + Y_0;
+                    Y_max - Y_0];
+                f = -2*obj.M'*(Y_zad - Y_0);
+                
+                % Obliczenie przyrostu sterowania dla chwili (i+1) w chwili i-tej
+                options = optimoptions('quadprog', 'Display', 'off');
+                delta_uk = quadprog(H,f,A,B,[],[],delta_U_min,delta_U_max,[],options);
+                delta_u(k) = delta_uk(1);
+                
+                % Obliczenie sterowania
+                u(1,k) = u(1,k-1) + delta_uk(1);
+            end
+            E = sum((y_zad - y_mod).^2)/kk + obj.lambda .* (sum(delta_u.^2))/kk;
+        end
+    
+        function [y_mod, u, E] = dmc_sl(obj, y_zad, u_D, delay, kk, F_10, F_D0, obiekt)
+            %% Alokacja pamięci
+            u = zeros(2, kk);
+            u(2,:) = u_D;
 
-% --- Znalezienie miejsca wypłaszczenia ---
-tolerance = 0.001; % Próg zmian wartości do uznania za wypłaszczenie
+            delta_up = zeros(1, obj.D-1);
+            delta_uz = zeros(1, obj.D_disturbance);
+            delta_uk = 0;
+            delta_u = zeros(1, kk);
+            
+            %% Sterowanie DMC
+            y_mod = zeros(size(y_zad));
+            y_mod(1:delay+2) = y_zad(1:delay+2);
+            for k = delay+3:kk
+                obiekt.linearization(F_10 + u(1,k), F_D0 + u(2,k));
+                [a, b, s, s_disturbance] = obiekt.mse();
+                obj.dynamic_matrix(s);
+                obj.past_matrix(s);
+                obj.matrix_disturbance(s_disturbance);
 
-idx1 = find(abs(diff(y1_smooth)) < tolerance, 1); % Pierwszy punkt stabilizacji
-idx2 = find(abs(diff(y2_smooth)) < tolerance, 1);
+                y_mod(k) = - a*[y_mod(k-1:-1:k-2)]' + b*[u(1, k-(delay+1):-1:k-(delay+2))]' + b*[u(2, k-1:-1:k-2)]';
 
-flat_point_x1 = x_new(idx1);
-flat_point_x2 = x_new(idx2);
+                % Ograniczenia wartości sygnału wyjściowego, tj. wysokości h_2
+                y_mod(k) = min(y_mod(k), obj.y_max);
+                y_mod(k) = max(y_mod(k), -obj.y_max);
 
-flat_point_y1 = y1_smooth(idx1);
-flat_point_y2 = y2_smooth(idx2);
+                % Przepisanie sterowań do wektora przeszłych sterowań
+                delta_up = [delta_uk, delta_up(1:end-1)];
+                delta_uz = [u(2, k) - u(2, k-1) , delta_uz(1:end-1)];
 
-% --- Wizualizacja wyników ---
-figure;
-subplot(2,1,1);
-plot(x, y1, 'r--', 'LineWidth', 1.2); hold on;
-plot(x_new, y1_extrap, 'g-', 'LineWidth', 1.5); % Regresja wielomianowa + ekstrapolacja
-plot(x_new, y1_smooth, 'b-', 'LineWidth', 1.5); % Savitzky-Golay
-plot(flat_point_x1, flat_point_y1, 'ko', 'MarkerSize', 10, 'MarkerFaceColor', 'k'); % Punkt wypłaszczenia
-legend('Oryginalne dane', 'Ekstrapolacja', 'Savitzky-Golay', 'Punkt wypłaszczenia');
-title('Druga kolumna - Aproksymacja i Wypłaszczenie');
-xlabel('Indeks czasu');
-ylabel('Wartość');
-grid on;
+                % Oblicznie uchybu    
+                e = y_zad(k) - y_mod(k);
+            
+                % Obliczenie przyrostu sterowania dla chwili (i+1) w chwili i-tej
+                delta_uk = obj.ke * e - obj.ku * delta_up' - obj.kz * delta_uz';
+                
+                % Ograniczenie wartości przyrostu sterowania
+                delta_uk = min(delta_uk, obj.delta_uk_max);
+                delta_uk = max(delta_uk, -obj.delta_uk_max);
+                delta_u(k) = delta_uk;
+                
+                % Obliczenie sterowania dla chwili (i+1) w chwili i-tej
+                u(1, k) = u(1, k-1) + delta_uk; 
+                
+                % Ograniczenie sterowania
+                u(1, k) = min(u(1, k), obj.u_max);
+                u(1, k) = max(u(1, k), -obj.u_max);
+            end
+            E = sum((y_zad - y_mod).^2)/kk + obj.lambda .* (sum(delta_u.^2))/kk;
+        end
 
-subplot(2,1,2);
-plot(x, y2, 'r--', 'LineWidth', 1.2); hold on;
-plot(x, y2_extrap, 'g-', 'LineWidth', 1.5);
-plot(x, y2_smooth, 'b-', 'LineWidth', 1.5);
-plot(flat_point_x2, flat_point_y2, 'ko', 'MarkerSize', 10, 'MarkerFaceColor', 'k');
-legend('Oryginalne dane', 'Ekstrapolacja', 'Savitzky-Golay', 'Punkt wypłaszczenia');
-title('Trzecia kolumna - Aproksymacja i Wypłaszczenie');
-xlabel('Indeks czasu');
-ylabel('Wartość');
-grid on;
+        function [y_mod, u, E] = dmc_SL(obj, y_zad, u_D, delay, kk, F_10, F_D0, linearization)
+            % Alokacja pamięci
+            u = zeros(2, kk);
+            u(2,:) = u_D;
+            
+            delta_up = zeros(obj.D-1,1);
+            delta_uk = zeros(obj.Nu,1);
+            delta_uz = zeros(obj.D_disturbance, 1);
+            delta_u = zeros(1, kk);
+
+            Y_max = ones(obj.N,1)*obj.y_max;
+            Y_min = ones(obj.N,1)*(-obj.y_max);
+            
+            U_max = ones(obj.Nu,1)*obj.u_max;
+            U_min = ones(obj.Nu,1)*(-obj.u_max);
+            delta_U_max = ones(obj.Nu,1)*obj.delta_uk_max;
+            delta_U_min = ones(obj.Nu,1)*(-obj.delta_uk_max);
+            
+            J = tril(ones(obj.Nu));
+            
+            y_mod = zeros(size(y_zad));
+            y_mod(1:delay+2) = y_zad(1:delay+2);
+            for k = delay+3:kk
+                [s, s_disturbance, a, b] = linearization(F_10 + u(1,k), F_D0 + u(2,k));
+                obj.dynamic_matrix(s);
+                obj.past_matrix(s);
+                obj.matrix_disturbance(s_disturbance);
+
+                y_mod(k) = - a*[y_mod(k-1:-1:k-2)]' + b*[u(1, k-(delay+1):-1:k-(delay+2))]' + b*[u(2, k-1:-1:k-2)]';
+                   
+                % Przepisanie sterowań do wektora przeszłych sterowań
+                delta_up = [delta_uk(1); delta_up(1:end-1)];
+                delta_uz = [u(2, k) - u(2, k-1); delta_uz(1:end-1)];
+            
+                A = [-J; J; -obj.M; obj.M];
+                H = 2*(obj.M'*obj.M + obj.lambda*eye(obj.Nu));
+                U_k_1 = ones(obj.Nu,1)*u(1,k-1);
+                Y = ones(obj.N,1)*y_mod(k);
+                Y_0 = Y + obj.M_p*delta_up + obj.M_zP*delta_uz;
+                Y_zad = ones(obj.N,1)*y_zad(k);
+                B = [-U_min + U_k_1;
+                    U_max - U_k_1;
+                    -Y_min + Y_0;
+                    Y_max - Y_0];
+                f = -2*obj.M'*(Y_zad - Y_0);
+                
+                % Obliczenie przyrostu sterowania dla chwili (i+1) w chwili i-tej
+                options = optimoptions('quadprog', 'Display', 'off');
+                delta_uk = quadprog(H,f,A,B,[],[],delta_U_min,delta_U_max,[],options);
+                delta_u(k) = delta_uk(1);
+                
+                % Obliczenie sterowania
+                u(1,k) = u(1,k-1) + delta_uk(1); 
+            end
+            E = sum((y_zad - y_mod).^2)/kk + obj.lambda .* (sum(delta_u.^2))/kk;
+        end
+
+        function [y_mod, u, E] = dmc_npl(obj, y_zad, u_D, delay, kk, F_10, F_D0, linearization, rk4)
+            %% Alokacja pamięci
+            u = zeros(2, kk);
+            u(2,:) = u_D;
+
+            delta_up = zeros(1, obj.D-1);
+            delta_uz = zeros(1, obj.D_disturbance);
+            delta_uk = 0;
+            delta_u = zeros(1, kk);
+            
+            %% Sterowanie DMC
+            y_mod = zeros(size(y_zad));
+            y_mod(1:delay+2) = y_zad(1:delay+2);
+            for k = delay+3:kk
+                [s, ~, a, b] = linearization(F_10 + u(1, k), F_D0 + u(2, k));
+                [S, ~] = rk4([ones(1, obj.D); zeros(1, obj.D)], obj.D);
+                [S_disturbance, ~] = rk4([zeros(1, obj.D_disturbance); ones(1, obj.D_disturbance)], obj.D_disturbance);
+
+                obj.dynamic_matrix(s);
+                obj.past_matrix(S');
+                obj.matrix_disturbance(S_disturbance');
+
+                y_mod(k) = - a*[y_mod(k-1:-1:k-2)]' + b*[u(1, k-(delay+1):-1:k-(delay+2))]' + b*[u(2, k-1:-1:k-2)]';
+
+                % Ograniczenia wartości sygnału wyjściowego, tj. wysokości h_2
+                y_mod(k) = min(y_mod(k), obj.y_max);
+                y_mod(k) = max(y_mod(k), -obj.y_max);
+
+                % Przepisanie sterowań do wektora przeszłych sterowań
+                delta_up = [delta_uk, delta_up(1:end-1)];
+                delta_uz = [u(2, k) - u(2, k-1) , delta_uz(1:end-1)];
+
+                % Oblicznie uchybu    
+                e = y_zad(k) - y_mod(k);
+            
+                % Obliczenie przyrostu sterowania dla chwili (i+1) w chwili i-tej
+                delta_uk = obj.ke * e - obj.ku * delta_up' - obj.kz * delta_uz';
+                
+                % Ograniczenie wartości przyrostu sterowania
+                delta_uk = min(delta_uk, obj.delta_uk_max);
+                delta_uk = max(delta_uk, -obj.delta_uk_max);
+                delta_u(k) = delta_uk;
+                
+                % Obliczenie sterowania dla chwili (i+1) w chwili i-tej
+                u(1, k) = u(1, k-1) + delta_uk; 
+                
+                % Ograniczenie sterowania
+                u(1, k) = min(u(1, k), obj.u_max);
+                u(1, k) = max(u(1, k), -obj.u_max);
+            end
+            E = sum((y_zad - y_mod).^2)/kk + obj.lambda .* (sum(delta_u.^2))/kk;
+        end
+
+        function [y_mod, u, E] = dmc_NPL(obj, y_zad, u_D, delay, kk, F_10, F_D0, linearization, rk4)
+            % Alokacja pamięci
+            u = zeros(2, kk);
+            u(2,:) = u_D;
+            
+            delta_up = zeros(obj.D-1,1);
+            delta_uk = zeros(obj.Nu,1);
+            delta_uz = zeros(obj.D_disturbance, 1);
+            delta_u = zeros(1, kk);
+
+            Y_max = ones(obj.N,1)*obj.y_max;
+            Y_min = ones(obj.N,1)*(-obj.y_max);
+            
+            U_max = ones(obj.Nu,1)*obj.u_max;
+            U_min = ones(obj.Nu,1)*(-obj.u_max);
+            delta_U_max = ones(obj.Nu,1)*obj.delta_uk_max;
+            delta_U_min = ones(obj.Nu,1)*(-obj.delta_uk_max);
+            
+            J = tril(ones(obj.Nu));
+            
+            y_mod = zeros(size(y_zad));
+            y_mod(1:delay+2) = y_zad(1:delay+2);
+            for k = delay+3:kk
+                [s, ~, a, b] = linearization(F_10 + u(1, k), F_D0 + u(2, k));
+                [S, ~] = rk4([ones(1, obj.D); zeros(1, obj.D)], obj.D);
+                [S_disturbance, ~] = rk4([zeros(1, obj.D_disturbance); ones(1, obj.D_disturbance)], obj.D_disturbance);
+
+                obj.dynamic_matrix(s);
+                obj.past_matrix(S');
+                obj.matrix_disturbance(S_disturbance');
+
+                y_mod(k) = - a*[y_mod(k-1:-1:k-2)]' + b*[u(1, k-(delay+1):-1:k-(delay+2))]' + b*[u(2, k-1:-1:k-2)]';
+                   
+                % Przepisanie sterowań do wektora przeszłych sterowań
+                delta_up = [delta_uk(1); delta_up(1:end-1)];
+                delta_uz = [u(2, k) - u(2, k-1); delta_uz(1:end-1)];
+            
+                A = [-J; J; -obj.M; obj.M];
+                H = 2*(obj.M'*obj.M + obj.lambda*eye(obj.Nu));
+                U_k_1 = ones(obj.Nu,1)*u(1,k-1);
+                Y = ones(obj.N,1)*y_mod(k);
+                Y_0 = Y + obj.M_p*delta_up + obj.M_zP*delta_uz;
+                Y_zad = ones(obj.N,1)*y_zad(k);
+                B = [-U_min + U_k_1;
+                    U_max - U_k_1;
+                    -Y_min + Y_0;
+                    Y_max - Y_0];
+                f = -2*obj.M'*(Y_zad - Y_0);
+                
+                % Obliczenie przyrostu sterowania dla chwili (i+1) w chwili i-tej
+                options = optimoptions('quadprog', 'Display', 'off');
+                delta_uk = quadprog(H,f,A,B,[],[],delta_U_min,delta_U_max,[],options);
+                delta_u(k) = delta_uk(1);
+                
+                % Obliczenie sterowania
+                u(1,k) = u(1,k-1) + delta_uk(1); 
+            end
+            E = sum((y_zad - y_mod).^2)/kk + obj.lambda .* (sum(delta_u.^2))/kk;
+        end
+
+        function [y_mod, u, E] = dmc_fuzzy(obj, y_zad, u_D, a, b, delay, kk, fis, F_10, F_D0, linearization)
+            %% Alokacja pamięci
+            u = zeros(2, kk);
+            u(2,:) = u_D;
+
+            delta_up = zeros(1, obj.D-1);
+            delta_uz = zeros(1, obj.D_disturbance);
+            delta_uk = 0;
+            delta_u = zeros(1, kk);
+
+            F_1 = [-45, 45];
+            F_D = [-5, 5];
+            
+            KE = zeros(1, length(F_1)*length(F_D));
+            KU = cell(1, length(F_1)*length(F_D));
+            KZ = cell(1, length(F_1)*length(F_D));
+
+            for i = 1:length(F_1)
+                for j = 1:length(F_D)
+                    [s, s_disturbance, ~, ~] = linearization(F_10+F_1(i), F_D0+F_D(j));
+                    obj.dynamic_matrix(s);
+                    obj.past_matrix(s);
+                    obj.matrix_disturbance(s_disturbance);
+            
+                    KE((i - 1) * length(F_D) + j) = obj.ke;
+                    KU{(i - 1) * length(F_D) + j} = obj.ku;
+                    KZ{(i - 1) * length(F_D) + j} = obj.kz;
+                end
+            end
+            
+            %% Sterowanie DMC
+            y_mod = zeros(size(y_zad));
+            y_mod(1:delay+2) = y_zad(1:delay+2);
+            for k = delay+3:kk
+                y_mod(k) = - a*[y_mod(k-1:-1:k-2)]' + b*[u(1, k-(delay+1):-1:k-(delay+2))]' + b*[u(2, k-1:-1:k-2)]';
+
+                % Ograniczenia wartości sygnału wyjściowego, tj. wysokości h_2
+                y_mod(k) = min(y_mod(k), obj.y_max);
+                y_mod(k) = max(y_mod(k), -obj.y_max);
+
+                % Przepisanie sterowań do wektora przeszłych sterowań
+                delta_up = [delta_uk, delta_up(1:end-1)];
+                delta_uz = [u(2, k) - u(2, k-1) , delta_uz(1:end-1)];
+
+                % Oblicznie uchybu    
+                e = y_zad(k) - y_mod(k);
+
+                % Obliczenie przyrostu sterowania dla chwili (i+1) w chwili i-tej
+                inputs = [y_mod(k-1), u(1, k-(delay+1)), u(2, k-1)];
+                % inputs = [y_mod(k-1), u(1, k-(delay+1))];
+                [~, degree] = evalfis(fis, inputs);
+                strength = max(degree);
+                % strength = strength / sum(strength);
+                for i = 1:length(strength)
+                    idx = mod(i-1, length(F_1)*length(F_D)) + 1;
+                    delta_uk = delta_uk + strength(i)*(KE(idx) * e - KU{idx} * delta_up' - KZ{idx} * delta_uz');
+                end
+                delta_uk = delta_uk / sum(strength);
+
+                % Ograniczenie wartości przyrostu sterowania
+                delta_uk = min(delta_uk, obj.delta_uk_max);
+                delta_uk = max(delta_uk, -obj.delta_uk_max);
+                delta_u(k) = delta_uk;
+                
+                % Obliczenie sterowania dla chwili (i+1) w chwili i-tej
+                u(1, k) = u(1, k-1) + delta_uk;
+                
+                % Ograniczenie sterowania
+                u(1, k) = min(u(1, k), obj.u_max);
+                u(1, k) = max(u(1, k), -obj.u_max);
+            end
+            E = sum((y_zad - y_mod).^2)/kk + obj.lambda .* sum(delta_u.^2)/kk;
+        end
+
+        function [y_mod, u, E] = dmc_FUZZY(obj, y_zad, u_D, a, b, delay, kk, fis, F_10, F_D0, linearization)

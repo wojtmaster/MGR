@@ -329,17 +329,17 @@ classdef Hammerstein < handle
                     %     dydQ3 = dydQ3 + w(i) * (-derivative);  % Pochodna po Q3 ma przeciwny znak
                     % end
 
-                    delta = 0.05;
+                    delta = 0.1;
                     y0 = evalfis(obj.nonlinear_fis.pH, tanh((U(1,k-1)- U(3,k-1))/15));
-                    y_Q1 = evalfis(obj.nonlinear_fis.pH, tanh(((U(1,k-1) + delta) - (U(3,k-1)+delta))/15));
+                    y_Q1 = evalfis(obj.nonlinear_fis.pH, tanh(((U(1,k-1) + delta) - U(3,k-1))/15));
                     y_Q3 = evalfis(obj.nonlinear_fis.pH, tanh((U(1,k-1) - (U(3,k-1)+delta))/15));
                     
                     dydQ1 = (y_Q1 - y0) / delta;
                     dydQ3 = (y_Q3 - y0) / delta;
-                    if (mod(k, 200) == 0)
-                        fprintf("dydQ1 = %.3f\n", dydQ1);
-                        fprintf("dydQ3 = %.3f\n", dydQ3);
-                    end
+
+                    if (k == 20)
+                        return;
+                        e
                     
                     if(abs(Y_fuzzy(k-1)) <= 3)
                         K = Y_fuzzy(k-1) / (abs(U(1,k-1)) + abs(U(3,k-1)));
@@ -355,7 +355,7 @@ classdef Hammerstein < handle
 
                     y_1(k) = -a_pH.Q1 * y_1(k-1:-1:k-2)' + dydQ1*b_pH.Q1*U(1,k-1);
                     y_2(k) = 0;
-                    y_3(k) = -a_pH.Q3 * y_3(k-1:-1:k-3)' + dydQ1*b_pH.Q3*U(3,k-1);
+                    y_3(k) = -a_pH.Q3 * y_3(k-1:-1:k-3)' + dydQ3*b_pH.Q3*U(3,k-1);
                     Y_out(k) = y_1(k) + y_2(k) + y_3(k);
                     % Y_out(k) = -A * Y_out(k-1:-1:k-5)' + K*B_Q1*U(1,k-1:-1:k-4)' + B_Q2*U(2,k-1:-1:k-4)' + K*B_Q3*U(3,k-1:-1:k-3)';
                     % disp(K);

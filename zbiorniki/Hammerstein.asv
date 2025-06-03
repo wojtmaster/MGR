@@ -114,7 +114,7 @@ classdef Hammerstein < handle
                     ['model Hammersteina' blanks(5) sprintf('E = %.3f', E_out)]}, ...
                     'Location', 'best');
 
-            title('Porównanie wyjścia obiektu testowego i jego modeli - następniki liniowe');
+            title('Porównanie wyjścia obiektu testowego i jego modeli');
             ylabel('y [cm]');
             xlabel('t [s]');
             grid on;
@@ -176,7 +176,7 @@ classdef Hammerstein < handle
                     ['model liniowy' blanks(17) sprintf('E = %.3f', E_lin)], ...
                     ['model Hammersteina' blanks(5) sprintf('E = %.3f', E_out)]}, ...
                     'Location', 'best');
-            title('Porównanie wyjścia obiektu testowego i jego modeli - następniki nieliniowe');
+            title('Porównanie wyjścia obiektu testowego i jego modeli');
             ylabel('y [cm]');
             xlabel('t [s]');
             grid on;

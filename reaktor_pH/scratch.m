@@ -280,3 +280,53 @@ legend('pH (nieliniowe)', 'pH (liniowe)', 'Location', 'northeast');
 grid on;
 
 % saveas(gcf, 'D:/EiTI/MGR/raporty/raport_MGR/pictures/wymuszenie_Q1pH.png');  % Zapisuje jako plik PNG
+
+%%
+% Układ wielowymiarowy (MIMO): 3 wejścia (U1, U2, U3), 1 wyjście (Y)
+
+% Podukład 1 (U1)
+A1 = [1.6301  -0.6572;
+      1       0];
+B1 = [1;
+      0];
+C1 = [-0.0271  0];
+D1 = 0;
+
+% Podukład 2 (U2)
+A2 = [1.5218  -0.5632;
+      1        0];
+B2 = [1;
+      0];
+C2 = [0.0413   0];
+D2 = 0;
+
+% Podukład 3 (U3)
+A3 = [2.7830  -2.5937   0.8095;
+      1        0        0;
+      0        1        0];
+B3 = [1;
+      0;
+      0];
+C3 = [0.0012  0  0];
+D3 = 0;
+
+% Macierz A (blok diagonalny)
+A = blkdiag(A1, A2, A3);
+
+% Macierz B (kolumny B1, B2, B3 umieszczone odpowiednio)
+B = [B1, zeros(2,1), zeros(2,1);
+     zeros(2,1), B2, zeros(2,1);
+     zeros(3,2), B3];
+
+% Macierz C (zsumowanie wpływu wszystkich wejść)
+C = [C1, C2, C3];
+
+% Macierz D (brak sprzężenia bezpośredniego)
+D = [0 0 0];
+
+% Stworzenie obiektu systemu
+sys = ss(A, B, C, D, 10);  % -1 oznacza dyskretny czas z nieokreślonym krokiem
+
+G = tf(sys);
+G
+

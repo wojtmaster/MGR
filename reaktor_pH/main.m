@@ -12,97 +12,107 @@ set(groot, 'DefaultAxesFontSize', 10);
 %% Inicjalizacja obiektu oraz linearyzacja
 obiekt = Obiekt();
 %  pH_0, h_0, Q_10, Q_20, Q_30
-[s, a, b] = obiekt.linearization(16.6, 0.55, 15.6);
+obiekt.linearization(16.6, 0.55, 15.6);
+[a_h, b_h, s_h] = obiekt.mse('h');
+[a_pH, b_pH, s_pH] = obiekt.mse('pH');
 
-%% Dane do wykresów 3D
-% Zakresy sterowania
-U = [linspace(-15, 15, 100);
-    linspace(-15, 15, 100)];
+S = cell(1, obiekt.dynamic_horizont);
+S_disturbance = cell(1, obiekt.dynamic_horizont);
 
-[Q1_grid, Q3_grid] = meshgrid(U(1,:), U(2,:));  % kombinacje
-
-% Przygotuj siatkę
-h = zeros(100,100);
-pH = zeros(100,100);
-
-% Petla po siatce sterowań
-for i = 1:length(U)
-    for j = 1:length(U)
-        u = [ones(1, 200)*U(1,j);
-             zeros(1, 200);
-             ones(1, 200)*U(2,i)];
-    
-        [y, ~, ~] = obiekt.modifiedEuler(u, 200);
-        h(i,j) =  y(1, end) + obiekt.h_0;
-        pH(i,j) = y(2, end) + obiekt.pH_0; 
-    end
+for i = 1:obiekt.dynamic_horizont
+    S{i} = [s_h.Q1(1,i), s_h.Q3(1,i)
+            s_pH.Q1(2,i), s_pH.Q3(2,i)];
+    S_disturbance{i} = [s_h.Q2(1,i); s_pH.Q2(2,i)];
 end
 
-% Rysuj 3D wykres
-figure;
-surf(Q1_grid, Q3_grid, pH);
-xlabel('Q_3 [ml/s]');
-ylabel('Q_1 [ml/s]');
-zlabel('pH');
-title('Wpływ dopływów Q_1 oraz Q_3 na stężenie substancji pH');
-shading interp;
-colorbar;
-view(135, 0);
-% saveas(gcf, 'D:/EiTI/MGR/raporty/raport_MGR/pictures/ph-_staticCharacteristic.png');  % Zapisuje jako plik PNG
-
-figure;
-surf(Q1_grid, Q3_grid, h);
-xlabel('Q_1 [ml/s]');
-ylabel('Q_3 [ml/s]');
-zlabel('h [cm]');
-title('Wpływ dopływów Q_1 oraz Q_3 na wysokość słupa cieczy h');
-shading interp;
-colorbar;
-view(45, 30);
-% saveas(gcf, 'D:/EiTI/MGR/raporty/raport_MGR/pictures/h_staticCharacteristic.png');  % Zapisuje jako plik PNG
-
-% [fis] = obiekt.fuzzyfication();
-
-% u = [linspace(-45, 45, 250)
-%     linspace(-15, 15, 250)*0];
-% y = obiekt.static_charakteristic(u);
-
-%% Hammerstein
-hammerstein = Hammerstein();
+%% Hammerstein 
+hammerstein = Hammerstein(@(u, kk) obiekt.modifiedEuler(u, kk));
 hammerstein.linearFuzzy();
 hammerstein.nonlinearFuzzy();
 
-% hammerstein.show_fuzzy(hammerstein.linear_fis, 'liniowe');
-% hammerstein.show_fuzzy(hammerstein.nonlinear_fis, 'nieliniowe');
-
 %% Wiener
-wiener = Wiener();
+wiener = Wiener(a_h, a_pH, b_h, b_pH, obiekt);
 wiener.linearFuzzy();
 wiener.nonlinearFuzzy();
 
-% wiener.show_fuzzy(wiener.linear_fis, 'liniowe');
-% wiener.show_fuzzy(wiener.nonlinear_fis, 'nieliniowe');
+%% Check fuzzy static
+U_min = -15;
+U_max = 15;
+U = [linspace(U_min, U_max, 100);
+    linspace(U_min, U_max, 100)];
+[Q1_grid, Q3_grid] = meshgrid(U(1,:), U(2,:));
 
-%% Testing 
-for index = 1:5
-    % i = 1;
-    U = [repelem((rand(1, obiekt.kk/250) * 90 - 45), 250); zeros(1, obiekt.kk)];
+% % Dane wejściowe
+% X = [Q1_grid(:), Q3_grid(:)]';
+% Y = wiener.pH(:)';
+% 
+% % Sieć neuronowa (feedforward)
+% net = fitnet([10 10], 'trainlm');  % 2 warstwy ukryte po 10 neuronów
+% net.trainParam.showWindow = true;
+% net = train(net, X, Y);
+% 
+% % Predykcja
+% Y_pred = net(X)';
+% pH_pred = reshape(Y_pred, size(Q1_grid));
+% 
+% % Rysowanie
+% figure;
+% surf(Q1_grid, Q3_grid, pH_pred);
+% xlabel('Q_1'); ylabel('Q_3'); zlabel('pH');
+% title('Charakterystyka statyczna - sieć neuronowa');
+% shading interp; colormap parula;
 
-    hammerstein.testLinearModel(U, a, b, obiekt.delay, obiekt.kk, obiekt.Tp, @(x, y) obiekt.rk4(x, y), index);
-    hammerstein.testNonlinearModel(U, a, b, obiekt.delay, obiekt.kk, obiekt.Tp, @(x, y) obiekt.rk4(x, y), index);
-    
-    wiener.testLinearModel(U, a, b, obiekt.delay, obiekt.kk, obiekt.Tp, @(x, y) obiekt.rk4(x, y), index);
-    wiener.testNonlinearModel(U, a, b, obiekt.delay, obiekt.kk, obiekt.Tp, @(x, y) obiekt.rk4(x, y), index);
+Y_out = zeros(100,100);
+for i = 1:100
+    disp(i);
+    for j = 1:100
+        Y_out(i,j) = evalfis(hammerstein.linear_fis.pH, [U(1,j) U(2,i)]);
+        % Y_out(i,j) = evalfis(wiener.linear_fis.pH, wiener.Y_pH(i,j));
+        % Y_out(i,j) = evalfis(hammerstein.nonlinear_fis.pH, tanh((U(1,j)-U(2,i))/15));
+        % Y_out(i,j) = evalfis(wiener.nonlinear_fis.pH, tanh(wiener.Y_pH(i,j)/30));
+    end
 end
 
-%% DMC(N, Nu, D, D_disturbance, lambda)
-dmc = DMC(100, 2, 150, 150, 1);
-% Pierwsza iteracja jest wspólna dla wszystkich algorytmów DMC
-dmc.dynamic_matrix(type);
-dmc.past_matrix(type);
-dmc.matrix_disturbance(s_disturbance);
+figure;
+surf(Q1_grid, Q3_grid, Y_out);
+xlabel('Q_1 [ml/s]');
+ylabel('Q_3 [ml/s]');
+zlabel('pH');
+title(sprintf('Wpływ dopływów Q_1 oraz Q_3 na stężenie substancji pH\nHammerstein- następniki liniowe'));
+shading interp;
+colorbar;
+view(-45, 30);
 
-% Test
+%% Testy Hammerstein
+U = [repelem((rand(1, obiekt.kk/300) * 30 - 15), 300);
+    zeros(1, obiekt.kk);
+    repelem((rand(1, obiekt.kk/700) * 30 - 15), 700)];
+
+% hammerstein.testLinearModel(U, a_h, a_pH, b_h, b_pH, obiekt, 'h', 1);
+% hammerstein.testNonlinearModel(U, a_h, a_pH, b_h, b_pH, obiekt, 'h', 1);
+
+% hammerstein.testLinearModel(U, a_h, a_pH, b_h, b_pH, obiekt, 'pH', 1);
+hammerstein.testNonlinearModel(U, a_h, a_pH, b_h, b_pH, obiekt, 'pH', 1);
+
+%% Testy Wiener
+% U = [repelem((rand(1, obiekt.kk/300) * 30 - 15), 300);
+%     zeros(1, obiekt.kk);
+%     repelem((rand(1, obiekt.kk/700) * 30 - 15), 700)];
+
+% wiener.testLinearModel(U, a_h, a_pH, b_h, b_pH, obiekt, 'h', 1);
+% wiener.testNonlinearModel(U, a_h, a_pH, b_h, b_pH, obiekt, 'h', 1);
+
+wiener.testLinearModel(U, a_h, a_pH, b_h, b_pH, obiekt, 'pH', 1);
+wiener.testNonlinearModel(U, a_h, a_pH, b_h, b_pH, obiekt, 'pH', 1);
+
+%% DMC(N, Nu, D, D_disturbance, lambda)
+dmc = DMC(100, 4, 120, 120, 1);
+% Pierwsza iteracja jest wspólna dla wszystkich algorytmów DMC
+dmc.dynamic_matrix(S);
+dmc.past_matrix(S);
+dmc.matrix_disturbance(S_disturbance);
+
+%% Test
 y_zad = [repelem((rand(1, obiekt.kk/250) * 40 - 20), 250)];
 y_zad(1:100) = 0;
 % u_D = [repelem((rand(1, obiekt.kk/200) * 10 - 5), 200)];
@@ -195,53 +205,3 @@ fprintf("\nFunkcje uruchomione asynchronicznie...\n\n");
 % dmc.show_result(y.fuzzyWiener, y_zad, u.fuzzyWiener, E.fuzzyWiener, E.u, E.y, obiekt.kk, 'fuzzy', 'Wiener');
 
 % delete(pool);
-
-%% Prezentacja wyników
-fields = fieldnames(y);
-%%
-range = 1:obiekt.kk;
-type = 'numeric';
-index = 1;
-
-figure;
-hold on;
-stairs(0:length(range)-1, y.(fields{index})(range), 'r-', 'LineWidth', 1.4);
-stairs(0:length(range)-1, y.(fields{index+4})(range), 'g-', 'LineWidth', 1.4);
-stairs(0:length(range)-1, y.(fields{index+10})(range), 'b-', 'LineWidth', 1);
-stairs(0:length(range)-1, y.(fields{index+14})(range), 'm-', 'LineWidth', 1);
-stairs(0:length(range)-1, y_zad(range), 'k-', 'LineWidth', 1);
-hold off;
-legend('Hammerstein (następniki liniowe)', ...
-    'Wiener (następniki liniowe)', ...
-    'Hammerstein (następniki nieliniowe)', ...
-    'Wiener (następniki nieliniowe)', ...,
-    'y_{zad}', 'Location', 'best');
-title(sprintf('Sygnał wyjściowy y(k) \t DMC - %s \t %s', type));
-xlabel('k');
-ylabel('y(k)');
-grid on;
-% saveas(gcf, sprintf('D:/EiTI/MGR/raporty/raport_MGR/pictures/DMC_%s_y.png', s));  % Zapisuje jako plik PNG
-
-figure;
-hold on;
-stairs(0:length(range)-1, u.(fields{index})(range), 'r-', 'LineWidth', 1.4);
-stairs(0:length(range)-1, u.(fields{index+4})(1,(range)), 'g-', 'LineWidth', 1.4);
-stairs(0:length(range)-1, u.(fields{index+10})(range), 'b-', 'LineWidth', 1);
-stairs(0:length(range)-1, u.(fields{index+14})(1,(range)), 'm-', 'LineWidth', 1);
-hold off;
-legend('Hammerstein (następniki liniowe)', ...
-    'Wiener (następniki liniowe)', ...
-    'Hammerstein (następniki nieliniowe)', ...
-    'Wiener (następniki nieliniowe)', ...,
-    'Location', 'best');
-title(sprintf('Sygnał sterujący u(k) \t DMC - %s \t %s', type));
-xlabel('k');
-ylabel('u(k)');
-grid on;
-% saveas(gcf, sprintf('D:/EiTI/MGR/raporty/raport_MGR/pictures/DMC_%s_u.png', s));  % Zapisuje jako plik PNG
-
-%% Errors
-fields = fieldnames(E);
-for i = 1:numel(fields)
-    disp([fields{i}, ' = ', num2str(E.(fields{i}))]);
-end

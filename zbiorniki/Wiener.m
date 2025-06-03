@@ -72,7 +72,6 @@ classdef Wiener < handle
             obj.nonlinear_fis.Y_center = linspace(obj.Y_min, obj.Y_max, 3);
             obj.nonlinear_fis.sigma = 30;
             obj.nonlinear_fis.rules_number = 3;
-            obj.nonlinear_fis.sigma = 30;
 
             obj.nonlinear_fis.a_param = [5.7627	16.2006	12.0295];
             obj.nonlinear_fis.b_param = [-10.9354 -0.5527 15.2669];
@@ -104,7 +103,7 @@ classdef Wiener < handle
             legend('model nieliniowy', ...
                 sprintf('model liniowy \t E = %.3f', E_lin), ...
                 sprintf('model Wiener \t E = %.3f', E_out), 'Location', 'best');
-            title('Porównanie wyjścia obiektu testowego i jego modeli');
+            title('Porównanie wyjścia obiektu testowego i jego modeli - następniki liniowe');
             ylabel('y [cm]');
             xlabel('t [s]');
             grid on;
@@ -146,7 +145,7 @@ classdef Wiener < handle
             legend('model nieliniowy', ...
                 sprintf('model liniowy \t E = %.3f', E_lin), ...
                 sprintf('model Wiener \t E = %.3f', E_out), 'Location', 'best');
-            title('Porównanie wyjścia obiektu testowego i jego modeli');
+            title('Porównanie wyjścia obiektu testowego i jego modeli - następniki nieliniowe');
             ylabel('y [cm]');
             xlabel('t [s]');
             grid on;

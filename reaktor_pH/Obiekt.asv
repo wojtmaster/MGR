@@ -17,7 +17,7 @@ classdef Obiekt < handle
         % Okres próbkowania
         Tp = 10;
         % Próbki dyskretne
-        kk = 1200;
+        kk = 2100;  % 1200
 
         % Punkt pracy
         % Q_1, Q_3 - wartości sterujące
@@ -34,7 +34,7 @@ classdef Obiekt < handle
 
         % Współczynniki modelu
         delay
-        dynamic_horizont = 120;
+        dynamic_horizont = 5000;
     end
 
     methods
@@ -42,7 +42,7 @@ classdef Obiekt < handle
             obj.delay = obj.tau/obj.Tp;
         end
 
-        function [a_1, a_2, a_3, b_1, b_2, b_3, G_z] = linearization(obj, Q_10, Q_20, Q_30)
+        function linearization(obj, Q_10, Q_20, Q_30)
 
             obj.h_0 = ((Q_10+Q_20+Q_30) / (obj.C_V))^2;
 
@@ -56,33 +56,206 @@ classdef Obiekt < handle
 
             obj.pH_0 = obj.pH_calc(obj.W_a40, obj.W_b40);
 
-            A_matrix = [-obj.C_V/(2*sqrt(obj.h_0)*obj.A), 0, 0;
-                 ((obj.W_a1-obj.W_a40)*obj.Q_10 + (obj.W_a2-obj.W_a40)*obj.Q_20 + (obj.W_a3-obj.W_a40)*obj.Q_30) / (obj.A * obj.h_0^2), - (obj.Q_10 + obj.Q_20 + obj.Q_30) / (obj.A*obj.h_0), 0;
-                 ((obj.W_b1-obj.W_b40)*obj.Q_10 + (obj.W_b2-obj.W_b40)*obj.Q_20 + (obj.W_b3-obj.W_b40)*obj.Q_30) / (obj.A * obj.h_0^2), 0, - (obj.Q_10 + obj.Q_20 + obj.Q_30) / (obj.A*obj.h_0)];
-            B_matrix = [1 / obj.A, 1 / obj.A, 1 / obj.A; 
-                (obj.W_a1-obj.W_a40) / (obj.A * obj.h_0), (obj.W_a2-obj.W_a40) / (obj.A * obj.h_0),  (obj.W_a3-obj.W_a40) / (obj.A * obj.h_0);
-                (obj.W_b1-obj.W_b40) / (obj.A * obj.h_0),  (obj.W_b2-obj.W_b40) / (obj.A * obj.h_0), (obj.W_b3-obj.W_b40) / (obj.A * obj.h_0)];
-            C_matrix = eye(3);
-            D_matrix = zeros(3);
+            % a_1, a_2, a_3, b_1, b_2, b_3, G_z
+            % A_matrix = [-obj.C_V/(2*sqrt(obj.h_0)*obj.A), 0, 0;
+            %      ((obj.W_a1-obj.W_a40)*obj.Q_10 + (obj.W_a2-obj.W_a40)*obj.Q_20 + (obj.W_a3-obj.W_a40)*obj.Q_30) / (obj.A * obj.h_0^2), - (obj.Q_10 + obj.Q_20 + obj.Q_30) / (obj.A*obj.h_0), 0;
+            %      ((obj.W_b1-obj.W_b40)*obj.Q_10 + (obj.W_b2-obj.W_b40)*obj.Q_20 + (obj.W_b3-obj.W_b40)*obj.Q_30) / (obj.A * obj.h_0^2), 0, - (obj.Q_10 + obj.Q_20 + obj.Q_30) / (obj.A*obj.h_0)];
+            % B_matrix = [1 / obj.A, 1 / obj.A, 1 / obj.A; 
+            %     (obj.W_a1-obj.W_a40) / (obj.A * obj.h_0), (obj.W_a2-obj.W_a40) / (obj.A * obj.h_0),  (obj.W_a3-obj.W_a40) / (obj.A * obj.h_0);
+            %     (obj.W_b1-obj.W_b40) / (obj.A * obj.h_0),  (obj.W_b2-obj.W_b40) / (obj.A * obj.h_0), (obj.W_b3-obj.W_b40) / (obj.A * obj.h_0)];
+            % C_matrix = eye(3);
+            % D_matrix = zeros(3);
+            % 
+            % sys = ss(A_matrix, B_matrix, C_matrix, D_matrix);
+            % G_s = tf(sys);
+            % G_z = c2d(G_s, obj.Tp, 'zoh');
+            % G_z = set(G_z, 'Variable', 'z^-1');  % poprawne ustawienie zmiennej
+            % 
+            % % s = step(G_z(1), (0:obj.dynamic_horizont-1) * obj.Tp);
+            % a_1 = G_z(1,1).Denominator{1}(2:end);
+            % a_2 = G_z(2,2).Denominator{1}(2:end);
+            % a_3 = G_z(3,3).Denominator{1}(2:end);
+            % b_1.Q_1 = G_z(1,1).Numerator{1}(2:end);
+            % b_1.Q_2 = G_z(1,2).Numerator{1}(2:end);
+            % b_1.Q_3 = G_z(1,3).Numerator{1}(2:end);
+            % b_2.Q_1 = G_z(2,1).Numerator{1}(2:end);
+            % b_2.Q_2 = G_z(2,2).Numerator{1}(2:end);
+            % b_2.Q_3 = G_z(2,3).Numerator{1}(2:end);
+            % b_3.Q_1 = G_z(3,1).Numerator{1}(2:end);
+            % b_3.Q_2 = G_z(3,2).Numerator{1}(2:end);
+            % b_3.Q_3 = G_z(3,3).Numerator{1}(2:end);
+        end
 
-            sys = ss(A_matrix, B_matrix, C_matrix, D_matrix);
-            G_s = tf(sys);
-            G_z = c2d(G_s, obj.Tp, 'zoh');
-            G_z = set(G_z, 'Variable', 'z^-1');  % poprawne ustawienie zmiennej
+        function [a, b, s] = mse(obj, data)
+            if (strcmp(data, 'h'))
+                u = [ones(1,obj.dynamic_horizont)
+                    zeros(1,obj.dynamic_horizont)
+                    zeros(1,obj.dynamic_horizont)];
+                
+                [s.Q1, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+                y.Q1 = s.Q1(1,:) / abs(s.Q1(1,end));
+    
+                Y = y.Q1(2:end)';
+                M = [y.Q1(1:end-1)' u(1,1:end-1)'];
+                w = M \ Y;
+    
+                a.Q1 = -w(1);
+                b.Q1 = w(2);
+    
+                y_Q1 = zeros(size(y.Q1));
+                y_Q1(1:2) = y.Q1(1:2);
+                for k = 2:obj.dynamic_horizont
+                    y_Q1(k) = -a.Q1*y_Q1(k-1) + b.Q1*u(1, k-1);
+                end
 
-            % s = step(G_z(1), (0:obj.dynamic_horizont-1) * obj.Tp);
-            a_1 = G_z(1,1).Denominator{1}(2:end);
-            a_2 = G_z(2,2).Denominator{1}(2:end);
-            a_3 = G_z(3,3).Denominator{1}(2:end);
-            b_1.Q_1 = G_z(1,1).Numerator{1}(2:end);
-            b_1.Q_2 = G_z(1,2).Numerator{1}(2:end);
-            b_1.Q_3 = G_z(1,3).Numerator{1}(2:end);
-            b_2.Q_1 = G_z(2,1).Numerator{1}(2:end);
-            b_2.Q_2 = G_z(2,2).Numerator{1}(2:end);
-            b_2.Q_3 = G_z(2,3).Numerator{1}(2:end);
-            b_3.Q_1 = G_z(3,1).Numerator{1}(2:end);
-            b_3.Q_2 = G_z(3,2).Numerator{1}(2:end);
-            b_3.Q_3 = G_z(3,3).Numerator{1}(2:end);
+                u = [zeros(1,obj.dynamic_horizont)
+                    ones(1,obj.dynamic_horizont)
+                    zeros(1,obj.dynamic_horizont)];
+                [s.Q2, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+                y.Q2 = s.Q2(1,:);
+    
+                Y = y.Q2(2:end)';
+                M = [y.Q2(1:end-1)' u(2,1:end-1)'];
+                w = M \ Y;
+    
+                a.Q2 = -w(1);
+                b.Q2 = w(2);
+    
+                y_Q2 = zeros(size(y.Q2));
+                y_Q2(1:2) = y.Q2(1:2);
+                for k = 2:obj.dynamic_horizont
+                    y_Q2(k) = -a.Q2*y_Q2(k-1) + b.Q2*u(2, k-1);
+                end
+
+                u = [zeros(1,obj.dynamic_horizont)
+                    zeros(1,obj.dynamic_horizont)
+                    ones(1,obj.dynamic_horizont)];
+                [s.Q3, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+                y.Q3 = s.Q3(1,:) / abs(s.Q3(1,end));
+    
+                Y = y.Q3(2:end)';
+                M = [y.Q3(1:end-1)' u(3,1:end-1)'];
+                w = M \ Y;
+    
+                a.Q3 = -w(1);
+                b.Q3 = w(2);
+    
+                y_Q3 = zeros(size(y.Q3));
+                y_Q3(1:2) = y.Q3(1:2);
+                for k = 2:obj.dynamic_horizont
+                    y_Q3(k) = -a.Q3*y_Q3(k-1) + b.Q3*u(3, k-1);
+                end
+
+            else
+                u = [ones(1,obj.dynamic_horizont)
+                    zeros(1,obj.dynamic_horizont)
+                    zeros(1,obj.dynamic_horizont)];
+                
+                [s.Q1, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+                y.Q1 = s.Q1(2,:) / abs(s.Q1(2,end));
+    
+                Y = y.Q1(3:end)';
+                M = [y.Q1(2:end-1)' y.Q1(1:end-2)' u(1,2:end-1)'];
+                w = M \ Y;
+    
+                a.Q1 = -w(1:2)';
+                b.Q1 = w(3)';
+    
+                y_Q1 = zeros(size(y.Q1));
+                y_Q1(1:3) = y.Q1(1:3);
+                for k = 4:obj.dynamic_horizont
+                    y_Q1(k) = -a.Q1*y_Q1(k-1:-1:k-2)' + b.Q1*u(1, k-1);
+                end
+
+                u = [zeros(1,obj.dynamic_horizont)
+                    ones(1,obj.dynamic_horizont)
+                    zeros(1,obj.dynamic_horizont)];
+
+                [s.Q2, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+                y.Q2 = s.Q2(2,:);
+
+                Y = y.Q2(3:end)';
+                M = [y.Q2(2:end-1)' y.Q2(1:end-2)' u(2,2:end-1)'];
+                w = M \ Y;
+
+                a.Q2 = -w(1:2)';
+                b.Q2 = w(3);
+
+                y_Q2 = zeros(size(y.Q2));
+                y_Q2(1:3) = y.Q2(1:3);
+                for k = 4:obj.dynamic_horizont
+                    y_Q2(k) = -a.Q2*y_Q2(k-1:-1:k-2)' + b.Q2*u(2, k-1);
+                end
+
+                u = [zeros(1,obj.dynamic_horizont)
+                    zeros(1,obj.dynamic_horizont)
+                    ones(1,obj.dynamic_horizont)];
+
+                [s.Q3, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+                y.Q3 = s.Q3(2,:) / abs(s.Q3(2,end));
+
+                Y = y.Q3(4:end)';
+                M = [y.Q3(3:end-1)' y.Q3(2:end-2)' y.Q3(1:end-3)' u(3,3:end-1)'];
+                w = M \ Y;
+
+                a.Q3 = -w(1:3)';
+                b.Q3 = w(4)';
+
+                y_Q3 = zeros(size(y.Q3));
+                y_Q3(1:4) = y.Q3(1:4);
+                for k = 5:obj.dynamic_horizont
+                    y_Q3(k) = -a.Q3*y_Q3(k-1:-1:k-3)' + b.Q3*u(3, k-1);
+                end
+
+                u = [repelem((rand(1, obj.kk/300) * 30 - 15), 300)
+                    zeros(1, obj.kk);
+                    repelem((rand(1, obj.kk/700) * 30 - 15), 700)];
+
+                [s.Q, ~] = obj.modifiedEuler(u, obj.kk);
+                y.Q = s.Q(2,:);
+
+                disp(size(y.Q));
+                disp(size(u));
+
+                Y = y.Q(4:end)';
+                M = [y.Q(3:end-1) y.Q(2:end-2)' y.Q(1:end-3)' u(1, 3:end-1)' u(1, 2:end-2)' u(3,3:end-1)' u(3,2:end-2)'];
+                w = M \ Y;
+
+                a.Q = -w(1:3)';
+                b.Q = w(4:7)';
+
+                y_Q = zeros(size(y.Q));
+                y_Q(1:4) = y.Q(1:4);
+                for k = 5:obj.kk
+                    y_Q(k) = -a.Q*y_Q(k-1:-1:k-3)' + b.Q(1:2)*u(1, k-1:-1:k-2)' + b.Q(3:4)*u(3, k-1:-1:k-2)';
+                end
+            end
+            
+            t = (0:length(u)-1) * obj.Tp;
+
+            % figure; 
+            % plot(t, y.Q1, 'b', t, y_Q1, 'g');
+            % title(sprintf('%s ( Q_1 )', data));
+            % legend('dane', 'symulacja');
+            % grid on;
+            % 
+            % figure; 
+            % plot(t, y.Q2, 'm', t, y_Q2, 'c');
+            % title(sprintf('%s ( Q_2 )', data));
+            % legend('dane', 'symulacja');
+            % grid on;
+            % 
+            % figure; 
+            % plot(t, y.Q3, 'y', t, y_Q3, 'k');
+            % title(sprintf('%s ( Q_3 )', data));
+            % legend('dane', 'symulacja');
+            % grid on;
+
+            figure; 
+            plot(t, y.Q, 'y', t, y_Q, 'k');
+            title(sprintf('%s ( Q_3 )', data));
+            legend('dane', 'symulacja');
+            grid on;
         end
 
         function [y, y_L, E_h, E_pH] = modifiedEuler(obj, u, kk)
@@ -98,7 +271,6 @@ classdef Obiekt < handle
             W_a4eL = zeros(1, kk);
             W_b4eL = zeros(1, kk);
 
-            
             %% Warunki początkowe
             W_a4(1) = obj.W_a40;
             W_b4(1) = obj.W_b40;
@@ -116,16 +288,6 @@ classdef Obiekt < handle
             h_L = obj.h_0;
             h_eL = obj.h_0;
 
-            y_h = zeros(2, obj.kk);
-            h_Q1 = obj.h_0;
-            h_Q2 = obj.h_0;
-            h_Q3 = obj.h_0;
-            h_Q4 = obj.h_0;
-            h_Q1e = obj.h_0;
-            h_Q2e = obj.h_0;
-            h_Q3e = obj.h_0;
-            h_Q4e = obj.h_0;
-
             %% Funkcje
             fun_1 = @(Q_1, Q_2, Q_3, h) (Q_1 + Q_2 + Q_3 - obj.C_V*sqrt(h)) / obj.A;
             fun_1L = @(Q_1, Q_2, Q_3, h) (Q_1 + Q_2 + Q_3 - obj.C_V*sqrt(obj.h_0)) / obj.A - obj.C_V/(2*sqrt(obj.h_0)*obj.A) * (h - obj.h_0);
@@ -137,11 +299,6 @@ classdef Obiekt < handle
             fun_3L = @(Q_1, Q_2, Q_3, h, W_b4) ((obj.W_b1-obj.W_b40)*Q_1 + (obj.W_b2-obj.W_b40)*Q_2 + (obj.W_b3-obj.W_b40)*Q_3) / (obj.A * obj.h_0) ...
                 - (obj.Q_10 + obj.Q_20 + obj.Q_30) / (obj.A*obj.h_0) * (W_b4 - obj.W_b40) ...
                 + ((obj.W_b1-obj.W_b40)*obj.Q_10 + (obj.W_b2-obj.W_b40)*obj.Q_20 + (obj.W_b3-obj.W_b40)*obj.Q_30) / (obj.A * obj.h_0^2) * (h - obj.h_0);
-
-            fun_1Q1 = @(Q_1) (Q_1) / obj.A;
-            fun_1Q2 = @(Q_2) (Q_2) / obj.A;
-            fun_1Q3 = @(Q_3) (Q_3) / obj.A;
-            fun_1Q4 = @(h) ( - obj.C_V*sqrt(h)) / obj.A;
             
             %% Wymuszenia
             Q_1 = u(1,:) + obj.Q_10;
@@ -158,12 +315,12 @@ classdef Obiekt < handle
                 W_a4e(k) = W_a4e(k-1) + 1/2 * obj.Tp * (fun_2(Q_1(k), Q_2(k), Q_3(k), h_e, W_a4e(k-1)) + fun_2(Q_1(k), Q_2(k), Q_3(k), h, W_a4(k)));
                 W_b4e(k) = W_b4e(k-1) + 1/2 * obj.Tp * (fun_3(Q_1(k), Q_2(k), Q_3(k), h_e, W_b4e(k-1)) + fun_3(Q_1(k), Q_2(k), Q_3(k), h, W_b4(k)));
                 
-                if (k < obj.delay + 1)
-                    pH = obj.pH_calc(W_a4e(1), W_b4e(1));
-                else
-                    pH = obj.pH_calc(W_a4e(k - obj.delay), W_b4e(k - obj.delay));
-                end
-
+                % if (k <= obj.delay)
+                %     pH = obj.pH_calc(obj.W_a40, obj.W_b40);
+                % else
+                %     pH = obj.pH_calc(W_a4e(k - obj.delay), W_b4e(k - obj.delay));
+                % end
+                pH = obj.pH_calc(W_a4e(k), W_b4e(k));
                 % Sprowadzenie wartości do punktu pracy
                 y(1, k) = h_e - obj.h_0;
                 y(2, k) = pH - obj.pH_0;
@@ -178,99 +335,22 @@ classdef Obiekt < handle
                 W_a4eL(k) = W_a4eL(k-1) + 1/2 * obj.Tp * (fun_2L(Q_1(k), Q_2(k), Q_3(k), h_eL, W_a4eL(k-1)) + fun_2L(Q_1(k), Q_2(k), Q_3(k), h_L, W_a4L(k)));
                 W_b4eL(k) = W_b4eL(k-1) + 1/2 * obj.Tp * (fun_3L(Q_1(k), Q_2(k), Q_3(k), h_eL, W_b4eL(k-1)) + fun_3L(Q_1(k), Q_2(k), Q_3(k), h_L, W_b4L(k)));
                 
-                if (k < obj.delay + 1)
-                    pH = obj.pH_calc(W_a4eL(1), W_b4eL(1));
-                else
-                    pH = obj.pH_calc(W_a4eL(k - obj.delay), W_b4eL(k - obj.delay));
-                end
-
+                % if (k <= obj.delay)
+                %     pH = obj.pH_calc(obj.W_a40, obj.W_b40);
+                % else
+                %     pH = obj.pH_calc(W_a4eL(k - obj.delay), W_b4eL(k - obj.delay));
+                % end
+                pH = obj.pH_calc(W_a4eL(k), W_b4eL(k));
                 % Sprowadzenie wartości do punktu pracy
                 y_L(1, k) = h_eL - obj.h_0;
                 y_L(2, k) = pH - obj.pH_0;
-            end
-
-            for k = 2:kk
-                h_Q1 = h_Q1 + obj.Tp * fun_1Q1(Q_1(k));
-                h_Q2 = h_Q2 + obj.Tp * fun_1Q2(Q_2(k));
-                h_Q3 = h_Q3 + obj.Tp * fun_1Q3(Q_3(k));
-                h_Q4 = h_Q1 + h_Q2 + h_Q3;
-                h_Q4 = h_Q4 + obj.Tp * fun_1Q4(h_Q4);
-
-                h_Q1e = h_Q1e + 1/2 * obj.Tp * (fun_1Q1(Q_1(k)) + fun_1Q1(Q_1(k)));
-                h_Q2e = h_Q2e + 1/2 * obj.Tp * (fun_1Q2(Q_2(k)) + fun_1Q2(Q_2(k)));
-                h_Q3e = h_Q3e + 1/2 * obj.Tp * (fun_1Q3(Q_3(k)) + fun_1Q3(Q_3(k)));
-                h_Q4e = h_Q1e + h_Q2e + h_Q3e;
-                h_Q4e = h_Q4e + 1/2 * obj.Tp * (fun_1Q4(h_Q4e) + fun_1Q4(h_Q4));
-
-                % Sprowadzenie wartości do punktu pracy
-                y_h(1, k) = h_Q1e - obj.h_0;
-                y_h(2, k) = Q - obj.pH_0;
             end
 
             E_h = sum((y(1,:)-y_L(1,:)).^2) / kk;
             E_pH = sum((y(2,:)-y_L(2,:)).^2) / kk;
         end
 
-        function [fis_trained] = fuzzyfication(obj)
-            U = zeros(2, obj.kk);
-            U(1,:) =  repelem([0, -22.5, -45, 22.5, 45], 400);
-            U(2,:) = repelem([0 -5, 0, 5], 500);
-            
-            [Y, ~] = obj.modifiedEuler(U, obj.kk);
-            Y = Y';
-            U = U';
-            
-            X = [Y(1:end-1), [zeros(obj.delay,1); U(1:end-(obj.delay+1), 1)], U(1:end-1, 2)];
-            Y = Y(2:end);
-            
-            options = genfisOptions('GridPartition'); 
-            options.NumMembershipFunctions = [2, 2, 2]; % Liczba funkcji przynależności
-            options.InputMembershipFunctionType = 'gaussmf'; % Typ funkcji przynależności
-            fis = genfis(X, Y, options);
-            
-            options = anfisOptions('InitialFIS', fis, 'EpochNumber', 100, 'DisplayErrorValues', false);
-            fis_trained = anfis([X Y], options);
-            % % Symulacja modelu na danych testowych
-            % Y_pred = evalfis(fis_trained, X);
-            
-            % figure;
-            % plotmf(fis_trained, 'input', 2);
-            % title('Funkcje przynależności dla F_1');
-            % grid on;
-
-            % figure;
-            % plotmf(fis_trained, 'input', 3);
-            % title('Funkcje przynależności dla F_D');
-            % grid on;
-            
-            % Wizualizacja wyników
-            % figure;
-            % plot(1:length(Y), Y, 'b', 'LineWidth', 1.5); hold on;
-            % plot(1:length(Y_pred), Y_pred, 'r--', 'LineWidth', 1.5);
-            % legend('Rzeczywiste wyjście', 'Model TS');
-            % xlabel('Próbki');
-            % ylabel('Wartość wyjściowa');
-            % title('Porównanie rzeczywistego wyjścia z modelem Takagi-Sugeno');
-            % grid on;
-            
-            % % Liczba reguł w FIS
-            % numRules = length(fis.Rules);
-            % 
-            % % Wyświetlenie szczegółów następników dla każdej reguły
-            % for i = 1:numRules
-            %     fprintf('Reguła %d:\n', i);
-            %     fprintf('   Opis: %s\n', fis_trained.Rules(i).Description);
-            % 
-            %     % Współczynniki następników są w właściwości Outputs.MembershipFunctions
-            %     coeffs = fis_trained.Outputs.MembershipFunctions(i).Parameters;
-            %     fprintf('   Następnik: y = ');
-            %     fprintf('%f*x + ', coeffs(1:end-1)); % Współczynniki wejściowe
-            %     fprintf('%f\n', coeffs(end)); % Wyraz wolny
-            % end
-        end
-
         function [pH] = pH_calc(obj, W_a4, W_b4)
-            
             a_0 = -10^obj.pK_1;
             a_1 = W_a4 * 10^obj.pK_1-1;
             a_2 = 10^(obj.pK_1-14) + W_a4 + W_b4 - 10^-obj.pK_2;
@@ -310,13 +390,6 @@ classdef Obiekt < handle
             xlabel('t [s]');
             ylabel('h [cm]');
             grid on;
-        end
-
-        function y = static_charakteristic(obj, u)
-            F_1 = obj.F_10 + u(1,:);
-            F_D = obj.F_D0 + u(2,:);
-
-            y = ((F_1+F_D)/(obj.alpha_2)).^2;
         end
     end
 end

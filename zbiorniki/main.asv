@@ -1,4 +1,4 @@
-% %% MGR
+%% MGR
 % Autor: Wojciech Rogalski
 % Data: 15.12.2024r.
 % Tytuł: Porównanie modeli Hammersteina i Winera w regulacji rozmytej
@@ -59,7 +59,7 @@ obiekt.linearization(90, 30);
 % dmc = DMC(50, 4, 150, 150, 0.2);
 % NPL - lambda = 25 / Nu = 10
 
-dmc = DMC(100, 10, 150, 150, 30);
+dmc = DMC(50, 4, 150, 150, 1);
 dmc.dynamic_matrix(s'); dmc.past_matrix(s'); dmc.matrix_disturbance(s_D');
 
 y_zad = [repelem((rand(1, obiekt.kk/200) * 36 - 18), 200)];
@@ -114,64 +114,64 @@ f.fuzzyWiener = parfeval(pool, @dmc.dmc_fuzzyWiener, 5, y_zad, u_D, a, b, wiener
 fprintf("\nFunkcje uruchomione asynchronicznie...\n\n");
 
 [y.analiticH, u.analiticH, E.analiticH, E.u_analiticH, E.y_analiticH] = fetchOutputs(f.analiticH);
-% dmc.show_result(y.analiticH, y_zad, u.analiticH, E.analiticH, E.u_analiticH, E.y_analiticH, obiekt.kk, 'analitic', 'Hammerstein');
+dmc.show_result(y.analiticH, y_zad, u.analiticH, E.analiticH, E.u_analiticH, E.y_analiticH, obiekt.kk, 'analitic', 'Hammerstein');
 
 [y.analiticW, u.analiticW, E.analiticW, E.u_analiticW, E.y_analiticW] = fetchOutputs(f.analiticW);
-% dmc.show_result(y.analiticW, y_zad, u.analiticW, E.analiticW, E.u_analiticW, E.y_analiticW, obiekt.kk, 'analitic', 'Wiener');
+dmc.show_result(y.analiticW, y_zad, u.analiticW, E.analiticW, E.u_analiticW, E.y_analiticW, obiekt.kk, 'analitic', 'Wiener');
 
 [y.numericH, u.numericH, E.numericH, E.u_numericH, E.y_numericH] = fetchOutputs(f.numericH);
-% dmc.show_result(y.numericH, y_zad, u.numericH, E.numericH, E.u_numericH, E.y_numericH, obiekt.kk, 'numeric', 'Hammerstein');
+dmc.show_result(y.numericH, y_zad, u.numericH, E.numericH, E.u_numericH, E.y_numericH, obiekt.kk, 'numeric', 'Hammerstein');
 
 [y.numericW, u.numericW, E.numericW, E.u_numericW, E.y_numericW] = fetchOutputs(f.numericW);
-% dmc.show_result(y.numericW, y_zad, u.numericW, E.numericW, E.u_numericW, E.y_numericW, obiekt.kk, 'numeric', 'Wiener');
+dmc.show_result(y.numericW, y_zad, u.numericW, E.numericW, E.u_numericW, E.y_numericW, obiekt.kk, 'numeric', 'Wiener');
 
 [y.slH, u.slH, E.slH, E.u_slH, E.y_slH] = fetchOutputs(f.slH);
-% dmc.show_result(y.slH, y_zad, u.slH, E.slH, E.u_slH, E.y_slH, obiekt.kk, 'SL', 'Hammerstein');
+dmc.show_result(y.slH, y_zad, u.slH, E.slH, E.u_slH, E.y_slH, obiekt.kk, 'SL', 'Hammerstein');
 
 [y.slW, u.slW, E.slW, E.u_slW, E.y_slW] = fetchOutputs(f.slW);
-% dmc.show_result(y.slW, y_zad, u.slW, E.slW, E.u_slW, E.y_slW, obiekt.kk, 'SL', 'Wiener');
+dmc.show_result(y.slW, y_zad, u.slW, E.slW, E.u_slW, E.y_slW, obiekt.kk, 'SL', 'Wiener');
 
 [y.nplH, u.nplH, E.nplH, E.u_nplH, E.y_nplH] = fetchOutputs(f.nplH);
-% dmc.show_result(y.nplH, y_zad, u.nplH, E.nplH, E.u_nplH, E.y_nplH, obiekt.kk, 'NPL', 'Hammerstein');
+dmc.show_result(y.nplH, y_zad, u.nplH, E.nplH, E.u_nplH, E.y_nplH, obiekt.kk, 'NPL', 'Hammerstein');
 
 [y.nplW, u.nplW, E.nplW, E.u_nplW, E.y_nplW] = fetchOutputs(f.nplW);
-% dmc.show_result(y.nplW, y_zad, u.nplW, E.nplW, E.u_nplW, E.y_nplW, obiekt.kk, 'NPL', 'Wiener');
+dmc.show_result(y.nplW, y_zad, u.nplW, E.nplW, E.u_nplW, E.y_nplW, obiekt.kk, 'NPL', 'Wiener');
 
 [y.fuzzyH, u.fuzzyH, E.fuzzyH, E.u_fuzzyH, E.y_fuzzyH] = fetchOutputs(f.fuzzyH);
-% dmc.show_result(y.fuzzyH, y_zad, u.fuzzyH, E.fuzzyH, E.u_fuzzyH, E.y_fuzzyH, obiekt.kk, 'fuzzy', 'Hammerstein');
+dmc.show_result(y.fuzzyH, y_zad, u.fuzzyH, E.fuzzyH, E.u_fuzzyH, E.y_fuzzyH, obiekt.kk, 'fuzzy', 'Hammerstein');
 
 [y.fuzzyW, u.fuzzyW, E.fuzzyW, E.u_fuzzyW, E.y_fuzzyW] = fetchOutputs(f.fuzzyW);
-% dmc.show_result(y.fuzzyW, y_zad, u.fuzzyW, E.fuzzyW, E.u_fuzzyW, E.y_fuzzyW, obiekt.kk, 'fuzzy', 'Wiener');
+dmc.show_result(y.fuzzyW, y_zad, u.fuzzyW, E.fuzzyW, E.u_fuzzyW, E.y_fuzzyW, obiekt.kk, 'fuzzy', 'Wiener');
 
 [y.analiticHammerstein, u.analiticHammerstein, E.analiticHammerstein, E.u_analiticHammerstein, E.y_analiticHammerstein] = fetchOutputs(f.analiticHammerstein);
-% dmc.show_result(y.analiticHammerstein, y_zad, u.analiticHammerstein, E.analiticHammerstein, E.u_analiticHammerstein, E.y_analiticHammerstein, obiekt.kk, 'analitic', 'Hammerstein');
+dmc.show_result(y.analiticHammerstein, y_zad, u.analiticHammerstein, E.analiticHammerstein, E.u_analiticHammerstein, E.y_analiticHammerstein, obiekt.kk, 'analitic', 'Hammerstein');
 
 [y.analiticWiener, u.analiticWiener, E.analiticWiener, E.u_analiticWiener, E.y_analiticWiener] = fetchOutputs(f.analiticWiener);
-% dmc.show_result(y.analiticWiener, y_zad, u.analiticWiener, E.analiticWiener, E.u_analiticWiener, E.y_analiticWiener, obiekt.kk, 'analitic', 'Wiener');
+dmc.show_result(y.analiticWiener, y_zad, u.analiticWiener, E.analiticWiener, E.u_analiticWiener, E.y_analiticWiener, obiekt.kk, 'analitic', 'Wiener');
 
 [y.numericHammerstein, u.numericHammerstein, E.numericHammerstein, E.u_numericHammerstein, E.y_numericHammerstein] = fetchOutputs(f.numericHammerstein);
-% dmc.show_result(y.numericHammerstein, y_zad, u.numericHammerstein, E.numericHammerstein, E.u_numericHammerstein, E.y_numericHammerstein, obiekt.kk, 'numeric', 'Hammerstein');
+dmc.show_result(y.numericHammerstein, y_zad, u.numericHammerstein, E.numericHammerstein, E.u_numericHammerstein, E.y_numericHammerstein, obiekt.kk, 'numeric', 'Hammerstein');
 
 [y.numericWiener, u.numericWiener, E.numericWiener, E.u_numericWiener, E.y_numericWiener] = fetchOutputs(f.numericWiener);
-% dmc.show_result(y.numericWiener, y_zad, u.numericWiener, E.numericWiener, E.u_numericWiener, E.y_numericWiener, obiekt.kk, 'numeric', 'Wiener');
+dmc.show_result(y.numericWiener, y_zad, u.numericWiener, E.numericWiener, E.u_numericWiener, E.y_numericWiener, obiekt.kk, 'numeric', 'Wiener');
 
 [y.slHammerstein, u.slHammerstein, E.slHammerstein, E.u_slHammerstein, E.y_slHammerstein] = fetchOutputs(f.slHammerstein);
-% dmc.show_result(y.slHammerstein, y_zad, u.slHammerstein, E.slHammerstein, E.u_slHammerstein, E.y_slHammerstein, obiekt.kk, 'SL',' Hammerstein');
+dmc.show_result(y.slHammerstein, y_zad, u.slHammerstein, E.slHammerstein, E.u_slHammerstein, E.y_slHammerstein, obiekt.kk, 'SL',' Hammerstein');
 
 [y.slWiener, u.slWiener, E.slWiener, E.u_slWiener, E.y_slWiener] = fetchOutputs(f.slWiener);
-% % dmc.show_result(y.slWiener, y_zad, u.slWiener, E.slWiener, E.u_slWiener, E.y_slWiener, obiekt.kk, 'SL', 'Wiener');
+dmc.show_result(y.slWiener, y_zad, u.slWiener, E.slWiener, E.u_slWiener, E.y_slWiener, obiekt.kk, 'SL', 'Wiener');
 
 [y.nplHammerstein, u.nplHammerstein, E.nplHammerstein, E.u_nplHammerstein, E.y_nplHammerstein] = fetchOutputs(f.nplHammerstein);
-% dmc.show_result(y.nplHammerstein, y_zad, u.nplHammerstein, E.nplHammerstein, E.u_nplHammerstein, E.y_nplHammerstein, obiekt.kk, 'NPL', 'Hammerstein');
+dmc.show_result(y.nplHammerstein, y_zad, u.nplHammerstein, E.nplHammerstein, E.u_nplHammerstein, E.y_nplHammerstein, obiekt.kk, 'NPL', 'Hammerstein');
 
 [y.nplWiener, u.nplWiener, E.nplWiener, E.u_nplWiener, E.y_nplWiener] = fetchOutputs(f.nplWiener);
-% dmc.show_result(y.nplWiener, y_zad, u.nplWiener, E.nplWiener, E.u_nplWiener, E.y_nplWiener, obiekt.kk, 'NPL', 'Wiener');
+dmc.show_result(y.nplWiener, y_zad, u.nplWiener, E.nplWiener, E.u_nplWiener, E.y_nplWiener, obiekt.kk, 'NPL', 'Wiener');
 
 [y.fuzzyHammerstein, u.fuzzyHammerstein, E.fuzzyHammerstein, E.u_fuzzyHammerstein, E.y_fuzzyHammerstein] = fetchOutputs(f.fuzzyHammerstein);
-% dmc.show_result(y.fuzzyHammerstein, y_zad, u.fuzzyHammerstein, E.fuzzyHammerstein, E.u_fuzzyHammerstein, E.y_fuzzyHammerstein, obiekt.kk, 'fuzzy', 'Hammerstein');
+dmc.show_result(y.fuzzyHammerstein, y_zad, u.fuzzyHammerstein, E.fuzzyHammerstein, E.u_fuzzyHammerstein, E.y_fuzzyHammerstein, obiekt.kk, 'fuzzy', 'Hammerstein');
 
 [y.fuzzyWiener, u.fuzzyWiener, E.fuzzyWiener, E.u_fuzzyWiener, E.y_fuzzyWiener] = fetchOutputs(f.fuzzyWiener);
-% dmc.show_result(y.fuzzyWiener, y_zad, u.fuzzyWiener, E.fuzzyWiener, E.u_fuzzyWiener, E.y_fuzzyWiener, obiekt.kk, 'fuzzy', 'Wiener');
+dmc.show_result(y.fuzzyWiener, y_zad, u.fuzzyWiener, E.fuzzyWiener, E.u_fuzzyWiener, E.y_fuzzyWiener, obiekt.kk, 'fuzzy', 'Wiener');
 
 % delete(pool);
 
@@ -180,31 +180,13 @@ t = 0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp;
 figure;
 plot(t, y_zad, 'k-');
 hold on;
-plot(t, y.analiticHammerstein, 'b-');
-plot(t, y.numericHammerstein, 'r-');
-plot(t, y.slHammerstein, 'g-');
-plot(t, y.nplHammerstein, 'm-');
-plot(t, y.fuzzyHammerstein, 'c-');
-legend('y_{zad}', 'y_{analiticHammerstein}', ...
-    'y_{numericHammerstein}', 'y_{slHammerstein}', ...
-    'y_{nplHammerstein}', 'y_{fuzzyHammerstein}', 'Location', 'best');
-title(sprintf('Sygnał wyjściowy y(k) - Hammerstein'));
-xlabel('k');
-ylabel('y(k)');
-grid on;
-
-figure;
-plot(t, y_zad, 'k-');
-hold on;
-plot(t, y.analiticWiener, 'b-');
-plot(t, y.numericWiener, 'r-');
-plot(t, y.slWiener, 'g-');
-plot(t, y.nplWiener, 'm-');
-plot(t, y.fuzzyWiener, 'c-');
-legend('y_{zad}', 'y_{analiticWiener}', ...
-    'y_{numericWiener}', 'y_{slWiener}', ...
-    'y_{nplWiener}', 'y_{fuzzyWiener}', 'Location', 'best');
-title(sprintf('Sygnał wyjściowy y(k) - Wiener'));
+plot(t, y.analiticHammerstein, 'k-');
+plot(t, y.numericHammerstein, 'k-');
+plot(t, y.slHammerstein, 'k-');
+plot(t, y.nplHammerstein, 'k-');
+plot(t, y.fuzzyHammerstein, 'k-');
+legend('y', 'y_{zad}', 'Location', 'best');
+title(sprintf('Sygnał wyjściowy y(k) \t DMC - %s \t %s', s, t));
 xlabel('k');
 ylabel('y(k)');
 grid on;

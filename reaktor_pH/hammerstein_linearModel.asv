@@ -57,12 +57,12 @@ colorbar;
 %% ANFIS
 % Dane wejściowe
 % X = [Q1_grid(:)  Q3_grid(:)];
-X = [tanh((Q1_grid(:) -Q3_grid(:))/15)];
+X = [tanh((Q1_grid(:)/15) - tanh(Q3_grid(:))/15)];
 Y = pH(:);
 data_train = [X Y];
 
 % Ustawienia
-numMFs = 5;                 % liczba funkcji przynależności na wejście
+numMFs = 15;                 % liczba funkcji przynależności na wejście
 mfType = 'gaussmf';         % typ MF: gaussmf, gbellmf, trimf, ...
 
 % Generowanie systemu rozmytego
@@ -72,25 +72,15 @@ fis = genfis1(data_train, numMFs, mfType, 'linear');
 % Trening ANFIS
 options = anfisOptions('InitialFIS', fis, 'EpochNumber', 100, ...
     'DisplayANFISInformation', 0, 'DisplayErrorValues', 0);
-fis_trained = anfis(data_train, options);
+fis_trained_hiperbolic = anfis(data_train, options);
 
-% % Predykcja
-% Y_pred = evalfis(fis_trained, X);
-% pH_pred = reshape(Y_pred, size(Q1_grid));
-
-fis_trained = readfis("D:\EiTI\MGR\reaktor_pH\hammerstein_linearFIS_pH.fis");
-
-Y_out = zeros(100,100);
-for i = 1:100
-    disp(i);
-    for j = 1:100
-        Y_out(i,j) = evalfis(fis_trained, [U(1,j) U(2,i)]);
-    end
-end
+% Predykcja
+Y_pred = evalfis(fis_trained_hiperbolic, X);
+pH_pred = reshape(Y_pred, size(Q1_grid));
 
 % Rysunek
 figure;
-surf(Q1_grid, Q3_grid, Y_out);
+surf(Q1_grid, Q3_grid, pH_pred);
 xlabel('Q_1'); ylabel('Q_3'); zlabel('pH');
 title('Dokładniejsza charakterystyka statyczna TS (genfis1 + ANFIS)');
 shading interp; colormap turbo;
