@@ -388,49 +388,46 @@ classdef DMC < handle
                 if (strcmp(type, 'linear'))
                     dydu = (evalfis(fis, [u(1,k-(delay+1)), u(2,k-1)]) - evalfis(fis, [u(1,k-(delay+1))-du, u(2,k-1)]))/du;
                 else
-                    % gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
-                    % 
-                    % w = 0;
-                    % output = 0;
-                    % for i = 1:3
-                    %     for j = 1:2
-                    %         idx = (i - 1) * 2 + j;
-                    % 
-                    %         deg_u1 = gaussmf_val(u(1,k-(delay+1)), fis.sigma_F1, fis.F1_center(i));
-                    %         deg_u2 = gaussmf_val(u(2,k-1), fis.sigma_FD, fis.FD_center(j));
-                    % 
-                    %         degrees = deg_u1 * deg_u2;
-                    % 
-                    %         output = output + degrees*(fis.a_param(idx)*sinh(u(1,k-(delay+1))/22.5) + fis.b_param(idx)*sinh(u(2,k-1)/7.5) + fis.c_param(idx));
-                    %         w = w + degrees;
-                    %     end
-                    % end
-                    % v_k = output / w;
-                    % 
-                    % w = 0;
-                    % output = 0;
-                    % for i = 1:3
-                    %     for j = 1:2
-                    %         idx = (i - 1) * 2 + j;
-                    % 
-                    %         deg_u1 = gaussmf_val(u(1,k-(delay+1))-du, fis.sigma_F1, fis.F1_center(i));
-                    %         deg_u2 = gaussmf_val(u(2,k-1), fis.sigma_FD, fis.FD_center(j));
-                    % 
-                    %         degrees = deg_u1 * deg_u2;
-                    % 
-                    %         output = output + degrees*(fis.a_param(idx)*sinh((u(1,k-(delay+1))-du)/22.5) + fis.b_param(idx)*sinh(u(2,k-1)/7.5) + fis.c_param(idx));
-                    %         w = w + degrees;
-                    %     end
-                    % end
-                    % v_k_1 = output / w;
-                    % 
-                    % dydu = (v_k - v_k_1) / du;
-                    dydu = (evalfis(fis, [tanh(u(1,k-(delay+1))/45), tanh(u(2,k-1)/15)]) - ...
-                        evalfis(fis, [tanh((u(1,k-(delay+1))-du)/45), tanh(u(2,k-1)/15)]))/du;
+                    gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
+
+                    w = 0;
+                    output = 0;
+                    for i = 1:3
+                        for j = 1:2
+                            idx = (i - 1) * 2 + j;
+
+                            deg_u1 = gaussmf_val(u(1,k-(delay+1)), fis.sigma_F1, fis.F1_center(i));
+                            deg_u2 = gaussmf_val(u(2,k-1), fis.sigma_FD, fis.FD_center(j));
+                    
+                            degrees = deg_u1 * deg_u2;
+    
+                            output = output + degrees*(fis.a_param(idx)*sinh(u(1,k-(delay+1))/22.5) + fis.b_param(idx)*sinh(u(2,k-1)/7.5) + fis.c_param(idx));
+                            w = w + degrees;
+                        end
+                    end
+                    v_k = output / w;
+
+                    w = 0;
+                    output = 0;
+                    for i = 1:3
+                        for j = 1:2
+                            idx = (i - 1) * 2 + j;
+
+                            deg_u1 = gaussmf_val(u(1,k-(delay+1))-du, fis.sigma_F1, fis.F1_center(i));
+                            deg_u2 = gaussmf_val(u(2,k-1), fis.sigma_FD, fis.FD_center(j));
+                    
+                            degrees = deg_u1 * deg_u2;
+    
+                            output = output + degrees*(fis.a_param(idx)*sinh((u(1,k-(delay+1))-du)/22.5) + fis.b_param(idx)*sinh(u(2,k-1)/7.5) + fis.c_param(idx));
+                            w = w + degrees;
+                        end
+                    end
+                    v_k_1 = output / w;
+
+                    dydu = (v_k - v_k_1) / du;
                 end
                 
                 v(k) = ((90+u(1,k-(delay+1)) + 30 + u(2, k-1)) /20)^2 - 36;
-                % v(k) = evalfis(fis, [u(1,k-(delay+1)), u(2,k-1)]);
                 y(k) = - a*y(k-1:-1:k-2)' + b*v(k-1:-1:k-2)';
 
                 % Ograniczenia wartości sygnału wyjściowego, tj. wysokości h_2
@@ -494,49 +491,48 @@ classdef DMC < handle
                 if (strcmp(type, 'linear'))
                     dydu = (evalfis(fis, [u(1,k-(delay+1)), u(2,k-1)]) - evalfis(fis, [u(1,k-(delay+1))-du, u(2,k-1)]))/du;
                 else
-                    % gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
-                    % 
-                    % w = 0;
-                    % output = 0;
-                    % for i = 1:3
-                    %     for j = 1:2
-                    %         idx = (i - 1) * 2 + j;
-                    % 
-                    %         deg_u1 = gaussmf_val(u(1,k-(delay+1)), fis.sigma_F1, fis.F1_center(i));
-                    %         deg_u2 = gaussmf_val(u(2,k-1), fis.sigma_FD, fis.FD_center(j));
-                    % 
-                    %         degrees = deg_u1 * deg_u2;
-                    % 
-                    %         output = output + degrees*(fis.a_param(idx)*sinh(u(1,k-(delay+1))/22.5) + fis.b_param(idx)*sinh(u(2,k-1)/7.5) + fis.c_param(idx));
-                    %         w = w + degrees;
-                    %     end
-                    % end
-                    % v_k = output / w;
-                    % 
-                    % w = 0;
-                    % output = 0;
-                    % for i = 1:3
-                    %     for j = 1:2
-                    %         idx = (i - 1) * 2 + j;
-                    % 
-                    %         deg_u1 = gaussmf_val(u(1,k-(delay+1))-du, fis.sigma_F1, fis.F1_center(i));
-                    %         deg_u2 = gaussmf_val(u(2,k-1), fis.sigma_FD, fis.FD_center(j));
-                    % 
-                    %         degrees = deg_u1 * deg_u2;
-                    % 
-                    %         output = output + degrees*(fis.a_param(idx)*sinh((u(1,k-(delay+1))-du)/22.5) + fis.b_param(idx)*sinh(u(2,k-1)/7.5) + fis.c_param(idx));
-                    %         w = w + degrees;
-                    %     end
-                    % end
-                    % v_k_1 = output / w;
-                    % 
-                    % dydu = (v_k - v_k_1) / du;
-                    dydu = (evalfis(fis, [tanh(u(1,k-(delay+1))/45), tanh(u(2,k-1)/15)]) - ...
-                        evalfis(fis, [tanh((u(1,k-(delay+1))-du)/45), tanh(u(2,k-1)/15)]))/du;
+                    gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
+
+                    w = 0;
+                    output = 0;
+                    for i = 1:3
+                        for j = 1:2
+                            idx = (i - 1) * 2 + j;
+
+                            deg_u1 = gaussmf_val(u(1,k-(delay+1)), fis.sigma_F1, fis.F1_center(i));
+                            deg_u2 = gaussmf_val(u(2,k-1), fis.sigma_FD, fis.FD_center(j));
+                    
+                            degrees = deg_u1 * deg_u2;
+    
+                            output = output + degrees*(fis.a_param(idx)*sinh(u(1,k-(delay+1))/22.5) + fis.b_param(idx)*sinh(u(2,k-1)/7.5) + fis.c_param(idx));
+                            w = w + degrees;
+                        end
+                    end
+                    v_k = output / w;
+
+                    w = 0;
+                    output = 0;
+                    for i = 1:3
+                        for j = 1:2
+                            idx = (i - 1) * 2 + j;
+
+                            deg_u1 = gaussmf_val(u(1,k-(delay+1))-du, fis.sigma_F1, fis.F1_center(i));
+                            deg_u2 = gaussmf_val(u(2,k-1), fis.sigma_FD, fis.FD_center(j));
+                    
+                            degrees = deg_u1 * deg_u2;
+    
+                            output = output + degrees*(fis.a_param(idx)*sinh((u(1,k-(delay+1))-du)/22.5) + fis.b_param(idx)*sinh(u(2,k-1)/7.5) + fis.c_param(idx));
+                            w = w + degrees;
+                        end
+                    end
+                    v_k_1 = output / w;
+
+                    dydu = (v_k - v_k_1) / du;
                 end
                 
                 v(k) = ((90+u(1,k-(delay+1)) + 30 + u(2, k-1)) / 20)^2 - 36;
-                % v(k) = evalfis(fis, [u(1,k-(delay+1)), u(2,k-1)]);
+                V = evalfis(fis, [u(1,k-(delay+1)), u(2,k-1)]);
+                
                 y(k) = - a*y(k-1:-1:k-2)' + b*v(k-1:-1:k-2)';
                 
                 M_new = dydu * obj.M;
@@ -565,39 +561,44 @@ classdef DMC < handle
             function y_0 = fuzzy_free_response(u, v, y, k, a, b, N, fis, type)
                 y_0 = zeros(N, 1);
                 v_0 =  v(1, k);
+                u_10 = u(1, k-6);
+                u_20 = u(2, k-1);
         
                 if (strcmp(type, 'linear'))
                     v_hat = evalfis(fis, [u(1, k-(delay+1)) u(2, k-1)]);
                 else
-                    % output = 0;
-                    % w = 0;
-                    % for m = 1:3
-                    %     for n = 1:2
-                    %         idx = (m - 1) * 2 + n;
-                    % 
-                    %         deg_u1 = gaussmf_val(u(1,k-(delay+1)), fis.sigma_F1, fis.F1_center(m));
-                    %         deg_u2 = gaussmf_val(u(2,k-1), fis.sigma_FD, fis.FD_center(n));
-                    % 
-                    %         degrees = deg_u1 * deg_u2;
-                    % 
-                    %         output = output + degrees*(fis.a_param(idx)*sinh(u(1,k-(delay+1))/22.5) + fis.b_param(idx)*sinh(u(2,k-1)/7.5) + fis.c_param(idx));
-                    %         w = w + degrees;
-                    %     end
-                    % end
-                    % v_hat = output / w;
-                    v_hat = evalfis(fis, [tanh(u(1, k-(delay+1))/45) tanh(u(2, k-1)/15)]);
+                    output = 0;
+                    w = 0;
+                    for m = 1:3
+                        for n = 1:2
+                            idx = (m - 1) * 2 + n;
+
+                            deg_u1 = gaussmf_val(u(1,k-(delay+1)), fis.sigma_F1, fis.F1_center(m));
+                            deg_u2 = gaussmf_val(u(2,k-1), fis.sigma_FD, fis.FD_center(n));
+                    
+                            degrees = deg_u1 * deg_u2;
+    
+                            output = output + degrees*(fis.a_param(idx)*sinh(u(1,k-(delay+1))/22.5) + fis.b_param(idx)*sinh(u(2,k-1)/7.5) + fis.c_param(idx));
+                            w = w + degrees;
+                        end
+                    end
+                    v_hat = output / w;
                 end
                 
-                y_hat = -a*y(k-1:-1:k-2)' + b*[v_hat v_hat]';
-                dk = y(k) - y_hat;
+                if ((u(1, k-(delay+1)) - u(2, k-1)) > 1e-3) 
+                    dvdu = v_hat / (u(1, k-(delay+1)) - u(2, k-1));
+                else 
+                    dvdu = 1;
+                end
+                dk = v(k) - v_hat;
         
                 for m = 1:N
                     if m == 1
-                        y_0(m) = -a*[y(k) y(k-1)]' + b*[v_0 v_0]' + dk;
+                        y_0(m) = -a*[y(k) y(k-1)]' + dvdu*b*[u_10 u_10]' + dvdu*b*[u_20 u_20]' + dk;
                     elseif m == 2
-                        y_0(m) = -a*[y_0(m-1) y(k)]' + b*[v_0 v_0]' + dk;
+                        y_0(m) = -a*[y_0(m-1) y(k)]' + dvdu*b*[u_10 u_10]' + dvdu*b*[u_20 u_20]' + dk;
                     else
-                        y_0(m) = -a*[y_0(m-1) y_0(m-2)]' + b*[v_0 v_0]' + dk;
+                        y_0(m) = -a*[y_0(m-1) y_0(m-2)]' + dvdu*b*[u_10 u_10]' + dvdu*b*[u_20 u_20]' + dk;
                     end
                 end
             end
@@ -631,27 +632,26 @@ classdef DMC < handle
                 if strcmp(type, 'linear')
                     dydv = (evalfis(fis, v(k)) - evalfis(fis, v(k)-dv)) / dv;
                 else
-                    % gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
-                    % 
-                    % output = 0;
-                    % w = 0;
-                    % for i = 1:fis.rules_number
-                    %     degrees = gaussmf_val(v(k), fis.sigma, fis.Y_center(i));
-                    %     output = output + degrees * (fis.a_param(i)*sinh(v(k)/36) + fis.b_param(i));
-                    %     w = w + degrees;
-                    % end
-                    % y_k = output / w;
-                    % 
-                    % output = 0;
-                    % w = 0;
-                    % for i = 1:fis.rules_number
-                    %     degrees = gaussmf_val(v(k)-dv, fis.sigma, fis.Y_center(i));
-                    %     output = output + degrees * (fis.a_param(i)*sinh((v(k)-dv)/36) + fis.b_param(i));
-                    %     w = w + degrees;
-                    % end
-                    % y_k_1 = output / w;
-                    % dydv = (y_k - y_k_1) / dv;
-                    dydv = (evalfis(fis, sinh(v(k)/30)) - evalfis(fis, sinh((v(k)-dv)/30))) / dv;
+                    gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
+        
+                    output = 0;
+                    w = 0;
+                    for i = 1:fis.rules_number
+                        degrees = gaussmf_val(v(k), fis.sigma, fis.Y_center(i));
+                        output = output + degrees * (fis.a_param(i)*sinh(v(k)/36) + fis.b_param(i));
+                        w = w + degrees;
+                    end
+                    y_k = output / w;
+        
+                    output = 0;
+                    w = 0;
+                    for i = 1:fis.rules_number
+                        degrees = gaussmf_val(v(k)-dv, fis.sigma, fis.Y_center(i));
+                        output = output + degrees * (fis.a_param(i)*sinh((v(k)-dv)/36) + fis.b_param(i));
+                        w = w + degrees;
+                    end
+                    y_k_1 = output / w;
+                    dydv = (y_k - y_k_1) / dv;
                 end
         
                 M_new = dydv * obj.M;
@@ -711,33 +711,32 @@ classdef DMC < handle
                 y(k) = ((120 + v(k))/20)^2 - 36;
         
                 if strcmp(type, 'linear')
-                    dydv = (evalfis(fis, v(k)) - evalfis(fis, v(k)-dv)) / dv;
+                    dydu = (evalfis(fis, v(k)) - evalfis(fis, v(k)-dv)) / dv;
                 else
-                    % gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
-                    % 
-                    % output = 0;
-                    % w = 0;
-                    % for i = 1:fis.rules_number
-                    %     degrees = gaussmf_val(v(k), fis.sigma, fis.Y_center(i));
-                    %     output = output + degrees * (fis.a_param(i)*sinh(v(k)/36) + fis.b_param(i));
-                    %     w = w + degrees;
-                    % end
-                    % y_k = output / w;
-                    % 
-                    % output = 0;
-                    % w = 0;
-                    % for i = 1:fis.rules_number
-                    %     degrees = gaussmf_val(v(k)-dv, fis.sigma, fis.Y_center(i));
-                    %     output = output + degrees * (fis.a_param(i)*sinh((v(k)-dv)/36) + fis.b_param(i));
-                    %     w = w + degrees;
-                    % end
-                    % y_k_1 = output / w;
-                    % 
-                    % dydu = (y_k - y_k_1) / dv;
-                    dydv = (evalfis(fis, sinh(v(k)/30)) - evalfis(fis, sinh((v(k)-dv)/30))) / dv;
+                    gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
+        
+                    output = 0;
+                    w = 0;
+                    for i = 1:fis.rules_number
+                        degrees = gaussmf_val(v(k), fis.sigma, fis.Y_center(i));
+                        output = output + degrees * (fis.a_param(i)*sinh(v(k)/36) + fis.b_param(i));
+                        w = w + degrees;
+                    end
+                    y_k = output / w;
+        
+                    output = 0;
+                    w = 0;
+                    for i = 1:fis.rules_number
+                        degrees = gaussmf_val(v(k)-dv, fis.sigma, fis.Y_center(i));
+                        output = output + degrees * (fis.a_param(i)*sinh((v(k)-dv)/36) + fis.b_param(i));
+                        w = w + degrees;
+                    end
+                    y_k_1 = output / w;
+        
+                    dydu = (y_k - y_k_1) / dv;
                 end
         
-                M_new = dydv * obj.M;
+                M_new = dydu * obj.M;
                 K_new = ((M_new' * M_new + obj.lambda * eye(obj.Nu))^(-1)) * M_new';
         
                 Y_0 = fuzzy_free_response(u, v, y, k, a, b, obj.N, fis, type);
@@ -772,15 +771,14 @@ classdef DMC < handle
                 if (strcmp(type, 'linear'))
                     y_hat = evalfis(fis, v(k));
                 else
-                    % output = 0;
-                    % w = 0;
-                    % for j = 1:fis.rules_number
-                    %     degrees = gaussmf_val(v(k), fis.sigma, fis.Y_center(j));
-                    %     output = output + degrees * (fis.a_param(j)*sinh(v(k)/36) + fis.b_param(j));
-                    %     w = w + degrees;
-                    % end
-                    % y_hat = output / w;
-                    y_hat = evalfis(fis, sinh(v(k)/30));
+                    output = 0;
+                    w = 0;
+                    for j = 1:fis.rules_number
+                        degrees = gaussmf_val(v(k), fis.sigma, fis.Y_center(j));
+                        output = output + degrees * (fis.a_param(j)*sinh(v(k)/36) + fis.b_param(j));
+                        w = w + degrees;
+                    end
+                    y_hat = output / w;
                 end
 
                 dk = y(k) - y_hat;
@@ -799,15 +797,14 @@ classdef DMC < handle
                     if (strcmp(type, 'linear'))
                         y0 = evalfis(fis, v_0(j));
                     else
-                        % output = 0;
-                        % w = 0;
-                        % for l = 1:fis.rules_number
-                        %     degrees = gaussmf_val(v_0(j), fis.sigma, fis.Y_center(l));
-                        %     output = output + degrees * (fis.a_param(l)*sinh(v_0(j)/36) + fis.b_param(l));
-                        %     w = w + degrees;
-                        % end
-                        % y0 = output / w;
-                        y0 = evalfis(fis, sinh(v_0(j)/30));
+                        output = 0;
+                        w = 0;
+                        for l = 1:fis.rules_number
+                            degrees = gaussmf_val(v_0(j), fis.sigma, fis.Y_center(l));
+                            output = output + degrees * (fis.a_param(l)*sinh(v_0(j)/36) + fis.b_param(l));
+                            w = w + degrees;
+                        end
+                        y0 = output / w;
                     end
                     y_0(j) = y0 + dk;
                 end

@@ -6,7 +6,7 @@ obiekt.linearization(90, 30);
 %% Identyfikacja dynamiki
 U = [ones(1, 100)
     zeros(1, 100)];
-[Y_step, ~] = obiekt.rk4(U, 100);
+[Y_step, ~] = obiekt.modifiedEuler(U, 100);
 % Normalizacja odpowiedzi skokowej
 Y_step = Y_step / Y_step(end);
 t = (0:length(U)-1) * obiekt.Tp; % Czas w sekundach (próbkowanie = 20s)
@@ -64,11 +64,15 @@ for i = 1:100
                 + G_z.Numerator{1}(2)*u(1, k-6) + G_z.Numerator{1}(3)*u(1, k-7) ...
                 + G_z.Numerator{1}(2)*u(2, k-1) + G_z.Numerator{1}(3)*u(2, k-2);
         end
-        h(i,j) = y(end);
+        % h(i,j) = ((120+y(end))/20)^2 - 36;
+        h(i,j) = ((90+u(1, k-6) + 30 + u(2, k-1))/20)^2 - 36;
     end
 end
 
+figure;
 surf(F1_grid, FD_grid, h);
+figure;
+surf(F1_grid, FD_grid, Y);
 
 %% System rozmyty
 % Zakres sterowania

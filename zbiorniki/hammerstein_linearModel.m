@@ -21,7 +21,7 @@ U = [linspace(-45, 45, 100);
 [F1_grid, FD_grid] = meshgrid(U(1,:), U(2,:));  % kombinacje
 Y = ((obiekt.F_10+F1_grid + obiekt.F_D0+FD_grid) / obiekt.alpha_2).^2;
 
-surf(F1_grid+obiekt.F_10, FD_grid+obiekt.F_D0, Y);
+surf(F1_grid, FD_grid, Y);
 
 %% Tworzenie początkowego systemu rozmytego TS
 close all;

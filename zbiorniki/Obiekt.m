@@ -11,7 +11,7 @@ classdef Obiekt < handle
         % Okres próbkowania
         Tp = 20;
         % Próbki dyskretne
-        kk = 1000;
+        kk = 2000;
 
         % Punkt pracy
         F_10;
@@ -49,8 +49,8 @@ classdef Obiekt < handle
             [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
             y = s / s(end);
 
-            Y = y(8:end)';
-            M = [y(7:end-1)' y(6:end-2)' u(1,2:end-6)'];
+            Y = y(7:end)';
+            M = [y(6:end-1)' y(5:end-2)' u(1,1:end-6)'];
             % M = [y(7:end-1)' y(6:end-2)' u(2,7:end-1)'];
             w = M \ Y;
 
@@ -83,6 +83,46 @@ classdef Obiekt < handle
             % figure; 
             % plot(t, y_D, 'b', t, y_testD, 'r');
             % title('S_D');
+        end
+
+        function [a, b, S, S_D] = sopdt(obj)
+            u = [ones(1,obj.dynamic_horizont)
+                zeros(1,obj.dynamic_horizont)];
+            [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+            y = s / s(end);
+
+            t = (0:length(y)-1) * obj.Tp;
+            
+            % Funkcja celu dopasowania SOPDT (K=1, optymalizujemy tylko T1 i T2)
+            cost_func = @(params) ...
+                sum((step(tf(1, conv([params(1) 1], [params(2) 1]), 'InputDelay', obj.tau), t) - y').^2);
+            
+            % Początkowe zgadywanie
+            initial_guess = [200, 20];  % [T1, T2]
+            
+            % Optymalizacja z fminsearch
+            options = optimset('Display', 'final', 'TolX', 1e-6, 'TolFun', 1e-6);
+            optimal_params = fminsearch(cost_func, initial_guess, options);
+            
+            % Transmitancja dopasowanego modelu
+            G = tf(1, conv([optimal_params(1) 1], [optimal_params(2) 1]));
+            S = step(G, t);
+            G = tf(G.Numerator, G.Denominator, 'InputDelay', obj.tau);
+            S_D = step(G, t);
+            G_z = c2d(G, obj.Tp, 'zoh');
+            G_z.Variable = 'z^-1';
+            a = G_z.Denominator{1}(2:3);
+            b = G_z.Numerator{1}(2:3);
+
+            % % Rysowanie wykresu
+            % figure;
+            % plot(t, y, 'b', 'LineWidth', 2); hold on;
+            % plot(t, S, 'r--', 'LineWidth', 2);
+            % legend('Odpowiedź rzeczywista', 'Model SOPDT');
+            % xlabel('Czas');
+            % ylabel('Odpowiedź skokowa');
+            % title(sprintf('Dopasowanie SOPDT: K = %.2f, T1 = %.2f, T2 = %.2f', optimal_params(1), optimal_params(2), optimal_params(3)));
+            % grid on;
         end
 
         function [y, y_L, E] = modifiedEuler(obj, u, kk)
@@ -152,15 +192,15 @@ classdef Obiekt < handle
             E = sum((y-y_L).^2) / kk;
         end
 
-        function [y, V_1, V_2, V_1e, V_2e] = realSimulation(obj, u, F_10, F_D0, h_20, V_10, V_20, V_10e, V_20e)
+        function [y, V_1, V_2, V_1e, V_2e] = realSimulation(obj, u, V_10, V_20, V_10e, V_20e)
 
             %% Funkcje
             fun_1 = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (V_1/obj.A)^(1/2);
             fun_2 = @(V_1, V_2) obj.alpha_1 * (V_1/obj.A)^(1/2) - obj.alpha_2 * (V_2/obj.C)^(1/4); 
 
             %% Wymuszenia
-            F_1in = u(1,1) + F_10;
-            F_D = u(2,1) + F_D0;
+            F_1in = u(1,1) + obj.F_10;
+            F_D = u(2,1) + obj.F_D0;
 
             V_1 = V_10 + obj.Tp * fun_1(F_1in, F_D, V_10);
             V_2 = V_20 + obj.Tp * fun_2(V_10, V_20);
@@ -171,7 +211,7 @@ classdef Obiekt < handle
             h_2 = sqrt(V_2e / obj.C);
 
             % Sprowadzenie wartości do punktu pracy
-            y = h_2 - h_20;
+            y = h_2 - obj.h_20;
          end
 
          function [y] = freeAnswer(obj, u, F_10, F_D0, h_20, V_10, V_20, V_10e, V_20e, N)
@@ -204,89 +244,6 @@ classdef Obiekt < handle
                 y(i) = h_2 - h_20;
             end
          end
-
-        function [fis_trained] = fuzzyfication(obj)
-            U = zeros(2, obj.kk);
-            U(1,:) =  repelem([0, -22.5, -45, 22.5, 45], 400);
-            U(2,:) = repelem([0 -5, 0, 5], 500);
-            
-            [Y, ~] = obj.rk4(U, obj.kk);
-            Y = Y';
-            U = U';
-            
-            X = [Y(1:end-1), [zeros(obj.delay,1); U(1:end-(obj.delay+1), 1)], U(1:end-1, 2)];
-            Y = Y(2:end);
-            
-            options = genfisOptions('GridPartition'); 
-            options.NumMembershipFunctions = [2, 2, 2]; % Liczba funkcji przynależności
-            options.InputMembershipFunctionType = 'gaussmf'; % Typ funkcji przynależności
-            fis = genfis(X, Y, options);
-            
-            options = anfisOptions('InitialFIS', fis, 'EpochNumber', 100, 'DisplayErrorValues', false);
-            fis_trained = anfis([X Y], options);
-            % % Symulacja modelu na danych testowych
-            % Y_pred = evalfis(fis_trained, X);
-            
-            % figure;
-            % plotmf(fis_trained, 'input', 2);
-            % title('Funkcje przynależności dla F_1');
-            % grid on;
-
-            % figure;
-            % plotmf(fis_trained, 'input', 3);
-            % title('Funkcje przynależności dla F_D');
-            % grid on;
-            
-            % Wizualizacja wyników
-            % figure;
-            % plot(1:length(Y), Y, 'b', 'LineWidth', 1.5); hold on;
-            % plot(1:length(Y_pred), Y_pred, 'r--', 'LineWidth', 1.5);
-            % legend('Rzeczywiste wyjście', 'Model TS');
-            % xlabel('Próbki');
-            % ylabel('Wartość wyjściowa');
-            % title('Porównanie rzeczywistego wyjścia z modelem Takagi-Sugeno');
-            % grid on;
-            
-            % % Liczba reguł w FIS
-            % numRules = length(fis.Rules);
-            % 
-            % % Wyświetlenie szczegółów następników dla każdej reguły
-            % for i = 1:numRules
-            %     fprintf('Reguła %d:\n', i);
-            %     fprintf('   Opis: %s\n', fis_trained.Rules(i).Description);
-            % 
-            %     % Współczynniki następników są w właściwości Outputs.MembershipFunctions
-            %     coeffs = fis_trained.Outputs.MembershipFunctions(i).Parameters;
-            %     fprintf('   Następnik: y = ');
-            %     fprintf('%f*x + ', coeffs(1:end-1)); % Współczynniki wejściowe
-            %     fprintf('%f\n', coeffs(end)); % Wyraz wolny
-            % end
-        end
-
-        function show_rk4(obj, u, y, y_L)
-            figure;
-            stairs(0:obj.kk-1, u(1,:), 'r-', 'LineWidth', 1.2);
-            hold on;
-            stairs(0:obj.kk-1, u(2,:), 'b--', 'LineWidth', 1.2);
-            hold off;
-            xlabel('k');
-            ylabel('u(k)');
-            title('Wartości sygnałów sterujących u(k)');
-            legend('F_1(k)', 'F_D(k)');
-            grid on;
-
-            %% Prezentacja wyników
-            figure;
-            hold on;
-            plot(0:obj.Tp:(obj.kk-1)*obj.Tp, round(y_L,3), 'b.','LineWidth',2);
-            plot(0:obj.Tp:(obj.kk-1)*obj.Tp, round(y,3), 'r-','LineWidth',2);
-            hold off;
-            title('Wysokość słupa cieczy w zbiorniku 2. - h_2(t)');
-            legend('h_{2lin}', 'h_2');
-            xlabel('t [s]');
-            ylabel('h [cm]');
-            grid on;
-        end
 
         function static_charakteristic(obj)
             F_1 = linspace(45, 135, obj.kk);

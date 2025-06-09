@@ -43,14 +43,14 @@ classdef Obiekt < handle
             obj.V_20 = obj.C * obj.h_20^2;
         end
 
-        function [a, b, s, s_D] = mse(obj)
+        function [a, b, S, S_D, s, s_D] = mse(obj)
             u = [ones(1,obj.dynamic_horizont)
                 zeros(1,obj.dynamic_horizont)];
             [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
             y = s / s(end);
 
-            Y = y(8:end)';
-            M = [y(7:end-1)' y(6:end-2)' u(1,2:end-6)'];
+            Y = y(7:end)';
+            M = [y(6:end-1)' y(5:end-2)' u(1,1:end-6)'];
             % M = [y(7:end-1)' y(6:end-2)' u(2,7:end-1)'];
             w = M \ Y;
 
@@ -62,6 +62,7 @@ classdef Obiekt < handle
             for k = obj.delay+2:obj.dynamic_horizont
                 y_test(k) = -a*y_test(k-1:-1:k-2)' + b*u(1, k-(obj.delay+1));
             end
+            S = y_test * s(end);
 
             u = [zeros(1,obj.dynamic_horizont)
                 ones(1,obj.dynamic_horizont)];
@@ -71,14 +72,91 @@ classdef Obiekt < handle
             y_testD = zeros(size(y_D));
             y_testD(1:obj.delay+1) = y_D(1:obj.delay+1);
             for k = obj.delay+2:obj.dynamic_horizont
-                y_testD(k) = -a*y_testD(k-1:-1:k-2)' + b*u(1, k-(obj.delay+1));
+                y_testD(k) = -a*y_testD(k-1:-1:k-2)' + b*u(2, k-1);
             end
+            S_D = y_testD * s_D(end);
 
-            t = (0:length(u)-1) * obj.Tp; % Czas w sekundach (próbkowanie = 20s)
-            figure; 
-            plot(t, y_D, 'b', t, y_testD, 'r');
-            figure; 
-            plot(t, y_D, 'b', t, y_testD, 'r');
+            % t = (0:length(u)-1) * obj.Tp; % Czas w sekundach (próbkowanie = 20s)
+            % figure; 
+            % plot(t, y, 'b', t, y_test, 'r');
+            % title('S');
+            % figure; 
+            % plot(t, y_D, 'b', t, y_testD, 'r');
+            % title('S_D');
+        end
+
+        function [a, b, S, S_D] = sopdt(obj, type)
+
+            if(strcmp(type, 'one'))
+                u = [ones(1,obj.dynamic_horizont)
+                    zeros(1,obj.dynamic_horizont)];
+                [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+                y = s / s(end);
+    
+                t = (0:length(y)-1) * obj.Tp;
+                
+                % Funkcja celu dopasowania SOPDT (K=1, optymalizujemy tylko T1 i T2)
+                cost_func = @(params) ...
+                    sum((step(tf(1, conv([params(1) 1], [params(2) 1]), 'InputDelay', obj.tau), t) - y').^2);
+                
+                % Początkowe zgadywanie
+                initial_guess = [200, 20];  % [T1, T2]
+                
+                % Optymalizacja z fminsearch
+                options = optimset('Display', 'final', 'TolX', 1e-6, 'TolFun', 1e-6);
+                optimal_params = fminsearch(cost_func, initial_guess, options);
+                
+                % Transmitancja dopasowanego modelu
+                G = tf(1, conv([optimal_params(1) 1], [optimal_params(2) 1]));
+                G = tf(G.Numerator, G.Denominator, 'InputDelay', obj.tau);
+                G_z = c2d(G, obj.Tp, 'zoh');
+                G_z.Variable = 'z^-1';
+                a = G_z.Denominator{1}(2:3);
+                b = G_z.Numerator{1}(2:3);
+
+                S = 0;
+                S_D = 0;
+            else
+                u = [ones(1,obj.dynamic_horizont)
+                    zeros(1,obj.dynamic_horizont)];
+                [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+                y = s;
+    
+                t = (0:length(y)-1) * obj.Tp;
+                
+                % Funkcja celu dopasowania SOPDT
+                cost_func = @(params) ...
+                    sum((step(tf(params(1), conv([params(2) 1], [params(3) 1]), 'InputDelay', obj.tau), t) - y').^2);
+                
+                % Początkowe zgadywanie
+                initial_guess = [1, 200, 20];  % [K, T1, T2]
+                
+                % Optymalizacja z fminsearch
+                options = optimset('Display', 'final', 'TolX', 1e-6, 'TolFun', 1e-6);
+                optimal_params = fminsearch(cost_func, initial_guess, options);
+                
+                % Transmitancja dopasowanego modelu
+                G = tf(optimal_params(1), conv([optimal_params(2) 1], [optimal_params(3) 1]));
+                S_D = step(G, t);
+
+                G = tf(G.Numerator, G.Denominator, 'InputDelay', obj.tau);
+                S = step(G, t);
+
+                G_z = c2d(G, obj.Tp, 'zoh');
+                G_z.Variable = 'z^-1';
+                a = G_z.Denominator{1}(2:3);
+                b = G_z.Numerator{1}(2:3);
+
+                % Rysowanie wykresu
+                figure;
+                plot(t, y, 'b', 'LineWidth', 2); hold on;
+                plot(t, S/s(end), 'r--', 'LineWidth', 2);
+                legend('Odpowiedź rzeczywista', 'Model SOPDT');
+                xlabel('Czas');
+                ylabel('Odpowiedź skokowa');
+                title(sprintf('Dopasowanie SOPDT: T1 = %.2f, T2 = %.2f', T(1), T(2)));
+                grid on;
+            end
         end
 
         function [y, y_L, E] = modifiedEuler(obj, u, kk)
@@ -112,7 +190,7 @@ classdef Obiekt < handle
 
             %% Modified Euler
             for i = 2:kk
-                if i <= obj.delay + 1
+                if i <= obj.delay+1
                     V_1 = V_1 + obj.Tp * fun_1(obj.F_10, F_D(i), V_1);
                     V_2 = V_2 + obj.Tp * fun_2(V_1, V_2);
 
@@ -125,16 +203,16 @@ classdef Obiekt < handle
                     V_1eL = V_1eL + 1/2 * obj.Tp * (fun_1L(obj.F_10, F_D(i), V_1eL) + fun_1L(obj.F_10, F_D(i), V_1L));
                     V_2eL = V_2eL + 1/2 * obj.Tp * (fun_2L(V_1eL, V_2eL) + fun_2L(V_1L, V_2L));
                 else            
-                    V_1 = V_1 + obj.Tp * fun_1(F_1in(i - obj.delay), F_D(i), V_1);
+                    V_1 = V_1 + obj.Tp * fun_1(F_1in(i - (obj.delay+1)), F_D(i), V_1);
                     V_2 = V_2 + obj.Tp * fun_2(V_1, V_2);
 
-                    V_1e = V_1e + 1/2 * obj.Tp * (fun_1(F_1in(i - obj.delay), F_D(i), V_1e) + fun_1(F_1in(i - obj.delay), F_D(i), V_1));
+                    V_1e = V_1e + 1/2 * obj.Tp * (fun_1(F_1in(i - (obj.delay+1)), F_D(i), V_1e) + fun_1(F_1in(i - (obj.delay+1)), F_D(i), V_1));
                     V_2e = V_2e + 1/2 * obj.Tp * (fun_2(V_1e, V_2e) + fun_2(V_1, V_2));
 
-                    V_1L = V_1L + obj.Tp * fun_1L(F_1in(i - obj.delay), F_D(i), V_1L);
+                    V_1L = V_1L + obj.Tp * fun_1L(F_1in(i - (obj.delay+1)), F_D(i), V_1L);
                     V_2L = V_2L + obj.Tp * fun_2L(V_1L, V_2L);
 
-                    V_1eL = V_1eL + 1/2 * obj.Tp * (fun_1L(F_1in(i - obj.delay), F_D(i), V_1eL) + fun_1L(F_1in(i - obj.delay), F_D(i), V_1L));
+                    V_1eL = V_1eL + 1/2 * obj.Tp * (fun_1L(F_1in(i - (obj.delay+1)), F_D(i), V_1eL) + fun_1L(F_1in(i - (obj.delay+1)), F_D(i), V_1L));
                     V_2eL = V_2eL + 1/2 * obj.Tp * (fun_2L(V_1eL, V_2eL) + fun_2L(V_1L, V_2L));
                 end
 
@@ -148,7 +226,31 @@ classdef Obiekt < handle
             E = sum((y-y_L).^2) / kk;
         end
 
-        function [y, V_1e, V_2e] = realSimulation(obj, u, F_10, F_D0, h_20, V_10, V_20)
+        function [y, V_1, V_2, V_1e, V_2e] = realSimulation(obj, u, V_10, V_20, V_10e, V_20e)
+
+            %% Funkcje
+            fun_1 = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (V_1/obj.A)^(1/2);
+            fun_2 = @(V_1, V_2) obj.alpha_1 * (V_1/obj.A)^(1/2) - obj.alpha_2 * (V_2/obj.C)^(1/4); 
+
+            %% Wymuszenia
+            F_1in = u(1,1) + obj.F_10;
+            F_D = u(2,1) + obj.F_D0;
+
+            V_1 = V_10 + obj.Tp * fun_1(F_1in, F_D, V_10);
+            V_2 = V_20 + obj.Tp * fun_2(V_10, V_20);
+
+            V_1e = V_10e + 1/2 * obj.Tp * (fun_1(F_1in, F_D, V_10e) + fun_1(F_1in, F_D, V_1));
+            V_2e = V_20e + 1/2 * obj.Tp * (fun_2(V_10e, V_20e) + fun_2(V_1, V_2));
+
+            h_2 = sqrt(V_2e / obj.C);
+
+            % Sprowadzenie wartości do punktu pracy
+            y = h_2 - obj.h_20;
+         end
+
+         function [y] = freeAnswer(obj, u, F_10, F_D0, h_20, V_10, V_20, V_10e, V_20e, N)
+
+            y = zeros(N, 1);
 
             %% Funkcje
             fun_1 = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (V_1/obj.A)^(1/2);
@@ -158,117 +260,24 @@ classdef Obiekt < handle
             F_1in = u(1,1) + F_10;
             F_D = u(2,1) + F_D0;
 
-            V_1 = V_10 + obj.Tp * fun_1(F_1in, F_D, V_10);
-            V_2 = V_20 + obj.Tp * fun_2(V_10, V_20);
+            V_1 = V_10;
+            V_2 = V_20;
+            V_1e = V_10e;
+            V_2e = V_20e;
 
-            V_1e = V_10 + 1/2 * obj.Tp * (fun_1(F_1in, F_D, V_10) + fun_1(F_1in, F_D, V_1));
-            V_2e = V_20 + 1/2 * obj.Tp * (fun_2(V_10, V_20) + fun_2(V_1, V_2));
-
-            h_2 = sqrt(V_2e / obj.C);
-
-            % Sprowadzenie wartości do punktu pracy
-            y = h_2 - h_20;
-         end
-
-
-        function [y, y_L, E] = rk4(obj, u, kk)
-
-            %% Alokacja pamięci
-            y = zeros(1, kk);
-            y_L = zeros(1, kk);
-            
-            %% Warunki początkowe
-            V_1 = obj.V_10;
-            V_2 = obj.V_20;
-            V_1L = obj.V_10;
-            V_2L = obj.V_20;
-            y(1) = 0;
-            y_L(1) = 0;
-            
-            %% Funkcje
-            fun_1 = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (V_1/obj.A)^(1/2);
-            fun_1L = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (obj.V_10/obj.A)^(1/2) - obj.alpha_1 / (2*obj.V_10^(1/2)*obj.A^(1/2)) * (V_1-obj.V_10);
-            fun_2 = @(V_1, V_2) obj.alpha_1 * (V_1/obj.A)^(1/2) - obj.alpha_2 * (V_2/obj.C)^(1/4); 
-            fun_2L = @(V_1, V_2) obj.alpha_1 * (obj.V_10/obj.A)^(1/2) - obj.alpha_2 * (obj.V_20/obj.C)^(1/4) + ...
-                     obj.alpha_1 / (2*obj.V_10^(1/2)*obj.A^(1/2)) * (V_1-obj.V_10) - obj.alpha_2 / (4*obj.V_20^(3/4)*obj.C^(1/4)) * (V_2-obj.V_20);
-            
-            %% Wymuszenia
-            F_1in = u(1,:) + obj.F_10;
-            F_D = u(2,:) + obj.F_D0;
-            
-            %% RK4 - Runge-Kutta 4. rzędu
-            for i = 2:kk
-                if i <= obj.delay + 1
-                    % RK4 dla nieliniowego układu
-                    % Krok dla V_1
-                    k1_V1 = obj.Tp * fun_1(obj.F_10, F_D(i), max(V_1, 0));
-                    k2_V1 = obj.Tp * fun_1(obj.F_10, F_D(i), max(V_1 + 0.5 * k1_V1, 0));
-                    k3_V1 = obj.Tp * fun_1(obj.F_10, F_D(i), max(V_1 + 0.5 * k2_V1, 0));
-                    k4_V1 = obj.Tp * fun_1(obj.F_10, F_D(i), max( V_1 + k3_V1, 0));
-                    V_1 = V_1 + (k1_V1 + 2*k2_V1 + 2*k3_V1 + k4_V1) / 6;
-            
-                    % Krok dla V_2
-                    k1_V2 = obj.Tp * fun_2(max(V_1, 0), max(V_2, 0));
-                    k2_V2 = obj.Tp * fun_2(max(V_1, 0), max(V_2 + 0.5 * k1_V2, 0));
-                    k3_V2 = obj.Tp * fun_2(max(V_1, 0), max(V_2 + 0.5 * k2_V2, 0));
-                    k4_V2 = obj.Tp * fun_2(max(V_1, 0), max(V_2 + k3_V2, 0));
-                    V_2 = V_2 + (k1_V2 + 2*k2_V2 + 2*k3_V2 + k4_V2) / 6;
-            
-                    % RK4 dla układu liniowego
-                    k1_V1L = obj.Tp * fun_1L(obj.F_10, F_D(i), V_1L);
-                    k2_V1L = obj.Tp * fun_1L(obj.F_10, F_D(i), V_1L + 0.5 * k1_V1L);
-                    k3_V1L = obj.Tp * fun_1L(obj.F_10, F_D(i), V_1L + 0.5 * k2_V1L);
-                    k4_V1L = obj.Tp * fun_1L(obj.F_10, F_D(i), V_1L + k3_V1L);
-                    V_1L = V_1L + (k1_V1L + 2*k2_V1L + 2*k3_V1L + k4_V1L) / 6;
-            
-                    k1_V2L = obj.Tp * fun_2L(V_1L, V_2L);
-                    k2_V2L = obj.Tp * fun_2L(V_1L, V_2L + 0.5 * k1_V2L);
-                    k3_V2L = obj.Tp * fun_2L(V_1L, V_2L + 0.5 * k2_V2L);
-                    k4_V2L = obj.Tp * fun_2L(V_1L, V_2L + k3_V2L);
-                    V_2L = V_2L + (k1_V2L + 2*k2_V2L + 2*k3_V2L + k4_V2L) / 6;
-                else
-                    % Uwzględnienie opóźnienia dla F_1in
-                    delayed_idx = i - obj.delay;
-            
-                    % RK4 dla nieliniowego układu
-                    k1_V1 = obj.Tp * fun_1(F_1in(delayed_idx), F_D(i), max(V_1, 0));
-                    k2_V1 = obj.Tp * fun_1(F_1in(delayed_idx), F_D(i), max(V_1 + 0.5 * k1_V1, 0));
-                    k3_V1 = obj.Tp * fun_1(F_1in(delayed_idx), F_D(i), max(V_1 + 0.5 * k2_V1, 0));
-                    k4_V1 = obj.Tp * fun_1(F_1in(delayed_idx), F_D(i), max(V_1 + k3_V1, 0));
-                    V_1 = V_1 + (k1_V1 + 2*k2_V1 + 2*k3_V1 + k4_V1) / 6;
-            
-                    k1_V2 = obj.Tp * fun_2(max(V_1, 0), max(V_2, 0));
-                    k2_V2 = obj.Tp * fun_2(max(V_1, 0), max(V_2 + 0.5 * k1_V2, 0));
-                    k3_V2 = obj.Tp * fun_2(max(V_1, 0), max(V_2 + 0.5 * k2_V2, 0));
-                    k4_V2 = obj.Tp * fun_2(max(V_1, 0), max(V_2 + k3_V2, 0));
-                    V_2 = V_2 + (k1_V2 + 2*k2_V2 + 2*k3_V2 + k4_V2) / 6;
-            
-                    % RK4 dla układu liniowego
-                    k1_V1L = obj.Tp * fun_1L(F_1in(delayed_idx), F_D(i), V_1L);
-                    k2_V1L = obj.Tp * fun_1L(F_1in(delayed_idx), F_D(i), V_1L + 0.5 * k1_V1L);
-                    k3_V1L = obj.Tp * fun_1L(F_1in(delayed_idx), F_D(i), V_1L + 0.5 * k2_V1L);
-                    k4_V1L = obj.Tp * fun_1L(F_1in(delayed_idx), F_D(i), V_1L + k3_V1L);
-                    V_1L = V_1L + (k1_V1L + 2*k2_V1L + 2*k3_V1L + k4_V1L) / 6;
-            
-                    k1_V2L = obj.Tp * fun_2L(V_1L, V_2L);
-                    k2_V2L = obj.Tp * fun_2L(V_1L, V_2L + 0.5 * k1_V2L);
-                    k3_V2L = obj.Tp * fun_2L(V_1L, V_2L + 0.5 * k2_V2L);
-                    k4_V2L = obj.Tp * fun_2L(V_1L, V_2L + k3_V2L);
-                    V_2L = V_2L + (k1_V2L + 2*k2_V2L + 2*k3_V2L + k4_V2L) / 6;
-                end
-            
-                V_2 = max(V_2, 0);
-                V_2L = max(V_2L, 0);
-
-                h_2 = sqrt(V_2 / obj.C);
-                h_2L = sqrt(obj.V_20 / obj.C) + 1/(2*sqrt(obj.V_20 * obj.C)) * (V_2L - obj.V_20);
-            
+            for i = 1:N
+                V_1 = V_1 + obj.Tp * fun_1(F_1in, F_D, V_1);
+                V_2 = V_2 + obj.Tp * fun_2(V_1, V_2);
+    
+                V_1e = V_1e + 1/2 * obj.Tp * (fun_1(F_1in, F_D, V_1e) + fun_1(F_1in, F_D, V_1));
+                V_2e = V_2e + 1/2 * obj.Tp * (fun_2(V_1e, V_2e) + fun_2(V_1, V_2));
+    
+                h_2 = sqrt(V_2e / obj.C);
+    
                 % Sprowadzenie wartości do punktu pracy
-                y(i) = h_2 - obj.h_20;
-                y_L(i) = h_2L - obj.h_20;
+                y(i) = h_2 - h_20;
             end
-            E = sum((y-y_L).^2) / kk;
-        end
+         end
 
         function [fis_trained] = fuzzyfication(obj)
             U = zeros(2, obj.kk);
@@ -353,7 +362,7 @@ classdef Obiekt < handle
             grid on;
         end
 
-        function y = static_charakteristic(obj)
+        function static_charakteristic(obj)
             F_1 = linspace(45, 135, obj.kk);
             F_D = linspace(15, 45, obj.kk);
 
@@ -366,7 +375,7 @@ classdef Obiekt < handle
             xlabel('F_1');
             ylabel('F_D');
             zlabel('y');
-            title('Static Characteristic in 3D');
+            title('Charakterystyka statyczna');
             shading interp; % opcjonalne: wygładzenie powierzchni
         end
     end
