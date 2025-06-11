@@ -78,24 +78,24 @@ classdef DMC < handle
             obj.kz = obj.K(1, :) * obj.M_zP;
         end
    
-        function [y, u, E, E_u, E_y] = dmc_analitic(obj, y_zad, u_D, a, b, delay, kk)
+        function [y, u, E, E_u, E_y] = dmc_analiticHammerstein(obj, y_zad, u_D, a, b, obiekt)
             %% Alokacja pamięci
-            u = zeros(2, kk);
+            u = zeros(2, obiekt.kk);
             u(2,:) = u_D;
         
             delta_up = zeros(1, obj.D-1);
             delta_uz = zeros(1, obj.D_disturbance);
             delta_uk = 0;
-            delta_u = zeros(1, kk);
+            delta_u = zeros(1, obiekt.kk);
             
             %% Sterowanie DMC
             v = zeros(size(y_zad));
             y = zeros(size(y_zad));
-            v(1:delay+2) = y_zad(1:delay+2);
-            y(1:delay+2) = y_zad(1:delay+2);
-            for k = delay+3:kk
-                v(k) = - a*v(k-1:-1:k-2)' + b*u(1, k-(delay+1):-1:k-(delay+2))' + b*u(2, k-1:-1:k-2)';
-                y(k) = ((120+v(k))/20)^2 - 36;
+            v(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            y(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            for k = obiekt.delay+3:obiekt.kk
+                v(k) = ((90+u(1, k-(obiekt.delay+1)) + 30+u(2, k-1))/obiekt.alpha_2)^2 - obiekt.h_20;
+                y(k) = - a*y(k-1:-1:k-2)' + b*v(k-1:-1:k-2)';
         
                 % Ograniczenia wartości sygnału wyjściowego, tj. wysokości h_2
                 y(k) = min(y(k), obj.y_max);
@@ -123,20 +123,20 @@ classdef DMC < handle
                 u(1, k) = min(u(1, k), obj.u_max);
                 u(1, k) = max(u(1, k), -obj.u_max);
             end
-            E_u = obj.lambda .* sum(delta_u.^2)/kk;
-            E_y = sum((y_zad - y).^2)/kk;
+            E_u = obj.lambda .* sum(delta_u.^2)/obiekt.kk;
+            E_y = sum((y_zad - y).^2)/obiekt.kk;
             E =  E_u + E_y;
         end
 
-        function [y, u, E, E_u, E_y] = dmc_numeric(obj, y_zad, u_D, a, b, delay, kk)
+        function [y, u, E, E_u, E_y] = dmc_numericHammerstein(obj, y_zad, u_D, a, b, obiekt)
             % Alokacja pamięci
-            u = zeros(2, kk);
+            u = zeros(2, obiekt.kk);
             u(2,:) = u_D;
             
             delta_up = zeros(obj.D-1,1);
             delta_uk = zeros(obj.Nu,1);
             delta_uz = zeros(obj.D_disturbance, 1);
-            delta_u = zeros(1, kk);
+            delta_u = zeros(1, obiekt.kk);
         
             Y_max = ones(obj.N,1)*obj.y_max;
             Y_min = ones(obj.N,1)*(-obj.y_max);
@@ -152,11 +152,11 @@ classdef DMC < handle
             
             v = zeros(size(y_zad));
             y = zeros(size(y_zad));
-            v(1:delay+2) = y_zad(1:delay+2);
-            y(1:delay+2) = y_zad(1:delay+2);
-            for k = delay+3:kk
-                v(k) = - a*v(k-1:-1:k-2)' + b*u(1, k-(delay+1):-1:k-(delay+2))' + b*u(2, k-1:-1:k-2)';
-                y(k) = ((120+v(k))/20)^2 - 36;
+            v(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            y(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            for k = obiekt.delay+3:obiekt.kk
+                v(k) = ((90+u(1, k-(obiekt.delay+1)) + 30+u(2, k-1))/obiekt.alpha_2)^2 - obiekt.h_20;
+                y(k) = - a*y(k-1:-1:k-2)' + b*v(k-1:-1:k-2)';
         
                 % Ograniczenia wartości sygnału wyjściowego, tj. wysokości h_2
                 y(k) = min(y(k), obj.y_max);
@@ -184,26 +184,27 @@ classdef DMC < handle
                 % Obliczenie sterowania
                 u(1,k) = u(1,k-1) + delta_uk(1);
             end
-            E_u = obj.lambda .* sum(delta_u.^2)/kk;
-            E_y = sum((y_zad - y).^2)/kk;
+            E_u = obj.lambda .* sum(delta_u.^2)/obiekt.kk;
+            E_y = sum((y_zad - y).^2)/obiekt.kk;
             E =  E_u + E_y;
         end
 
-        function [y, u, E, E_u, E_y] = dmc_fuzzy(obj, y_zad, u_D, a, b, delay, kk, obiekt)
+        function [y, u, E, E_u, E_y] = dmc_fuzzyHammerstein(obj, y_zad, u_D, a, b, obiekt)
             gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
         
             %% Alokacja pamięci
-            u = zeros(2, kk);
+            u = zeros(2, obiekt.kk);
             u(2,:) = u_D;
         
             delta_up = zeros(1, obj.D-1);
             delta_uz = zeros(1, obj.D_disturbance);
             delta_uk = 0;
-            delta_u = zeros(1, kk);
+            delta_u = zeros(1, obiekt.kk);
         
             F_10 = obiekt.F_10;
             F_D0 = obiekt.F_D0;
             h_20 = obiekt.h_20;
+            lambda_original = obj.lambda;
         
             F_1 = [-30 -10 0 10 30];
             F_D = [-10 -5 0 5 10];
@@ -213,7 +214,7 @@ classdef DMC < handle
             KE = zeros(1, rules_number);
             KU = cell(1, rules_number);
             KZ = cell(1, rules_number);
-            L = ones(1,rules_number)*2.5;
+            L = ones(1,rules_number)*50;
         
             for i = 1:rules_number
                 obiekt.linearization(F_10+F_1(i), F_D0+F_D(i));
@@ -228,16 +229,17 @@ classdef DMC < handle
                 KU{i} = obj.ku;
                 KZ{i} = obj.kz;
             end
-            disp(Y);
+
+            obj.lambda = lambda_original;
         
             %% Sterowanie DMC
             v = zeros(size(y_zad));
             y = zeros(size(y_zad));
-            v(1:delay+2) = y_zad(1:delay+2);
-            y(1:delay+2) = y_zad(1:delay+2);
-            for k = delay+3:kk
-                v(k) = - a*v(k-1:-1:k-2)' + b*u(1, k-(delay+1):-1:k-(delay+2))' + b*u(2, k-1:-1:k-2)';
-                y(k) = ((120+v(k))/20)^2 - 36;
+            v(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            y(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            for k = obiekt.delay+3:obiekt.kk
+                v(k) = ((90+u(1, k-(obiekt.delay+1)) + 30+u(2, k-1))/obiekt.alpha_2)^2 - h_20;
+                y(k) = - a*y(k-1:-1:k-2)' + b*v(k-1:-1:k-2)';
         
                 % Ograniczenia wartości sygnału wyjściowego, tj. wysokości h_2
                 y(k) = min(y(k), obj.y_max);
@@ -271,27 +273,454 @@ classdef DMC < handle
                 u(1, k) = min(u(1, k), obj.u_max);
                 u(1, k) = max(u(1, k), -obj.u_max);
             end
-            E_u = obj.lambda .* sum(delta_u.^2)/kk;
-            E_y = sum((y_zad - y).^2)/kk;
+            E_u = obj.lambda .* sum(delta_u.^2)/obiekt.kk;
+            E_y = sum((y_zad - y).^2)/obiekt.kk;
             E =  E_u + E_y;
         end
 
-        function [y, u, E, E_u, E_y] = dmc_no(obj, y_zad, u_D, a, b, delay, kk)
+        function [y, u, E, E_u, E_y] = dmc_noHammerstein(obj, y_zad, u_D, a, b, obiekt)
             %% Alokacja pamięci
-            u = zeros(2, kk);
+            u = zeros(2, obiekt.kk);
             u(2,:) = u_D;
 
-            delta_u_hist = zeros(1, kk);
+            delta_u_hist = zeros(1, obiekt.kk);
             
             %% Sterowanie DMC
             v = zeros(size(y_zad));
             y = zeros(size(y_zad));
-            v(1:delay+2) = y_zad(1:delay+2);
-            y(1:delay+2) = y_zad(1:delay+2);
+            v(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            y(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
         
-            for k = delay+3:kk
-                v(k) = - a*v(k-1:-1:k-2)' + b*u(1, k-(delay+1):-1:k-(delay+2))' + b*u(2, k-1:-1:k-2)';
-                y(k) = ((120 + v(k))/20)^2 - 36;
+            for k = obiekt.delay+3:obiekt.kk
+                v(k) = ((90+u(1, k-(obiekt.delay+1)) + 30+u(2, k-1))/obiekt.alpha_2)^2 - obiekt.h_20;
+                y(k) = - a*y(k-1:-1:k-2)' + b*v(k-1:-1:k-2)';
+                
+                cost_func = @(du) (sum((y_zad(k)*ones(obj.N,1) - nonlinear_func(v, u, y, du, k, a, b, obj.N)).^2) + obj.lambda * sum(du.^2));
+  
+                % Ograniczenia na przyrosty sterowania
+                lb = -obj.delta_uk_max * ones(obj.Nu, 1);
+                ub = obj.delta_uk_max * ones(obj.Nu, 1);
+                
+                % Optymalizacja
+                options = optimoptions('fmincon', 'Display', 'none', ...
+                    'Algorithm', 'sqp', 'OptimalityTolerance', 1e-6, 'StepTolerance', 1e-6);
+                delta_u = fmincon(cost_func, zeros(obj.Nu, 1), [], [], [], [], lb, ub, [], options);
+                delta_uk = delta_u(1);
+        
+                % Aktualizacja sterowania
+                u(1, k) = u(1, k-1) + delta_uk;
+                delta_u_hist(k) = delta_uk;
+            end
+        
+            E_u = obj.lambda .* sum(delta_u_hist.^2) / obiekt.kk;
+            E_y = sum((y_zad - y).^2) / obiekt.kk;
+            E = E_u + E_y;
+        
+            function y_pred = nonlinear_func(v, u, y, du, k, a, b, N)
+                y_pred = zeros(N,1);
+                v_pred = zeros(N,1);
+                u_pred = zeros(N,1);
+            
+                for i = 1:N
+                    % wyliczenie przyrostu sterowania
+                    if i <= length(du)
+                        du_i = du(i);
+                    else
+                        du_i = du(end);
+                    end
+            
+                    % predykcja u1
+                    if i == 1
+                        u_pred(i) = u(1, k-1) + du_i;
+                    else
+                        u_pred(i) = u_pred(i-1) + du_i;
+                    end
+            
+                    % u1 z opóźnieniem: różne źródło w zależności od i
+                    if i < 6
+                        u1_delayed = u(1, k - 6 + i);       % znane
+                    elseif (i == 6)
+                        u1_delayed = u_pred(i - 5);         % przewidywane
+                    else
+                        u1_delayed = u_pred(i - 5);         % przewidywane
+                    end
+            
+                    u2_delayed = u(2, k - 1);
+            
+                    % predykcja stanu
+                    v_pred(i) = ((90 + u1_delayed + 30 + u2_delayed) / obiekt.alpha_2)^2 - obiekt.h_20;
+            
+                    if i == 1
+                        y_pred(i) = -a * [y(k); y(k-1)] + b * [v(k); v(k-1)];
+                    elseif i == 2
+                        y_pred(i) = -a * [y_pred(i-1); y(k)] + b * [v_pred(i-1); v(k)];
+                    else
+                        y_pred(i) = -a * [y_pred(i-1); y_pred(i-2)] + b * [v_pred(i-1); v_pred(i-2)];
+                    end
+                end
+            end
+        end
+
+        function [y, u, E, E_u, E_y] = dmc_slHammerstein(obj, y_zad, u_D, a, b, fis, obiekt, type)
+            %% Alokacja pamięci
+            u = zeros(2, obiekt.kk);
+            u(2,:) = u_D;
+
+            delta_up = zeros(1, obj.D-1);
+            delta_uz = zeros(1, obj.D_disturbance);
+            delta_uk = 0;
+            delta_u = zeros(1, obiekt.kk);
+
+            du = 0.001;
+            
+            %% Sterowanie DMC
+            y = zeros(size(y_zad));
+            y(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            v = zeros(size(y_zad));
+            for k = obiekt.delay+3:obiekt.kk
+
+                if (strcmp(type, 'linear'))
+                    dydu = (evalfis(fis, [u(1,k-(obiekt.delay+1)), u(2,k-1)]) - evalfis(fis, [u(1,k-(obiekt.delay+1))-du, u(2,k-1)]))/du;
+                else
+                    dydu = (evalfis(fis, [sinh(u(1,k-(obiekt.delay+1))/45), sinh(u(2,k-1)/15)]) - ...
+                        evalfis(fis, [sinh((u(1,k-(obiekt.delay+1))-du)/45), sinh(u(2,k-1)/15)]))/du;
+                end
+                
+                v(k) = ((90 + u(1,k-(obiekt.delay+1)) + 30 + u(2, k-1)) / obiekt.alpha_2)^2 - obiekt.h_20;
+                y(k) = - a*y(k-1:-1:k-2)' + b*v(k-1:-1:k-2)';
+
+                % Ograniczenia wartości sygnału wyjściowego, tj. wysokości h_2
+                y(k) = min(y(k), obj.y_max);
+                y(k) = max(y(k), -obj.y_max);
+
+                M_new = dydu * obj.M;
+                K_new = ((M_new' * M_new + obj.lambda * eye(obj.Nu))^(-1)) * M_new';
+                ke_new = sum(K_new(1, :));
+        
+                Mp_new = dydu * obj.M_p;
+                ku_new = K_new(1,:) * Mp_new;
+        
+                MzP_new = dydu * obj.M_zP;
+                kz_new = K_new(1,:) * MzP_new;
+
+                % Przepisanie sterowań do wektora przeszłych sterowań
+                delta_up = [delta_uk, delta_up(1:end-1)];
+                delta_uz = [u(2, k) - u(2, k-1) , delta_uz(1:end-1)];
+
+                % Oblicznie uchybu    
+                e = y_zad(k) - y(k);
+            
+                % Obliczenie przyrostu sterowania dla chwili (i+1) w chwili i-tej
+                delta_uk = ke_new * e - ku_new * delta_up' - kz_new * delta_uz';
+                
+                % Ograniczenie wartości przyrostu sterowania
+                delta_uk = min(delta_uk, obj.delta_uk_max);
+                delta_uk = max(delta_uk, -obj.delta_uk_max);
+                delta_u(k) = delta_uk;
+                
+                % Obliczenie sterowania dla chwili (i+1) w chwili i-tej
+                u(1, k) = u(1, k-1) + delta_uk; 
+                
+                % Ograniczenie sterowania
+                u(1, k) = min(u(1, k), obj.u_max);
+                u(1, k) = max(u(1, k), -obj.u_max);
+            end
+            E_u = obj.lambda .* sum(delta_u.^2)/obiekt.kk;
+            E_y = sum((y_zad - y).^2)/obiekt.kk;
+            E =  E_u + E_y;
+        end
+
+        function [y, u, E, E_u, E_y] = dmc_nplHammerstein(obj, y_zad, u_D, a, b, fis, obiekt, type)
+            % Alokacja pamięci
+            u = zeros(2, obiekt.kk);
+            u(2,:) = u_D;
+
+            delta_u = zeros(1, obiekt.kk);
+
+            du = 0.001;
+            
+            % Sterowanie DMC
+            y = zeros(size(y_zad));
+            y(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            v = zeros(size(y_zad));
+            % Główna pętla sterowania
+            for k = obiekt.delay+3:obiekt.kk
+                
+                % Obliczenie wzmocnienia z modelu Hammersteina
+                if (strcmp(type, 'linear'))
+                    dydu = (evalfis(fis, [u(1,k-(obiekt.delay+1)), u(2,k-1)]) - evalfis(fis, [u(1,k-(obiekt.delay+1))-du, u(2,k-1)]))/du;
+                else
+                    dydu = (evalfis(fis, [sinh(u(1,k-(obiekt.delay+1))/45), sinh(u(2,k-1)/15)]) - ...
+                        evalfis(fis, [sinh((u(1,k-(obiekt.delay+1))-du)/45), sinh(u(2,k-1)/15)]))/du;
+                end
+                
+                v(k) = ((90+u(1,k-(obiekt.delay+1)) + 30 + u(2, k-1)) / obiekt.alpha_2)^2 - obiekt.h_20;
+                y(k) = - a*y(k-1:-1:k-2)' + b*v(k-1:-1:k-2)';
+                
+                M_new = dydu * obj.M;
+                K_new = ((M_new' * M_new + obj.lambda * eye(obj.Nu))^(-1)) * M_new';
+        
+                Y_0 = fuzzy_free_response(u, v, y, k, a, b, obj.N, fis, type);
+                Y_zad = y_zad(k) * ones(obj.N, 1);
+                delta_uk = K_new(1,:) * (Y_zad - Y_0);
+        
+                % Ograniczenia przyrostu
+                delta_uk = min(max(delta_uk, -obj.delta_uk_max), obj.delta_uk_max);
+        
+                % Aktualizacja sterowania
+                u(1, k) = u(1, k-1) + delta_uk;
+        
+                % Ograniczenia sterowania
+                u(1, k) = min(max(u(1, k), -obj.u_max), obj.u_max);
+        
+                delta_u(k) = delta_uk;
+            end
+
+            E_u = obj.lambda .* sum(delta_u.^2)/obiekt.kk;
+            E_y = sum((y_zad - y).^2)/obiekt.kk;
+            E =  E_u + E_y;
+
+            function y_0 = fuzzy_free_response(u, v, y, k, a, b, N, fis, type)
+                y_0 = zeros(N, 1);
+                v_0 =  v(1, k);
+        
+                if (strcmp(type, 'linear'))
+                    v_hat = evalfis(fis, [u(1, k-(obiekt.delay+1)) u(2, k-1)]);
+                else
+                    v_hat = evalfis(fis, [sinh(u(1, k-(obiekt.delay+1))/45) sinh(u(2, k-1)/15)]);
+                end
+                
+                y_hat = -a*y(k-1:-1:k-2)' + b*[v_hat v_hat]';
+                dk = y(k) - y_hat;
+        
+                for m = 1:N
+                    if m == 1
+                        y_0(m) = -a*[y(k) y(k-1)]' + b*[v_0 v_0]' + dk;
+                    elseif m == 2
+                        y_0(m) = -a*[y_0(m-1) y(k)]' + b*[v_0 v_0]' + dk;
+                    else
+                        y_0(m) = -a*[y_0(m-1) y_0(m-2)]' + b*[v_0 v_0]' + dk;
+                    end
+                end
+            end
+        end
+
+        function [y, u, E, E_u, E_y] = dmc_analiticWiener(obj, y_zad, u_D, a, b, obiekt)
+            %% Alokacja pamięci
+            u = zeros(2, obiekt.kk);
+            u(2,:) = u_D;
+        
+            delta_up = zeros(1, obj.D-1);
+            delta_uz = zeros(1, obj.D_disturbance);
+            delta_uk = 0;
+            delta_u = zeros(1, obiekt.kk);
+            
+            %% Sterowanie DMC
+            v = zeros(size(y_zad));
+            y = zeros(size(y_zad));
+            v(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            y(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            for k = obiekt.delay+3:obiekt.kk
+                v(k) = - a*v(k-1:-1:k-2)' + b*u(1, k-(obiekt.delay+1):-1:k-(obiekt.delay+2))' + b*u(2, k-1:-1:k-2)';
+                y(k) = ((120+v(k))/obiekt.alpha_2)^2 - obiekt.h_20;
+        
+                % Ograniczenia wartości sygnału wyjściowego, tj. wysokości h_2
+                y(k) = min(y(k), obj.y_max);
+                y(k) = max(y(k), -obj.y_max);
+        
+                % Przepisanie sterowań do wektora przeszłych sterowań
+                delta_up = [delta_uk, delta_up(1:end-1)];
+                delta_uz = [u(2, k) - u(2, k-1), delta_uz(1:end-1)];
+        
+                % Obliczenie uchybu    
+                e = y_zad(k) - y(k);
+            
+                % Obliczenie przyrostu sterowania dla chwili (i+1) w chwili i-tej
+                delta_uk = obj.ke * e - obj.ku * delta_up' - obj.kz * delta_uz';
+                
+                % Ograniczenie wartości przyrostu sterowania
+                delta_uk = min(delta_uk, obj.delta_uk_max);
+                delta_uk = max(delta_uk, -obj.delta_uk_max);
+                delta_u(k) = delta_uk;
+                
+                % Obliczenie sterowania dla chwili (i+1) w chwili i-tej
+                u(1, k) = u(1, k-1) + delta_uk;
+                
+                % Ograniczenie sterowania
+                u(1, k) = min(u(1, k), obj.u_max);
+                u(1, k) = max(u(1, k), -obj.u_max);
+            end
+            E_u = obj.lambda .* sum(delta_u.^2)/obiekt.kk;
+            E_y = sum((y_zad - y).^2)/obiekt.kk;
+            E =  E_u + E_y;
+        end
+
+        function [y, u, E, E_u, E_y] = dmc_numericWiener(obj, y_zad, u_D, a, b, obiekt)
+            % Alokacja pamięci
+            u = zeros(2, obiekt.kk);
+            u(2,:) = u_D;
+            
+            delta_up = zeros(obj.D-1,1);
+            delta_uk = zeros(obj.Nu,1);
+            delta_uz = zeros(obj.D_disturbance, 1);
+            delta_u = zeros(1, obiekt.kk);
+        
+            Y_max = ones(obj.N,1)*obj.y_max;
+            Y_min = ones(obj.N,1)*(-obj.y_max);
+            
+            U_max = ones(obj.Nu,1)*obj.u_max;
+            U_min = ones(obj.Nu,1)*(-obj.u_max);
+            delta_U_max = ones(obj.Nu,1)*obj.delta_uk_max;
+            delta_U_min = ones(obj.Nu,1)*(-obj.delta_uk_max);
+            
+            J = tril(ones(obj.Nu));
+            A = [-J; J; -obj.M; obj.M];
+            H = 2*(obj.M'*obj.M + obj.lambda*eye(obj.Nu));
+            
+            v = zeros(size(y_zad));
+            y = zeros(size(y_zad));
+            v(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            y(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            for k = obiekt.delay+3:obiekt.kk
+                v(k) = - a*v(k-1:-1:k-2)' + b*u(1, k-(obiekt.delay+1):-1:k-(obiekt.delay+2))' + b*u(2, k-1:-1:k-2)';
+                y(k) = ((120+v(k))/obiekt.alpha_2)^2 - obiekt.h_20;
+        
+                % Ograniczenia wartości sygnału wyjściowego, tj. wysokości h_2
+                y(k) = min(y(k), obj.y_max);
+                y(k) = max(y(k), -obj.y_max);
+                   
+                % Przepisanie sterowań do wektora przeszłych sterowań
+                delta_up = [delta_uk(1); delta_up(1:end-1)];
+                delta_uz = [u(2, k) - u(2, k-1); delta_uz(1:end-1)];
+            
+                U_k_1 = ones(obj.Nu,1)*u(1,k-1);
+                Y = ones(obj.N,1)*y(k);
+                Y_0 = Y + obj.M_p*delta_up + obj.M_zP*delta_uz;
+                Y_zad = ones(obj.N,1)*y_zad(k);
+                B = [-U_min + U_k_1;
+                     U_max - U_k_1;
+                    -Y_min + Y_0;
+                     Y_max - Y_0];
+                f = -2*obj.M'*(Y_zad - Y_0);
+                
+                % Obliczenie przyrostu sterowania dla chwili (i+1) w chwili i-tej
+                options = optimoptions('quadprog', 'Display', 'off');
+                delta_uk = quadprog(H,f,A,B,[],[],delta_U_min,delta_U_max,[],options);
+                delta_u(k) = delta_uk(1);
+                
+                % Obliczenie sterowania
+                u(1,k) = u(1,k-1) + delta_uk(1);
+            end
+            E_u = obj.lambda .* sum(delta_u.^2)/obiekt.kk;
+            E_y = sum((y_zad - y).^2)/obiekt.kk;
+            E =  E_u + E_y;
+        end
+
+        function [y, u, E, E_u, E_y] = dmc_fuzzyWiener(obj, y_zad, u_D, a, b, obiekt)
+            gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
+        
+            %% Alokacja pamięci
+            u = zeros(2, obiekt.kk);
+            u(2,:) = u_D;
+        
+            delta_up = zeros(1, obj.D-1);
+            delta_uz = zeros(1, obj.D_disturbance);
+            delta_uk = 0;
+            delta_u = zeros(1, obiekt.kk);
+        
+            F_10 = obiekt.F_10;
+            F_D0 = obiekt.F_D0;
+            h_20 = obiekt.h_20;
+            lambda_original = obj.lambda;
+        
+            F_1 = [-30 -10 0 10 30];
+            F_D = [-10 -5 0 5 10];
+            sigma = 12;
+            rules_number = length(F_1);
+            Y = zeros(1, rules_number);
+            KE = zeros(1, rules_number);
+            KU = cell(1, rules_number);
+            KZ = cell(1, rules_number);
+            L = ones(1,rules_number)*50;
+        
+            for i = 1:rules_number
+                obiekt.linearization(F_10+F_1(i), F_D0+F_D(i));
+                [~, ~, s, s_D] = obiekt.sopdt();
+                obj.lambda = L(i);
+                obj.dynamic_matrix(s);
+                obj.past_matrix(s);
+                obj.matrix_disturbance(s_D);
+        
+                Y(i) = obiekt.h_20 - h_20;
+                KE(i) = obj.ke;
+                KU{i} = obj.ku;
+                KZ{i} = obj.kz;
+            end
+            
+            obj.lambda = lambda_original;
+        
+            %% Sterowanie DMC
+            v = zeros(size(y_zad));
+            y = zeros(size(y_zad));
+            v(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            y(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            for k = obiekt.delay+3:obiekt.kk
+                v(k) = - a*v(k-1:-1:k-2)' + b*u(1, k-(obiekt.delay+1):-1:k-(obiekt.delay+2))' + b*u(2, k-1:-1:k-2)';
+                y(k) = ((120+v(k))/obiekt.alpha_2)^2 - h_20;
+        
+                % Ograniczenia wartości sygnału wyjściowego, tj. wysokości h_2
+                y(k) = min(y(k), obj.y_max);
+                y(k) = max(y(k), -obj.y_max);
+        
+                % Przepisanie sterowań do wektora przeszłych sterowań
+                delta_up = [delta_uk, delta_up(1:end-1)];
+                delta_uz = [u(2, k) - u(2, k-1) , delta_uz(1:end-1)];
+        
+                % Oblicznie uchybu    
+                e = y_zad(k) - y(k);
+        
+                output = 0;
+                w = 0;
+                for i = 1:rules_number
+                    degree = gaussmf_val(v(k), sigma, Y(i));
+                    output = output + degree * (KE(i) * e - KU{i} * delta_up' - KZ{i} * delta_uz');
+                    w = w + degree;
+                end
+                delta_uk = output / w;
+        
+                % Ograniczenie wartości przyrostu sterowania
+                delta_uk = min(delta_uk, obj.delta_uk_max);
+                delta_uk = max(delta_uk, -obj.delta_uk_max);
+                delta_u(k) = delta_uk;
+        
+                % Obliczenie sterowania dla chwili (i+1) w chwili i-tej
+                u(1, k) = u(1, k-1) + delta_uk;
+        
+                % Ograniczenie sterowania
+                u(1, k) = min(u(1, k), obj.u_max);
+                u(1, k) = max(u(1, k), -obj.u_max);
+            end
+            E_u = obj.lambda .* sum(delta_u.^2)/obiekt.kk;
+            E_y = sum((y_zad - y).^2)/obiekt.kk;
+            E =  E_u + E_y;
+        end
+
+        function [y, u, E, E_u, E_y] = dmc_noWiener(obj, y_zad, u_D, a, b, obiekt)
+            %% Alokacja pamięci
+            u = zeros(2, obiekt.kk);
+            u(2,:) = u_D;
+
+            delta_u_hist = zeros(1, obiekt.kk);
+            
+            %% Sterowanie DMC
+            v = zeros(size(y_zad));
+            y = zeros(size(y_zad));
+            v(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            y(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+        
+            for k = obiekt.delay+3:obiekt.kk
+                v(k) = - a*v(k-1:-1:k-2)' + b*u(1, k-(obiekt.delay+1):-1:k-(obiekt.delay+2))' + b*u(2, k-1:-1:k-2)';
+                y(k) = ((120 + v(k))/obiekt.alpha_2)^2 - obiekt.h_20;
                 
                 cost_func = @(du) (sum((y_zad(k)*ones(obj.N,1) - nonlinear_func(v, u, du, k, a, b, obj.N)).^2) + obj.lambda * sum(du.^2));
   
@@ -310,8 +739,8 @@ classdef DMC < handle
                 delta_u_hist(k) = delta_uk;
             end
         
-            E_u = obj.lambda .* sum(delta_u_hist.^2) / kk;
-            E_y = sum((y_zad - y).^2) / kk;
+            E_u = obj.lambda .* sum(delta_u_hist.^2) / obiekt.kk;
+            E_y = sum((y_zad - y).^2) / obiekt.kk;
             E = E_u + E_y;
         
             function y_pred = nonlinear_func(v, u, du, k, a, b, N)
@@ -367,262 +796,26 @@ classdef DMC < handle
             end
         end
 
-        function [y, u, E, E_u, E_y] = dmc_slHammerstein(obj, y_zad, u_D, a, b, fis, delay, kk, type)
+        function [y, u, E, E_u, E_y] = dmc_slWiener(obj, y_zad, u_D, a, b, fis, obiekt, type)
             %% Alokacja pamięci
-            u = zeros(2, kk);
-            u(2,:) = u_D;
-
-            delta_up = zeros(1, obj.D-1);
-            delta_uz = zeros(1, obj.D_disturbance);
-            delta_uk = 0;
-            delta_u = zeros(1, kk);
-
-            du = 0.001;
-            
-            %% Sterowanie DMC
-            y = zeros(size(y_zad));
-            y(1:delay+2) = y_zad(1:delay+2);
-            v = zeros(size(y_zad));
-            for k = delay+3:kk
-
-                if (strcmp(type, 'linear'))
-                    dydu = (evalfis(fis, [u(1,k-(delay+1)), u(2,k-1)]) - evalfis(fis, [u(1,k-(delay+1))-du, u(2,k-1)]))/du;
-                else
-                    % gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
-                    % 
-                    % w = 0;
-                    % output = 0;
-                    % for i = 1:3
-                    %     for j = 1:2
-                    %         idx = (i - 1) * 2 + j;
-                    % 
-                    %         deg_u1 = gaussmf_val(u(1,k-(delay+1)), fis.sigma_F1, fis.F1_center(i));
-                    %         deg_u2 = gaussmf_val(u(2,k-1), fis.sigma_FD, fis.FD_center(j));
-                    % 
-                    %         degrees = deg_u1 * deg_u2;
-                    % 
-                    %         output = output + degrees*(fis.a_param(idx)*sinh(u(1,k-(delay+1))/22.5) + fis.b_param(idx)*sinh(u(2,k-1)/7.5) + fis.c_param(idx));
-                    %         w = w + degrees;
-                    %     end
-                    % end
-                    % v_k = output / w;
-                    % 
-                    % w = 0;
-                    % output = 0;
-                    % for i = 1:3
-                    %     for j = 1:2
-                    %         idx = (i - 1) * 2 + j;
-                    % 
-                    %         deg_u1 = gaussmf_val(u(1,k-(delay+1))-du, fis.sigma_F1, fis.F1_center(i));
-                    %         deg_u2 = gaussmf_val(u(2,k-1), fis.sigma_FD, fis.FD_center(j));
-                    % 
-                    %         degrees = deg_u1 * deg_u2;
-                    % 
-                    %         output = output + degrees*(fis.a_param(idx)*sinh((u(1,k-(delay+1))-du)/22.5) + fis.b_param(idx)*sinh(u(2,k-1)/7.5) + fis.c_param(idx));
-                    %         w = w + degrees;
-                    %     end
-                    % end
-                    % v_k_1 = output / w;
-                    % 
-                    % dydu = (v_k - v_k_1) / du;
-                    dydu = (evalfis(fis, [tanh(u(1,k-(delay+1))/45), tanh(u(2,k-1)/15)]) - ...
-                        evalfis(fis, [tanh((u(1,k-(delay+1))-du)/45), tanh(u(2,k-1)/15)]))/du;
-                end
-                
-                v(k) = ((90+u(1,k-(delay+1)) + 30 + u(2, k-1)) /20)^2 - 36;
-                % v(k) = evalfis(fis, [u(1,k-(delay+1)), u(2,k-1)]);
-                y(k) = - a*y(k-1:-1:k-2)' + b*v(k-1:-1:k-2)';
-
-                % Ograniczenia wartości sygnału wyjściowego, tj. wysokości h_2
-                y(k) = min(y(k), obj.y_max);
-                y(k) = max(y(k), -obj.y_max);
-
-                M_new = dydu * obj.M;
-                K_new = ((M_new' * M_new + obj.lambda * eye(obj.Nu))^(-1)) * M_new';
-                ke_new = sum(K_new(1, :));
-        
-                Mp_new = dydu * obj.M_p;
-                ku_new = K_new(1,:) * Mp_new;
-        
-                MzP_new = dydu * obj.M_zP;
-                kz_new = K_new(1,:) * MzP_new;
-
-                % Przepisanie sterowań do wektora przeszłych sterowań
-                delta_up = [delta_uk, delta_up(1:end-1)];
-                delta_uz = [u(2, k) - u(2, k-1) , delta_uz(1:end-1)];
-
-                % Oblicznie uchybu    
-                e = y_zad(k) - y(k);
-            
-                % Obliczenie przyrostu sterowania dla chwili (i+1) w chwili i-tej
-                delta_uk = ke_new * e - ku_new * delta_up' - kz_new * delta_uz';
-                
-                % Ograniczenie wartości przyrostu sterowania
-                delta_uk = min(delta_uk, obj.delta_uk_max);
-                delta_uk = max(delta_uk, -obj.delta_uk_max);
-                delta_u(k) = delta_uk;
-                
-                % Obliczenie sterowania dla chwili (i+1) w chwili i-tej
-                u(1, k) = u(1, k-1) + delta_uk; 
-                
-                % Ograniczenie sterowania
-                u(1, k) = min(u(1, k), obj.u_max);
-                u(1, k) = max(u(1, k), -obj.u_max);
-            end
-            E_u = obj.lambda .* sum(delta_u.^2)/kk;
-            E_y = sum((y_zad - y).^2)/kk;
-            E =  E_u + E_y;
-        end
-
-        function [y, u, E, E_u, E_y] = dmc_nplHammerstein(obj, y_zad, u_D, a, b, fis, delay, kk, type)
-            % Alokacja pamięci
-            u = zeros(2, kk);
-            u(2,:) = u_D;
-
-            delta_u = zeros(1, kk);
-
-            du = 0.001;
-            
-            % Sterowanie DMC
-            y = zeros(size(y_zad));
-            y(1:delay+2) = y_zad(1:delay+2);
-            v = zeros(size(y_zad));
-            % Główna pętla sterowania
-            for k = delay+3:kk
-                
-                % Obliczenie wzmocnienia z modelu Hammersteina
-                if (strcmp(type, 'linear'))
-                    dydu = (evalfis(fis, [u(1,k-(delay+1)), u(2,k-1)]) - evalfis(fis, [u(1,k-(delay+1))-du, u(2,k-1)]))/du;
-                else
-                    % gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
-                    % 
-                    % w = 0;
-                    % output = 0;
-                    % for i = 1:3
-                    %     for j = 1:2
-                    %         idx = (i - 1) * 2 + j;
-                    % 
-                    %         deg_u1 = gaussmf_val(u(1,k-(delay+1)), fis.sigma_F1, fis.F1_center(i));
-                    %         deg_u2 = gaussmf_val(u(2,k-1), fis.sigma_FD, fis.FD_center(j));
-                    % 
-                    %         degrees = deg_u1 * deg_u2;
-                    % 
-                    %         output = output + degrees*(fis.a_param(idx)*sinh(u(1,k-(delay+1))/22.5) + fis.b_param(idx)*sinh(u(2,k-1)/7.5) + fis.c_param(idx));
-                    %         w = w + degrees;
-                    %     end
-                    % end
-                    % v_k = output / w;
-                    % 
-                    % w = 0;
-                    % output = 0;
-                    % for i = 1:3
-                    %     for j = 1:2
-                    %         idx = (i - 1) * 2 + j;
-                    % 
-                    %         deg_u1 = gaussmf_val(u(1,k-(delay+1))-du, fis.sigma_F1, fis.F1_center(i));
-                    %         deg_u2 = gaussmf_val(u(2,k-1), fis.sigma_FD, fis.FD_center(j));
-                    % 
-                    %         degrees = deg_u1 * deg_u2;
-                    % 
-                    %         output = output + degrees*(fis.a_param(idx)*sinh((u(1,k-(delay+1))-du)/22.5) + fis.b_param(idx)*sinh(u(2,k-1)/7.5) + fis.c_param(idx));
-                    %         w = w + degrees;
-                    %     end
-                    % end
-                    % v_k_1 = output / w;
-                    % 
-                    % dydu = (v_k - v_k_1) / du;
-                    dydu = (evalfis(fis, [tanh(u(1,k-(delay+1))/45), tanh(u(2,k-1)/15)]) - ...
-                        evalfis(fis, [tanh((u(1,k-(delay+1))-du)/45), tanh(u(2,k-1)/15)]))/du;
-                end
-                
-                v(k) = ((90+u(1,k-(delay+1)) + 30 + u(2, k-1)) / 20)^2 - 36;
-                % v(k) = evalfis(fis, [u(1,k-(delay+1)), u(2,k-1)]);
-                y(k) = - a*y(k-1:-1:k-2)' + b*v(k-1:-1:k-2)';
-                
-                M_new = dydu * obj.M;
-                K_new = ((M_new' * M_new + obj.lambda * eye(obj.Nu))^(-1)) * M_new';
-        
-                Y_0 = fuzzy_free_response(u, v, y, k, a, b, obj.N, fis, type);
-                Y_zad = y_zad(k) * ones(obj.N, 1);
-                delta_uk = K_new(1,:) * (Y_zad - Y_0);
-        
-                % Ograniczenia przyrostu
-                delta_uk = min(max(delta_uk, -obj.delta_uk_max), obj.delta_uk_max);
-        
-                % Aktualizacja sterowania
-                u(1, k) = u(1, k-1) + delta_uk;
-        
-                % Ograniczenia sterowania
-                u(1, k) = min(max(u(1, k), -obj.u_max), obj.u_max);
-        
-                delta_u(k) = delta_uk;
-            end
-
-            E_u = obj.lambda .* sum(delta_u.^2)/kk;
-            E_y = sum((y_zad - y).^2)/kk;
-            E =  E_u + E_y;
-
-            function y_0 = fuzzy_free_response(u, v, y, k, a, b, N, fis, type)
-                y_0 = zeros(N, 1);
-                v_0 =  v(1, k);
-        
-                if (strcmp(type, 'linear'))
-                    v_hat = evalfis(fis, [u(1, k-(delay+1)) u(2, k-1)]);
-                else
-                    % output = 0;
-                    % w = 0;
-                    % for m = 1:3
-                    %     for n = 1:2
-                    %         idx = (m - 1) * 2 + n;
-                    % 
-                    %         deg_u1 = gaussmf_val(u(1,k-(delay+1)), fis.sigma_F1, fis.F1_center(m));
-                    %         deg_u2 = gaussmf_val(u(2,k-1), fis.sigma_FD, fis.FD_center(n));
-                    % 
-                    %         degrees = deg_u1 * deg_u2;
-                    % 
-                    %         output = output + degrees*(fis.a_param(idx)*sinh(u(1,k-(delay+1))/22.5) + fis.b_param(idx)*sinh(u(2,k-1)/7.5) + fis.c_param(idx));
-                    %         w = w + degrees;
-                    %     end
-                    % end
-                    % v_hat = output / w;
-                    v_hat = evalfis(fis, [tanh(u(1, k-(delay+1))/45) tanh(u(2, k-1)/15)]);
-                end
-                
-                y_hat = -a*y(k-1:-1:k-2)' + b*[v_hat v_hat]';
-                dk = y(k) - y_hat;
-        
-                for m = 1:N
-                    if m == 1
-                        y_0(m) = -a*[y(k) y(k-1)]' + b*[v_0 v_0]' + dk;
-                    elseif m == 2
-                        y_0(m) = -a*[y_0(m-1) y(k)]' + b*[v_0 v_0]' + dk;
-                    else
-                        y_0(m) = -a*[y_0(m-1) y_0(m-2)]' + b*[v_0 v_0]' + dk;
-                    end
-                end
-            end
-        end
-
-        function [y, u, E, E_u, E_y] = dmc_slWiener(obj, y_zad, u_D, a, b, fis, delay, kk, type)
-            %% Alokacja pamięci
-            u = zeros(2, kk);
+            u = zeros(2, obiekt.kk);
             u(2,:) = u_D;
         
             delta_up = zeros(1, obj.D-1);
             delta_uz = zeros(1, obj.D_disturbance);
             delta_uk = 0;
-            delta_u = zeros(1, kk);
+            delta_u = zeros(1, obiekt.kk);
             dv = 0.001;
             
             %% Sterowanie DMC
             v = zeros(size(y_zad));
             y = zeros(size(v));
-            v(1:delay+2) = y_zad(1:delay+2);
-            y(1:delay+2) = y_zad(1:delay+2);
+            v(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            y(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
         
-            for k = delay+3:kk
-                v(k) = - a*v(k-1:-1:k-2)' + b*u(1, k-(delay+1):-1:k-(delay+2))' + b*u(2, k-1:-1:k-2)';
-                y(k) = ((120+v(k))/20)^2 - 36;
+            for k = obiekt.delay+3:obiekt.kk
+                v(k) = - a*v(k-1:-1:k-2)' + b*u(1, k-(obiekt.delay+1):-1:k-(obiekt.delay+2))' + b*u(2, k-1:-1:k-2)';
+                y(k) = ((120+v(k))/obiekt.alpha_2)^2 - obiekt.h_20;
         
                 % Ograniczenia wartości sygnału wyjściowego
                 y(k) = min(y(k), obj.y_max);
@@ -631,26 +824,6 @@ classdef DMC < handle
                 if strcmp(type, 'linear')
                     dydv = (evalfis(fis, v(k)) - evalfis(fis, v(k)-dv)) / dv;
                 else
-                    % gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
-                    % 
-                    % output = 0;
-                    % w = 0;
-                    % for i = 1:fis.rules_number
-                    %     degrees = gaussmf_val(v(k), fis.sigma, fis.Y_center(i));
-                    %     output = output + degrees * (fis.a_param(i)*sinh(v(k)/36) + fis.b_param(i));
-                    %     w = w + degrees;
-                    % end
-                    % y_k = output / w;
-                    % 
-                    % output = 0;
-                    % w = 0;
-                    % for i = 1:fis.rules_number
-                    %     degrees = gaussmf_val(v(k)-dv, fis.sigma, fis.Y_center(i));
-                    %     output = output + degrees * (fis.a_param(i)*sinh((v(k)-dv)/36) + fis.b_param(i));
-                    %     w = w + degrees;
-                    % end
-                    % y_k_1 = output / w;
-                    % dydv = (y_k - y_k_1) / dv;
                     dydv = (evalfis(fis, sinh(v(k)/30)) - evalfis(fis, sinh((v(k)-dv)/30))) / dv;
                 end
         
@@ -687,53 +860,32 @@ classdef DMC < handle
                 u(1, k) = max(u(1, k), -obj.u_max);
             end
         
-            E_u = obj.lambda .* sum(delta_u.^2)/kk;
-            E_y = sum((y_zad - y).^2)/kk;
+            E_u = obj.lambda .* sum(delta_u.^2)/obiekt.kk;
+            E_y = sum((y_zad - y).^2)/obiekt.kk;
             E = E_u + E_y;
         end
 
-        function [y, u, E, E_u, E_y] = dmc_nplWiener(obj, y_zad, u_D, a, b, fis, delay, kk, type)
+        function [y, u, E, E_u, E_y] = dmc_nplWiener(obj, y_zad, u_D, a, b, fis, obiekt, type)
             %% Alokacja pamięci
-            u = zeros(2, kk);
+            u = zeros(2, obiekt.kk);
             u(2,:) = u_D;
         
-            delta_u = zeros(1, kk);
+            delta_u = zeros(1, obiekt.kk);
             dv = 0.001;
             
             %% Sterowanie DMC
             v = zeros(size(y_zad));
             y = zeros(size(y_zad));
-            v(1:delay+2) = y_zad(1:delay+2);
-            y(1:delay+2) = y_zad(1:delay+2);
+            v(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
+            y(1:obiekt.delay+2) = y_zad(1:obiekt.delay+2);
         
-            for k = delay+3:kk
-                v(k) = - a*v(k-1:-1:k-2)' + b*u(1, k-(delay+1):-1:k-(delay+2))' + b*u(2, k-1:-1:k-2)';
-                y(k) = ((120 + v(k))/20)^2 - 36;
+            for k = obiekt.delay+3:obiekt.kk
+                v(k) = - a*v(k-1:-1:k-2)' + b*u(1, k-(obiekt.delay+1):-1:k-(obiekt.delay+2))' + b*u(2, k-1:-1:k-2)';
+                y(k) = ((120 + v(k))/obiekt.alpha_2)^2 - obiekt.h_20;
         
                 if strcmp(type, 'linear')
                     dydv = (evalfis(fis, v(k)) - evalfis(fis, v(k)-dv)) / dv;
                 else
-                    % gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
-                    % 
-                    % output = 0;
-                    % w = 0;
-                    % for i = 1:fis.rules_number
-                    %     degrees = gaussmf_val(v(k), fis.sigma, fis.Y_center(i));
-                    %     output = output + degrees * (fis.a_param(i)*sinh(v(k)/36) + fis.b_param(i));
-                    %     w = w + degrees;
-                    % end
-                    % y_k = output / w;
-                    % 
-                    % output = 0;
-                    % w = 0;
-                    % for i = 1:fis.rules_number
-                    %     degrees = gaussmf_val(v(k)-dv, fis.sigma, fis.Y_center(i));
-                    %     output = output + degrees * (fis.a_param(i)*sinh((v(k)-dv)/36) + fis.b_param(i));
-                    %     w = w + degrees;
-                    % end
-                    % y_k_1 = output / w;
-                    % 
-                    % dydu = (y_k - y_k_1) / dv;
                     dydv = (evalfis(fis, sinh(v(k)/30)) - evalfis(fis, sinh((v(k)-dv)/30))) / dv;
                 end
         
@@ -757,13 +909,11 @@ classdef DMC < handle
                 delta_u(k) = delta_uk;
             end
         
-            E_u = obj.lambda .* sum(delta_u.^2) / kk;
-            E_y = sum((y_zad - y).^2) / kk;
+            E_u = obj.lambda .* sum(delta_u.^2) / obiekt.kk;
+            E_y = sum((y_zad - y).^2) / obiekt.kk;
             E = E_u + E_y;
         
             function y_0 = fuzzy_free_response(u, v, y, k, a, b, N, fis, type)
-                % gaussmf_val = @(x, sigma, c) exp(-((x - c).^2) / (2 * sigma^2));
-
                 y_0 = zeros(N, 1);
                 v_0 = zeros(N, 1);
                 u_10 = u(1, k-6);
@@ -772,14 +922,6 @@ classdef DMC < handle
                 if (strcmp(type, 'linear'))
                     y_hat = evalfis(fis, v(k));
                 else
-                    % output = 0;
-                    % w = 0;
-                    % for j = 1:fis.rules_number
-                    %     degrees = gaussmf_val(v(k), fis.sigma, fis.Y_center(j));
-                    %     output = output + degrees * (fis.a_param(j)*sinh(v(k)/36) + fis.b_param(j));
-                    %     w = w + degrees;
-                    % end
-                    % y_hat = output / w;
                     y_hat = evalfis(fis, sinh(v(k)/30));
                 end
 
@@ -799,14 +941,6 @@ classdef DMC < handle
                     if (strcmp(type, 'linear'))
                         y0 = evalfis(fis, v_0(j));
                     else
-                        % output = 0;
-                        % w = 0;
-                        % for l = 1:fis.rules_number
-                        %     degrees = gaussmf_val(v_0(j), fis.sigma, fis.Y_center(l));
-                        %     output = output + degrees * (fis.a_param(l)*sinh(v_0(j)/36) + fis.b_param(l));
-                        %     w = w + degrees;
-                        % end
-                        % y0 = output / w;
                         y0 = evalfis(fis, sinh(v_0(j)/30));
                     end
                     y_0(j) = y0 + dk;
@@ -842,6 +976,5 @@ classdef DMC < handle
             grid on;
             % saveas(gcf, sprintf('D:/EiTI/MGR/raporty/raport_MGR/pictures/u_%s%s.png', s, t));  % Zapisuje jako plik PNG
         end
-
     end
 end
