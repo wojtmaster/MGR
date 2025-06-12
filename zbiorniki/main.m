@@ -102,6 +102,8 @@ dmc.matrix_disturbance(s_D);
 %% Wielowątkowy DMC
 pool = gcp();
 
+b(2) = 0;
+
 f.analiticHammerstein = parfeval(pool, @dmc.dmc_analiticHammerstein, 5, y_zad, u_D, a, b, obiekt); 
 f.numericHammerstein = parfeval(pool, @dmc.dmc_numericHammerstein, 5, y_zad, u_D, a, b, obiekt);
 f.noHammerstein = parfeval(pool, @dmc.dmc_noHammerstein, 5, y_zad, u_D, a, b, obiekt);

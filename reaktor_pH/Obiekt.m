@@ -55,207 +55,124 @@ classdef Obiekt < handle
             obj.W_b40 = (obj.W_b1*Q_10 + obj.W_b2*Q_20 + obj.W_b3*Q_30) / (Q_10 + Q_20 + Q_30 );
 
             obj.pH_0 = obj.pH_calc(obj.W_a40, obj.W_b40);
-
-            % a_1, a_2, a_3, b_1, b_2, b_3, G_z
-            % A_matrix = [-obj.C_V/(2*sqrt(obj.h_0)*obj.A), 0, 0;
-            %      ((obj.W_a1-obj.W_a40)*obj.Q_10 + (obj.W_a2-obj.W_a40)*obj.Q_20 + (obj.W_a3-obj.W_a40)*obj.Q_30) / (obj.A * obj.h_0^2), - (obj.Q_10 + obj.Q_20 + obj.Q_30) / (obj.A*obj.h_0), 0;
-            %      ((obj.W_b1-obj.W_b40)*obj.Q_10 + (obj.W_b2-obj.W_b40)*obj.Q_20 + (obj.W_b3-obj.W_b40)*obj.Q_30) / (obj.A * obj.h_0^2), 0, - (obj.Q_10 + obj.Q_20 + obj.Q_30) / (obj.A*obj.h_0)];
-            % B_matrix = [1 / obj.A, 1 / obj.A, 1 / obj.A; 
-            %     (obj.W_a1-obj.W_a40) / (obj.A * obj.h_0), (obj.W_a2-obj.W_a40) / (obj.A * obj.h_0),  (obj.W_a3-obj.W_a40) / (obj.A * obj.h_0);
-            %     (obj.W_b1-obj.W_b40) / (obj.A * obj.h_0),  (obj.W_b2-obj.W_b40) / (obj.A * obj.h_0), (obj.W_b3-obj.W_b40) / (obj.A * obj.h_0)];
-            % C_matrix = eye(3);
-            % D_matrix = zeros(3);
-            % 
-            % sys = ss(A_matrix, B_matrix, C_matrix, D_matrix);
-            % G_s = tf(sys);
-            % G_z = c2d(G_s, obj.Tp, 'zoh');
-            % G_z = set(G_z, 'Variable', 'z^-1');  % poprawne ustawienie zmiennej
-            % 
-            % % s = step(G_z(1), (0:obj.dynamic_horizont-1) * obj.Tp);
-            % a_1 = G_z(1,1).Denominator{1}(2:end);
-            % a_2 = G_z(2,2).Denominator{1}(2:end);
-            % a_3 = G_z(3,3).Denominator{1}(2:end);
-            % b_1.Q_1 = G_z(1,1).Numerator{1}(2:end);
-            % b_1.Q_2 = G_z(1,2).Numerator{1}(2:end);
-            % b_1.Q_3 = G_z(1,3).Numerator{1}(2:end);
-            % b_2.Q_1 = G_z(2,1).Numerator{1}(2:end);
-            % b_2.Q_2 = G_z(2,2).Numerator{1}(2:end);
-            % b_2.Q_3 = G_z(2,3).Numerator{1}(2:end);
-            % b_3.Q_1 = G_z(3,1).Numerator{1}(2:end);
-            % b_3.Q_2 = G_z(3,2).Numerator{1}(2:end);
-            % b_3.Q_3 = G_z(3,3).Numerator{1}(2:end);
         end
 
-        function [a, b, s] = mse(obj, data)
-            if (strcmp(data, 'h'))
-                u = [ones(1,obj.dynamic_horizont)
-                    zeros(1,obj.dynamic_horizont)
-                    zeros(1,obj.dynamic_horizont)];
-                
-                [s.Q1, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
-                y.Q1 = s.Q1(1,:) / abs(s.Q1(1,end));
-    
-                Y = y.Q1(2:end)';
-                M = [y.Q1(1:end-1)' u(1,1:end-1)'];
-                w = M \ Y;
-    
-                a.Q1 = -w(1);
-                b.Q1 = w(2);
-    
-                y_Q1 = zeros(size(y.Q1));
-                y_Q1(1:2) = y.Q1(1:2);
-                for k = 2:obj.dynamic_horizont
-                    y_Q1(k) = -a.Q1*y_Q1(k-1) + b.Q1*u(1, k-1);
-                end
+        function [a, b, S] = fopdtModel(obj)
 
-                u = [zeros(1,obj.dynamic_horizont)
-                    ones(1,obj.dynamic_horizont)
-                    zeros(1,obj.dynamic_horizont)];
-                [s.Q2, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
-                y.Q2 = s.Q2(1,:);
-    
-                Y = y.Q2(2:end)';
-                M = [y.Q2(1:end-1)' u(2,1:end-1)'];
-                w = M \ Y;
-    
-                a.Q2 = -w(1);
-                b.Q2 = w(2);
-    
-                y_Q2 = zeros(size(y.Q2));
-                y_Q2(1:2) = y.Q2(1:2);
-                for k = 2:obj.dynamic_horizont
-                    y_Q2(k) = -a.Q2*y_Q2(k-1) + b.Q2*u(2, k-1);
-                end
+            u = [ones(1,obj.dynamic_horizont)
+                zeros(1, obj.dynamic_horizont)
+                zeros(1,obj.dynamic_horizont)];
+            [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+            y = s(1,:) / s(1,end);
 
-                u = [zeros(1,obj.dynamic_horizont)
-                    zeros(1,obj.dynamic_horizont)
-                    ones(1,obj.dynamic_horizont)];
-                [s.Q3, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
-                y.Q3 = s.Q3(1,:) / abs(s.Q3(1,end));
-    
-                Y = y.Q3(2:end)';
-                M = [y.Q3(1:end-1)' u(3,1:end-1)'];
-                w = M \ Y;
-    
-                a.Q3 = -w(1);
-                b.Q3 = w(2);
-    
-                y_Q3 = zeros(size(y.Q3));
-                y_Q3(1:2) = y.Q3(1:2);
-                for k = 2:obj.dynamic_horizont
-                    y_Q3(k) = -a.Q3*y_Q3(k-1) + b.Q3*u(3, k-1);
-                end
-
-            else
-                u = [ones(1,obj.dynamic_horizont)
-                    zeros(1,obj.dynamic_horizont)
-                    zeros(1,obj.dynamic_horizont)];
-                
-                [s.Q1, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
-                y.Q1 = s.Q1(2,:) / abs(s.Q1(2,end));
-    
-                Y = y.Q1(3:end)';
-                M = [y.Q1(2:end-1)' y.Q1(1:end-2)' u(1,2:end-1)'];
-                w = M \ Y;
-    
-                a.Q1 = -w(1:2)';
-                b.Q1 = w(3)';
-    
-                y_Q1 = zeros(size(y.Q1));
-                y_Q1(1:3) = y.Q1(1:3);
-                for k = 4:obj.dynamic_horizont
-                    y_Q1(k) = -a.Q1*y_Q1(k-1:-1:k-2)' + b.Q1*u(1, k-1);
-                end
-
-                u = [zeros(1,obj.dynamic_horizont)
-                    ones(1,obj.dynamic_horizont)
-                    zeros(1,obj.dynamic_horizont)];
-
-                [s.Q2, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
-                y.Q2 = s.Q2(2,:);
-
-                Y = y.Q2(3:end)';
-                M = [y.Q2(2:end-1)' y.Q2(1:end-2)' u(2,2:end-1)'];
-                w = M \ Y;
-
-                a.Q2 = -w(1:2)';
-                b.Q2 = w(3);
-
-                y_Q2 = zeros(size(y.Q2));
-                y_Q2(1:3) = y.Q2(1:3);
-                for k = 4:obj.dynamic_horizont
-                    y_Q2(k) = -a.Q2*y_Q2(k-1:-1:k-2)' + b.Q2*u(2, k-1);
-                end
-
-                u = [zeros(1,obj.dynamic_horizont)
-                    zeros(1,obj.dynamic_horizont)
-                    ones(1,obj.dynamic_horizont)];
-
-                [s.Q3, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
-                y.Q3 = s.Q3(2,:) / abs(s.Q3(2,end));
-
-                Y = y.Q3(4:end)';
-                M = [y.Q3(3:end-1)' y.Q3(2:end-2)' y.Q3(1:end-3)' u(3,3:end-1)'];
-                w = M \ Y;
-
-                a.Q3 = -w(1:3)';
-                b.Q3 = w(4)';
-
-                y_Q3 = zeros(size(y.Q3));
-                y_Q3(1:4) = y.Q3(1:4);
-                for k = 5:obj.dynamic_horizont
-                    y_Q3(k) = -a.Q3*y_Q3(k-1:-1:k-3)' + b.Q3*u(3, k-1);
-                end
-
-                % u = [repelem((rand(1, obj.kk/300) * 30 - 15), 300)
-                %     zeros(1, obj.kk);
-                %     repelem((rand(1, obj.kk/700) * 30 - 15), 700)];
-                % 
-                % [s.Q, ~] = obj.modifiedEuler(u, obj.kk);
-                % y.Q = s.Q(2,:);
-                % 
-                % disp(size(y.Q));
-                % disp(size(u));
-                % 
-                % Y = y.Q(4:end)';
-                % M = [y.Q(3:end-1)' y.Q(2:end-2)' y.Q(1:end-3)' u(1, 3:end-1)' u(1, 2:end-2)' u(1, 1:end-3)' u(3, 3:end-1)' u(3, 2:end-2)' u(3, 1:end-3)'];
-                % w = M \ Y;
-                % 
-                % a.Q = -w(1:3)';
-                % b.Q = w(4:9)';
-                % 
-                % y_Q = zeros(size(y.Q));
-                % y_Q(1:4) = y.Q(1:4);
-                % for k = 5:obj.kk
-                %     y_Q(k) = -[-1.9824 1.2739 -0.2690]*y_Q(k-1:-1:k-3)' + -0.02*u(1, k-1)' + 0.001*u(3, k-1)';
-                % end
-            end
+            t = (0:length(y)-1) * obj.Tp;
             
-            t = (0:length(u)-1) * obj.Tp;
+            % Funkcja celu dopasowania SOPDT (K=1, optymalizujemy tylko T1 i T2)
+            cost_func = @(params) ...
+                sum((step(tf(1, [params 1]), t) - y').^2);
+            
+            % Początkowe zgadywanie
+            initial_guess = 200;  % [T1, T2]
+            
+            % Optymalizacja z fminsearch
+            options = optimset('Display', 'final', 'TolX', 1e-6, 'TolFun', 1e-6);
+            optimal_params = fminsearch(cost_func, initial_guess, options);
+            
+            % Transmitancja dopasowanego modelu
+            G = tf(1, [optimal_params 1]);
+            S.Q1 = step(G, t);
+            G_z = c2d(G, obj.Tp, 'zoh');
+            G_z.Variable = 'z^-1';
+            a = G_z.Denominator{1}(2);
+            b = G_z.Numerator{1}(2);
 
-            figure; 
-            plot(t, y.Q1, 'b', t, y_Q1, 'g');
-            title(sprintf('%s ( Q_1 )', data));
-            legend('dane', 'symulacja');
+            S.Q2 = S.Q1;
+            S.Q3 = S.Q1;
+
+            % Rysowanie wykresu
+            figure;
+            plot(t, y, 'b', 'LineWidth', 2); hold on;
+            plot(t, S.Q1, 'r--', 'LineWidth', 2);
+            legend('Odpowiedź rzeczywista', 'Model SOPDT');
+            xlabel('Czas');
+            ylabel('Odpowiedź skokowa');
+            title(sprintf('Dopasowanie SOPDT: T1 = %.2f', optimal_params));
+            grid on;
+        end
+
+        function [a, b, S] = tfestModel(obj)
+
+            u = [ones(1,obj.dynamic_horizont)
+                zeros(1,obj.dynamic_horizont)
+                zeros(1,obj.dynamic_horizont)];
+            [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+            y.Q1 = s(2,:) / s(2,end);
+            model.Q1 = tfest(iddata(y.Q1', u(1,:)', obj.Tp), 2, 1);
+
+            u = [zeros(1,obj.dynamic_horizont)
+                ones(1,obj.dynamic_horizont)
+                zeros(1,obj.dynamic_horizont)];
+            [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+            y.Q2 = s(2,:) / s(2,end);
+            model.Q2 = tfest(iddata(y.Q2', u(2,:)', obj.Tp), 2, 1);
+
+            u = [zeros(1,obj.dynamic_horizont)
+                zeros(1,obj.dynamic_horizont)
+                ones(1,obj.dynamic_horizont)];
+            [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+            y.Q3 = s(2,:) / s(2,end);
+            model.Q3 = tfest(iddata(y.Q3', u(3,:)', obj.Tp), 2, 1);
+
+            t = (0:length(y.Q1)-1) * obj.Tp;
+
+            G = [tf(model.Q1), tf(model.Q2), tf(model.Q3)];
+            G.InputName = {'u1', 'u2', 'u3'};
+            G.OutputName = {'y1'};
+            [Y, ~] = step(G, t);
+            S.Q1 = Y(:,1,1);  % odpowiedź na skok w wejściu 1
+            S.Q2 = Y(:,1,2);  % odpowiedź na skok w wejściu 2
+            S.Q3 = Y(:,1,3);  % odpowiedź na skok w wejściu 3
+
+            G_z = c2d(G, obj.Tp, 'zoh');
+            G_z.Variable = 'z^-1';
+            a.Q1 = G_z.Denominator{1}(2:3);
+            b.Q1 = G_z.Numerator{1}(2:3);
+            a.Q2 = G_z.Denominator{2}(2:3);
+            b.Q2 = G_z.Numerator{2}(2:3);
+            a.Q3 = G_z.Denominator{3}(2:3);
+            b.Q3 = G_z.Numerator{3}(2:3);
+
+            % Rysowanie wykresu
+            figure;
+            subplot(1,3,1);
+            plot(t, y.Q1, 'b', 'LineWidth', 2); 
+            hold on;
+            plot(t, S.Q1, 'r--', 'LineWidth', 2);
+            legend('Odpowiedź rzeczywista', 'Model', 'Location', 'best');
+            xlabel('Czas');
+            ylabel('Odpowiedź skokowa');
+            title(sprintf('Odpowiedź układu na wymuszenie jednostkowe Q1'));
             grid on;
 
-            figure; 
-            plot(t, y.Q2, 'm', t, y_Q2, 'c');
-            title(sprintf('%s ( Q_2 )', data));
-            legend('dane', 'symulacja');
+            subplot(1,3,2);
+            plot(t, y.Q2, 'b', 'LineWidth', 2); 
+            hold on;
+            plot(t, S.Q2, 'r--', 'LineWidth', 2);
+            legend('Odpowiedź rzeczywista', 'Model', 'Location', 'best');
+            xlabel('Czas');
+            ylabel('Odpowiedź skokowa');
+            title(sprintf('Odpowiedź układu na wymuszenie jednostkowe Q2'));
             grid on;
 
-            figure; 
-            plot(t, y.Q3, 'y', t, y_Q3, 'k');
-            title(sprintf('%s ( Q_3 )', data));
-            legend('dane', 'symulacja');
+            subplot(1,3,3);
+            plot(t, y.Q3, 'b', 'LineWidth', 2); 
+            hold on;
+            plot(t, S.Q3, 'r--', 'LineWidth', 2);
+            legend('Odpowiedź rzeczywista', 'Model', 'Location', 'best');
+            xlabel('Czas');
+            ylabel('Odpowiedź skokowa');
+            title(sprintf('Odpowiedź układu na wymuszenie jednostkowe Q3'));
             grid on;
-
-            % figure; 
-            % plot(t, y.Q, 'y', t, y_Q, 'k');
-            % title(sprintf('%s ( Q_3 )', data));
-            % legend('dane', 'symulacja');
-            % grid on;
         end
 
         function [y, y_L, E_h, E_pH] = modifiedEuler(obj, u, kk)
@@ -367,29 +284,49 @@ classdef Obiekt < handle
             pH=log10(p);
         end
 
-        function show_rk4(obj, u, y, y_L)
-            figure;
-            stairs(0:obj.kk-1, u(1,:), 'r-', 'LineWidth', 1.2);
-            hold on;
-            stairs(0:obj.kk-1, u(2,:), 'b--', 'LineWidth', 1.2);
-            hold off;
-            xlabel('k');
-            ylabel('u(k)');
-            title('Wartości sygnałów sterujących u(k)');
-            legend('F_1(k)', 'F_D(k)');
-            grid on;
+        function show_staticCharacteristic(obj, Q2)
+            U_min = -15;
+            U_max = 15;
 
-            %% Prezentacja wyników
+            U = [linspace(U_min, U_max, 100);
+                linspace(U_min, U_max, 100)];
+            [Q1_grid, Q3_grid] = meshgrid(U(1,:), U(2,:));  % kombinacje
+            
+            h = zeros(100,100);
+            pH = zeros(100,100);
+            
+            % Petla po siatce sterowań
+            for i = 1:length(U)
+                for j = 1:length(U)
+                    u = [ones(1, 200)*U(1,i);
+                         ones(1, 200)*Q2;
+                         ones(1, 200)*U(2,j)];
+                
+                    [y, ~, ~] = obj.modifiedEuler(u, 200);
+                    h(i,j) =  y(1, end);
+                    pH(i,j) = y(2, end); 
+                end
+            end
+            
+            % Rysuj 3D wykres
             figure;
-            hold on;
-            plot(0:obj.Tp:(obj.kk-1)*obj.Tp, round(y_L,3), 'b.','LineWidth',2);
-            plot(0:obj.Tp:(obj.kk-1)*obj.Tp, round(y,3), 'r-','LineWidth',2);
-            hold off;
-            title('Wysokość słupa cieczy w zbiorniku 2. - h_2(t)');
-            legend('h_{2lin}', 'h_2');
-            xlabel('t [s]');
-            ylabel('h [cm]');
-            grid on;
+            surf(Q1_grid, Q3_grid, pH);
+            xlabel('Q_1 [ml/s]');
+            ylabel('Q_3 [ml/s]');
+            zlabel('pH');
+            title('Wpływ dopływów Q_1 oraz Q_3 na stężenie substancji pH');
+            shading interp;
+            colorbar;
+            view(-45, 30);
+            
+            figure;
+            surf(Q1_grid, Q3_grid, h);
+            xlabel('Q_1 [ml/s]');
+            ylabel('Q_3 [ml/s]');
+            zlabel('h [cm]');
+            title('Wpływ dopływów Q_1 oraz Q_3 na wysokość słupa cieczy h');
+            shading interp;
+            colorbar;
         end
     end
 end

@@ -13,17 +13,18 @@ set(groot, 'DefaultAxesFontSize', 10);
 obiekt = Obiekt();
 %  pH_0, h_0, Q_10, Q_20, Q_30
 obiekt.linearization(16.6, 0.55, 15.6);
-[a_h, b_h, s_h] = obiekt.mse('h');
-[a_pH, b_pH, s_pH] = obiekt.mse('pH');
 
-S = cell(1, obiekt.dynamic_horizont);
-S_disturbance = cell(1, obiekt.dynamic_horizont);
+[a_h, b_h, s_h] = obiekt.fopdtModel();
+[a_pH, b_pH, s_pH] = obiekt.tfestModel();
 
-for i = 1:obiekt.dynamic_horizont
-    S{i} = [s_h.Q1(1,i), s_h.Q3(1,i)
-            s_pH.Q1(2,i), s_pH.Q3(2,i)];
-    S_disturbance{i} = [s_h.Q2(1,i); s_pH.Q2(2,i)];
-end
+% S = cell(1, obiekt.dynamic_horizont);
+% S_disturbance = cell(1, obiekt.dynamic_horizont);
+% 
+% for i = 1:obiekt.dynamic_horizont
+%     S{i} = [s_h.Q1(1,i), s_h.Q3(1,i)
+%             s_pH.Q1(2,i), s_pH.Q3(2,i)];
+%     S_disturbance{i} = [s_h.Q2(1,i); s_pH.Q2(2,i)];
+% end
 
 %% Hammerstein 
 hammerstein = Hammerstein(@(u, kk) obiekt.modifiedEuler(u, kk));

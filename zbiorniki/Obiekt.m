@@ -43,48 +43,6 @@ classdef Obiekt < handle
             obj.V_20 = obj.C * obj.h_20^2;
         end
 
-        function [a, b, S, S_D, s, s_D] = mse(obj)
-            u = [ones(1,obj.dynamic_horizont)
-                zeros(1,obj.dynamic_horizont)];
-            [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
-            y = s / s(end);
-
-            Y = y(7:end)';
-            M = [y(6:end-1)' y(5:end-2)' u(1,1:end-6)'];
-            % M = [y(7:end-1)' y(6:end-2)' u(2,7:end-1)'];
-            w = M \ Y;
-
-            a = -w(1:2)';
-            b = w(3);
-
-            y_test = zeros(size(y));
-            y_test(1:obj.delay+1) = y(1:obj.delay+1);
-            for k = obj.delay+2:obj.dynamic_horizont
-                y_test(k) = -a*y_test(k-1:-1:k-2)' + b*u(1, k-(obj.delay+1));
-            end
-            S = y_test * s(end);
-
-            u = [zeros(1,obj.dynamic_horizont)
-                ones(1,obj.dynamic_horizont)];
-            [s_D, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
-            y_D = s_D / s_D(end);
-
-            y_testD = zeros(size(y_D));
-            y_testD(1:obj.delay+1) = y_D(1:obj.delay+1);
-            for k = obj.delay+2:obj.dynamic_horizont
-                y_testD(k) = -a*y_testD(k-1:-1:k-2)' + b*u(2, k-1);
-            end
-            S_D = y_testD * s_D(end);
-
-            % t = (0:length(u)-1) * obj.Tp; % Czas w sekundach (próbkowanie = 20s)
-            % figure; 
-            % plot(t, y, 'b', t, y_test, 'r');
-            % title('S');
-            % figure; 
-            % plot(t, y_D, 'b', t, y_testD, 'r');
-            % title('S_D');
-        end
-
         function [a, b, S, S_D] = sopdt(obj)
             u = [ones(1,obj.dynamic_horizont)
                 zeros(1,obj.dynamic_horizont)];
@@ -121,7 +79,7 @@ classdef Obiekt < handle
             % legend('Odpowiedź rzeczywista', 'Model SOPDT');
             % xlabel('Czas');
             % ylabel('Odpowiedź skokowa');
-            % title(sprintf('Dopasowanie SOPDT: K = %.2f, T1 = %.2f, T2 = %.2f', optimal_params(1), optimal_params(2), optimal_params(3)));
+            % title(sprintf('Dopasowanie SOPDT: T1 = %.2f, T2 = %.2f', optimal_params(1), optimal_params(2)));
             % grid on;
         end
 
@@ -191,59 +149,6 @@ classdef Obiekt < handle
             end
             E = sum((y-y_L).^2) / kk;
         end
-
-        function [y, V_1, V_2, V_1e, V_2e] = realSimulation(obj, u, V_10, V_20, V_10e, V_20e)
-
-            %% Funkcje
-            fun_1 = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (V_1/obj.A)^(1/2);
-            fun_2 = @(V_1, V_2) obj.alpha_1 * (V_1/obj.A)^(1/2) - obj.alpha_2 * (V_2/obj.C)^(1/4); 
-
-            %% Wymuszenia
-            F_1in = u(1,1) + obj.F_10;
-            F_D = u(2,1) + obj.F_D0;
-
-            V_1 = V_10 + obj.Tp * fun_1(F_1in, F_D, V_10);
-            V_2 = V_20 + obj.Tp * fun_2(V_10, V_20);
-
-            V_1e = V_10e + 1/2 * obj.Tp * (fun_1(F_1in, F_D, V_10e) + fun_1(F_1in, F_D, V_1));
-            V_2e = V_20e + 1/2 * obj.Tp * (fun_2(V_10e, V_20e) + fun_2(V_1, V_2));
-
-            h_2 = sqrt(V_2e / obj.C);
-
-            % Sprowadzenie wartości do punktu pracy
-            y = h_2 - obj.h_20;
-         end
-
-         function [y] = freeAnswer(obj, u, F_10, F_D0, h_20, V_10, V_20, V_10e, V_20e, N)
-
-            y = zeros(N, 1);
-
-            %% Funkcje
-            fun_1 = @(F_1, F_D, V_1) F_1 + F_D - obj.alpha_1 * (V_1/obj.A)^(1/2);
-            fun_2 = @(V_1, V_2) obj.alpha_1 * (V_1/obj.A)^(1/2) - obj.alpha_2 * (V_2/obj.C)^(1/4); 
-
-            %% Wymuszenia
-            F_1in = u(1,1) + F_10;
-            F_D = u(2,1) + F_D0;
-
-            V_1 = V_10;
-            V_2 = V_20;
-            V_1e = V_10e;
-            V_2e = V_20e;
-
-            for i = 1:N
-                V_1 = V_1 + obj.Tp * fun_1(F_1in, F_D, V_1);
-                V_2 = V_2 + obj.Tp * fun_2(V_1, V_2);
-    
-                V_1e = V_1e + 1/2 * obj.Tp * (fun_1(F_1in, F_D, V_1e) + fun_1(F_1in, F_D, V_1));
-                V_2e = V_2e + 1/2 * obj.Tp * (fun_2(V_1e, V_2e) + fun_2(V_1, V_2));
-    
-                h_2 = sqrt(V_2e / obj.C);
-    
-                % Sprowadzenie wartości do punktu pracy
-                y(i) = h_2 - h_20;
-            end
-         end
 
         function static_charakteristic(obj)
             F_1 = linspace(45, 135, obj.kk);
