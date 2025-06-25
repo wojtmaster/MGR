@@ -51,52 +51,232 @@ classdef Obiekt < handle
             obj.Q_30 = Q_30;
             obj.Q_40 = obj.C_V * obj.h_0;
 
-            obj.W_a40 = (obj.W_a1*Q_10 + obj.W_a2*Q_20 + obj.W_a3*Q_30) / (Q_10 + Q_20 + Q_30 );
-            obj.W_b40 = (obj.W_b1*Q_10 + obj.W_b2*Q_20 + obj.W_b3*Q_30) / (Q_10 + Q_20 + Q_30 );
+            obj.W_a40 = (obj.W_a1*Q_10 + obj.W_a2*Q_20 + obj.W_a3*Q_30) / (Q_10 + Q_20 + Q_30);
+            obj.W_b40 = (obj.W_b1*Q_10 + obj.W_b2*Q_20 + obj.W_b3*Q_30) / (Q_10 + Q_20 + Q_30);
 
             obj.pH_0 = obj.pH_calc(obj.W_a40, obj.W_b40);
         end
 
-        function [a, b, S] = fopdtModel(obj)
+        function [a, b, S] = fopdtModel(obj, type, index)
+            if (strcmp(type, 'h'))
+                u = [ones(1,obj.dynamic_horizont)
+                    zeros(1, obj.dynamic_horizont)
+                    zeros(1,obj.dynamic_horizont)];
+                [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+                y = s(index,:) / abs(s(index,end));
+    
+                t = (0:length(y)-1) * obj.Tp;
+                
+                % Funkcja celu dopasowania SOPDT (K=1, optymalizujemy tylko T1 i T2)
+                cost_func = @(params) ...
+                    sum((step(tf(params(1), [params(2) 1]), t) - y').^2);
+                
+                % Początkowe zgadywanie
+                initial_guess = [1 100];  % [T1, T2]
+                
+                % Optymalizacja z fminsearch
+                options = optimset('Display', 'final', 'TolX', 1e-6, 'TolFun', 1e-6);
+                optimal_params = fminsearch(cost_func, initial_guess, options);
+                
+                % Transmitancja dopasowanego modelu
+                G = tf(optimal_params(1), [optimal_params(2) 1]);
+                S.Q1 = step(G, t);
+                G_z = c2d(G, obj.Tp, 'zoh');
+                G_z.Variable = 'z^-1';
+                a = G_z.Denominator{1}(2);
+                b = G_z.Numerator{1}(2);
 
-            u = [ones(1,obj.dynamic_horizont)
-                zeros(1, obj.dynamic_horizont)
-                zeros(1,obj.dynamic_horizont)];
+                S.Q3 = S.Q1;
+    
+                % Rysowanie wykresu
+                figure;
+                subplot(1,2,1);
+                plot(t, y, 'b', 'LineWidth', 2); hold on;
+                plot(t, S.Q1, 'r--', 'LineWidth', 2);
+                legend('Odpowiedź rzeczywista', 'Model SOPDT');
+                xlabel('Czas');
+                ylabel('Odpowiedź skokowa');
+                title(sprintf('Model %s ( Q_1 )', type));
+                grid on;
+
+                subplot(1,2,2);
+                plot(t, y, 'b', 'LineWidth', 2); hold on;
+                plot(t, S.Q3, 'r--', 'LineWidth', 2);
+                legend('Odpowiedź rzeczywista', 'Model SOPDT');
+                xlabel('Czas');
+                ylabel('Odpowiedź skokowa');
+                title(sprintf('Model %s ( Q_3 )', type));
+                grid on;
+
+            else
+                u = [ones(1,obj.dynamic_horizont)
+                    zeros(1, obj.dynamic_horizont)
+                    zeros(1,obj.dynamic_horizont)];
+                [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+                y.Q1 = s(index,:) / abs(s(index,end));
+    
+                t = (0:length(y.Q1)-1) * obj.Tp;
+                
+                % Funkcja celu dopasowania SOPDT (K=1, optymalizujemy tylko T1 i T2)
+                cost_func = @(params) ...
+                    sum((step(tf(params(1), [params(2) 1]), t) - y.Q1').^2);
+                
+                % Początkowe zgadywanie
+                initial_guess = [1 100];  % [T1, T2]
+                
+                % Optymalizacja z fminsearch
+                options = optimset('Display', 'final', 'TolX', 1e-6, 'TolFun', 1e-6);
+                optimal_params = fminsearch(cost_func, initial_guess, options);
+                
+                % Transmitancja dopasowanego modelu
+                G = tf(optimal_params(1), [optimal_params(2) 1]);
+                S.Q1 = step(G, t);
+                G_z = c2d(G, obj.Tp, 'zoh');
+                G_z.Variable = 'z^-1';
+                a = G_z.Denominator{1}(2);
+                b = G_z.Numerator{1}(2);
+
+                u = [zeros(1,obj.dynamic_horizont)
+                    zeros(1, obj.dynamic_horizont)
+                    ones(1,obj.dynamic_horizont)];
+                [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+                y.Q3 = s(index,:) / abs(s(index,end));
+    
+                t = (0:length(y.Q3)-1) * obj.Tp;
+                
+                % Funkcja celu dopasowania SOPDT (K=1, optymalizujemy tylko T1 i T2)
+                cost_func = @(params) ...
+                    sum((step(tf(params(1), [params(2) 1]), t) - y.Q3').^2);
+                
+                % Początkowe zgadywanie
+                initial_guess = [1 100];  % [T1, T2]
+                
+                % Optymalizacja z fminsearch
+                options = optimset('Display', 'final', 'TolX', 1e-6, 'TolFun', 1e-6);
+                optimal_params = fminsearch(cost_func, initial_guess, options);
+                
+                % Transmitancja dopasowanego modelu
+                G = tf(optimal_params(1), [optimal_params(2) 1]);
+                S.Q3 = step(G, t);
+                G_z = c2d(G, obj.Tp, 'zoh');
+                G_z.Variable = 'z^-1';
+    
+                % Rysowanie wykresu
+                figure;
+                subplot(1,2,1);
+                plot(t, y.Q1, 'b', 'LineWidth', 2); hold on;
+                plot(t, S.Q1, 'r--', 'LineWidth', 2);
+                legend('Odpowiedź rzeczywista', 'Model SOPDT');
+                xlabel('Czas');
+                ylabel('Odpowiedź skokowa');
+                title(sprintf('Model %s ( Q_1 )', type));
+                grid on;
+
+                subplot(1,2,2);
+                plot(t, y.Q3, 'b', 'LineWidth', 2); hold on;
+                plot(t, S.Q3, 'r--', 'LineWidth', 2);
+                legend('Odpowiedź rzeczywista', 'Model SOPDT');
+                xlabel('Czas');
+                ylabel('Odpowiedź skokowa');
+                title(sprintf('Model %s ( Q_3 )', type));
+                grid on;
+            end
+        end
+
+        function [a, b, S] = Wa4Model(obj, index)
+
+            u = [zeros(1, obj.dynamic_horizont);
+                 zeros(1, obj.dynamic_horizont);
+                 zeros(1, obj.dynamic_horizont)];
+            u(1, 20:end) = 1;  % skok na Q1
+            u(3, 50:end) = 1;  % skok na Q3
+            
             [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
-            y = s(1,:) / abs(s(1,end));
+            y = s(index,:) / abs(s(index,end));  % np. Wa4
+            
+            data = iddata(y', u([1,3], :)', obj.Tp);
+            model = tfest(data, 2, 1);  % identyfikacja MIMO
 
             t = (0:length(y)-1) * obj.Tp;
-            
-            % Funkcja celu dopasowania SOPDT (K=1, optymalizujemy tylko T1 i T2)
-            cost_func = @(params) ...
-                sum((step(tf(1, [params 1]), t) - y').^2);
-            
-            % Początkowe zgadywanie
-            initial_guess = 200;  % [T1, T2]
-            
-            % Optymalizacja z fminsearch
-            options = optimset('Display', 'final', 'TolX', 1e-6, 'TolFun', 1e-6);
-            optimal_params = fminsearch(cost_func, initial_guess, options);
-            
-            % Transmitancja dopasowanego modelu
-            G = tf(1, [optimal_params 1]);
-            S.Q1 = step(G, t);
+
+            G = tf(model);
+            G.InputName = {'u1', 'u3'};
+            G.OutputName = {'y1'};
+            [Y, ~] = step(G, t);
+            S.Q1 = Y(:,1,1);
+            S.Q3 = Y(:,1,2);
+
             G_z = c2d(G, obj.Tp, 'zoh');
             G_z.Variable = 'z^-1';
-            a = G_z.Denominator{1}(2);
-            b = G_z.Numerator{1}(2);
-
-            S.Q2 = S.Q1;
-            S.Q3 = S.Q1;
+            a.Q1 = G_z.Denominator{1}(2:3);
+            b.Q1 = G_z.Numerator{1}(2:3);
+            a.Q3 = G_z.Denominator{2}(2:3);
+            b.Q3 = G_z.Numerator{2}(2:3);
 
             % Rysowanie wykresu
             figure;
-            plot(t, y, 'b', 'LineWidth', 2); hold on;
-            plot(t, S.Q1, 'r--', 'LineWidth', 2);
-            legend('Odpowiedź rzeczywista', 'Model SOPDT');
+            plot(t, y, 'b', 'LineWidth', 2); 
+            hold on;
+            plot(t, Y(:, 1, 1), 'r--', 'LineWidth', 2);
+            plot(t, Y(:, 1, 2), 'g--', 'LineWidth', 2);
+            % legend('Odpowiedź rzeczywista', 'Model', 'Location', 'best');
             xlabel('Czas');
             ylabel('Odpowiedź skokowa');
-            title(sprintf('Dopasowanie SOPDT: T1 = %.2f', optimal_params));
+            title(sprintf('Odpowiedź układu na wymuszenie jednostkowe Q1'));
+            grid on;
+        end
+
+        function [a, b, S] = Wb4Model(obj, index)
+
+            u = [ones(1,obj.dynamic_horizont)
+                zeros(1,obj.dynamic_horizont)
+                zeros(1,obj.dynamic_horizont)];
+            [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+            y.Q1 = s(index,:) / abs(s(index, end));
+            model.Q1 = tfest(iddata(y.Q1', u(1,:)', obj.Tp), 2, 1);
+
+            u = [zeros(1,obj.dynamic_horizont)
+                zeros(1,obj.dynamic_horizont)
+                ones(1,obj.dynamic_horizont)];
+            [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
+            y.Q3 = s(index,:) / abs(s(index, end));
+            model.Q3 = tfest(iddata(y.Q3', u(3,:)', obj.Tp), 2, 1);
+
+            t = (0:length(y.Q1)-1) * obj.Tp;
+
+            G = [tf(model.Q1), tf(model.Q3)];
+            G.InputName = {'u1', 'u3'};
+            G.OutputName = {'y1'};
+            [Y, ~] = step(G, t);
+            S.Q1 = Y(:,1,1);  % odpowiedź na skok w wejściu 1
+            S.Q3 = Y(:,1,2);  % odpowiedź na skok w wejściu 3
+
+            G_z = c2d(G, obj.Tp, 'zoh');
+            G_z.Variable = 'z^-1';
+            G_z
+            a = G_z.Denominator{1}(2:3);
+            b = G_z.Numerator{1}(2:3);
+
+            % Rysowanie wykresu
+            figure;
+            subplot(1,2,1);
+            plot(t, y.Q1, 'b', 'LineWidth', 2); 
+            hold on;
+            plot(t, S.Q1, 'r--', 'LineWidth', 2);
+            legend('Odpowiedź rzeczywista', 'Model', 'Location', 'best');
+            xlabel('Czas');
+            ylabel('Odpowiedź skokowa');
+            title(sprintf('Odpowiedź układu na wymuszenie jednostkowe Q1'));
+            grid on;
+
+            subplot(1,2,2);
+            plot(t, y.Q3, 'b', 'LineWidth', 2); 
+            hold on;
+            plot(t, S.Q3, 'r--', 'LineWidth', 2);
+            legend('Odpowiedź rzeczywista', 'Model', 'Location', 'best');
+            xlabel('Czas');
+            ylabel('Odpowiedź skokowa');
+            title(sprintf('Odpowiedź układu na wymuszenie jednostkowe Q3'));
             grid on;
         end
 
@@ -106,21 +286,21 @@ classdef Obiekt < handle
                 zeros(1,obj.dynamic_horizont)
                 zeros(1,obj.dynamic_horizont)];
             [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
-            y.Q1 = s(2,:) / abs(s(2,end));
+            y.Q1 = s(2,:) / abs(s(2, end));
             model.Q1 = tfest(iddata(y.Q1', u(1,:)', obj.Tp), 2, 1);
 
             u = [zeros(1,obj.dynamic_horizont)
                 ones(1,obj.dynamic_horizont)
                 zeros(1,obj.dynamic_horizont)];
             [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
-            y.Q2 = s(2,:) / abs(s(2,end));
+            y.Q2 = s(2,:) / abs(s(2, end));
             model.Q2 = tfest(iddata(y.Q2', u(2,:)', obj.Tp), 2, 1);
 
             u = [zeros(1,obj.dynamic_horizont)
                 zeros(1,obj.dynamic_horizont)
                 ones(1,obj.dynamic_horizont)];
             [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
-            y.Q3 = s(2,:) / abs(s(2,end));
+            y.Q3 = s(2,:) / abs(s(2, end));
             model.Q3 = tfest(iddata(y.Q3', u(3,:)', obj.Tp), 2, 1);
 
             t = (0:length(y.Q1)-1) * obj.Tp;
@@ -177,8 +357,8 @@ classdef Obiekt < handle
 
         function [y, y_L, E_h, E_pH] = modifiedEuler(obj, u, kk)
             %% Alokacja pamięci
-            y = zeros(2, kk);
-            y_L = zeros(2, kk);
+            y = zeros(4, kk);
+            y_L = zeros(4, kk);
             W_a4 = zeros(1, kk);
             W_b4 = zeros(1, kk);
             W_a4e = zeros(1, kk);
@@ -231,7 +411,7 @@ classdef Obiekt < handle
                 h_e = h_e + 1/2 * obj.Tp * (fun_1(Q_1(k), Q_2(k), Q_3(k), h_e) + fun_1(Q_1(k), Q_2(k), Q_3(k), h));
                 W_a4e(k) = W_a4e(k-1) + 1/2 * obj.Tp * (fun_2(Q_1(k), Q_2(k), Q_3(k), h_e, W_a4e(k-1)) + fun_2(Q_1(k), Q_2(k), Q_3(k), h, W_a4(k)));
                 W_b4e(k) = W_b4e(k-1) + 1/2 * obj.Tp * (fun_3(Q_1(k), Q_2(k), Q_3(k), h_e, W_b4e(k-1)) + fun_3(Q_1(k), Q_2(k), Q_3(k), h, W_b4(k)));
-                
+
                 % if (k <= obj.delay)
                 %     pH = obj.pH_calc(obj.W_a40, obj.W_b40);
                 % else
@@ -263,6 +443,8 @@ classdef Obiekt < handle
                 % Sprowadzenie wartości do punktu pracy
                 y_L(1, k) = h_eL - obj.h_0;
                 y_L(2, k) = pH - obj.pH_0;
+                y_L(3, k) = W_a4eL(k) - obj.W_a40;
+                y_L(4, k) = W_b4eL(k) - obj.W_b40;
             end
 
             E_h = sum((y(1,:)-y_L(1,:)).^2) / kk;

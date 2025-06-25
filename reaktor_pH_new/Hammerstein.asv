@@ -6,6 +6,8 @@ classdef Hammerstein < handle
         Q1_grid
         Q3_grid
         h
+        Wa4
+        Wb4
         pH
 
         linear_fis
@@ -18,14 +20,17 @@ classdef Hammerstein < handle
                 linspace(0.6, 30.6, 100)];
             [obj.Q1_grid, obj.Q3_grid] = meshgrid(U(1,:), U(2,:));
             obj.h = ((obj.Q1_grid + obiekt.Q_20 + obj.Q3_grid) / obiekt.C_V).^2 - obiekt.h_0;
-            Wa4 = (obiekt.W_a1*obj.Q1_grid + obiekt.W_a2*obiekt.Q_20 + obiekt.W_a3*obj.Q3_grid)./(obj.Q1_grid+obiekt.Q_20+obj.Q3_grid);
-            Wb4 = (obiekt.W_b1*obj.Q1_grid + obiekt.W_b2*obiekt.Q_20 + obiekt.W_b3*obj.Q3_grid)./(obj.Q1_grid+obiekt.Q_20+obj.Q3_grid);
+            obj.Wa4 = (obiekt.W_a1*obj.Q1_grid + obiekt.W_a2*obiekt.Q_20 + obiekt.W_a3*obj.Q3_grid)./(obj.Q1_grid+obiekt.Q_20+obj.Q3_grid);
+            obj.Wb4 = (obiekt.W_b1*obj.Q1_grid + obiekt.W_b2*obiekt.Q_20 + obiekt.W_b3*obj.Q3_grid)./(obj.Q1_grid+obiekt.Q_20+obj.Q3_grid);
             
             for i = 1:100
                 for j = 1:100
-                    obj.pH(i,j) = obiekt.pH_calc(Wa4(i,j), Wb4(i,j)) - obiekt.pH_0;
+                    obj.pH(i,j) = obiekt.pH_calc(obj.Wa4(i,j), obj.Wb4(i,j)) - obiekt.pH_0;
                 end
             end
+
+            obj.Wa4 = obj.Wa4 - obiekt.W_a40;
+            obj.Wb4 = obj.Wb4 - obiekt.W_b40;
 
             U = [linspace(obj.U_min, obj.U_max, 100);
                 linspace(obj.U_min, obj.U_max, 100)];
@@ -48,17 +53,25 @@ classdef Hammerstein < handle
             obj.linear_fis.h = anfis([X Y], options);
 
             % --------------- LINEAR PH --------------- %
-            X = (X1(:)-X2(:))/2;
+            X = [X1(:) X2(:)];
+           
+            Y_Wa4 = obj.Wa4';
+            Y_Wa4 = Y_Wa4(:);
             
-            Y = obj.pH';
-            Y = Y(:);
+            Y_Wb4 = obj.Wb4';
+            Y_Wb4 = Y_Wb4(:);
 
             % Generowanie systemu rozmytego
-            fis = genfis1([X Y], 12, 'gaussmf', 'linear');
+            fis_Wa4 = genfis1([X Y_Wa4], 5, 'gaussmf', 'linear');
+            fis_Wb4 = genfis1([X Y_Wb4], 5, 'gaussmf', 'linear');
+            
             % Trening ANFIS
-            options = anfisOptions('InitialFIS', fis, 'EpochNumber', 100, ...
+            options_1 = anfisOptions('InitialFIS', fis_Wa4, 'EpochNumber', 100, ...
                 'DisplayANFISInformation', 0, 'DisplayErrorValues', 0);
-            obj.linear_fis.pH = anfis([X Y], options);
+            options_2 = anfisOptions('InitialFIS', fis_Wb4, 'EpochNumber', 100, ...
+                'DisplayANFISInformation', 0, 'DisplayErrorValues', 0);
+            obj.linear_fis.Wa4 = anfis([X Y_Wa4], options_1);
+            obj.linear_fis.Wb4 = anfis([X Y_Wb4], options_2);
         end
 
         function nonlinearFuzzy(obj)
@@ -77,17 +90,27 @@ classdef Hammerstein < handle
             obj.nonlinear_fis.h = anfis([X Y], options);
         
             % % --------------- NONLINEAR PH --------------- %
-            X = tanh((X1(:)-X2(:))/15);
+            % Dane wejściowe
+            X_Wa4 = [tanh(X1(:)/15) tanh(X2(:)/15)];
+            X_Wb4 = [sinh(X1(:)/15) sinh(X2(:)/15)];
             
-            Y = obj.pH';
-            Y = Y(:);
-
+            Y_Wa4 = obj.Wa4';
+            Y_Wa4 = Y_Wa4(:);
+            
+            Y_Wb4 = obj.Wb4';
+            Y_Wb4 = Y_Wb4(:);
+            
             % Generowanie systemu rozmytego
-            fis = genfis1([X Y], 6, 'gaussmf', 'linear');
+            fis_Wa4 = genfis1([X_Wa4 Y_Wa4], 3, 'gaussmf', 'linear');
+            fis_Wb4 = genfis1([X_Wb4 Y_Wb4], 3, 'gaussmf', 'linear');
+            
             % Trening ANFIS
-            options = anfisOptions('InitialFIS', fis, 'EpochNumber', 100, ...
+            options_1 = anfisOptions('InitialFIS', fis_Wa4, 'EpochNumber', 100, ...
                 'DisplayANFISInformation', 0, 'DisplayErrorValues', 0);
-            obj.nonlinear_fis.pH = anfis([X Y], options);
+            options_2 = anfisOptions('InitialFIS', fis_Wb4, 'EpochNumber', 100, ...
+                'DisplayANFISInformation', 0, 'DisplayErrorValues', 0);
+            obj.nonlinear_fis.Wa4 = anfis([X_Wa4 Y_Wa4], options_1);
+            obj.nonlinear_fis.Wa4 = anfis([X_Wb4 Y_Wb4], options_2);
         end
 
         function testLinearModel(obj, U, a_h, a_pH, b_h, b_pH, obiekt, type, index)
@@ -99,14 +122,8 @@ classdef Hammerstein < handle
             % --------------- LINEAR H --------------- %
             if(strcmp(type, 'h'))
                 Y_fuzzy = evalfis(obj.linear_fis.h, [U(1,:)', U(3,:)']);
-                for k = 3:obiekt.kk
-                    if(U(1,k-1) + U(3, k-1) ~= 0)
-                        K = Y_fuzzy(k-1) / (U(1, k-1) + U(3, k-1));
-                    else
-                        K = 1;
-                    end
-
-                    Y_out(k) = - a_h*Y_out(k-1) + K*b_h*U(1, k-1) + b_h*U(2, k-1) + K*b_h*U(3, k-1);
+                for k = 2:obiekt.kk
+                    Y_out(k) = - a_h*Y_out(k-1) + b_h*Y_fuzzy(k-1);
                 end
 
                 E_lin = sum((Y_real(1, :) - Y_lin(1, :)).^2) / obiekt.kk;
@@ -130,35 +147,13 @@ classdef Hammerstein < handle
 
             % --------------- LINEAR PH --------------- %
             else
-                du = 0.001;
-                Y_fuzzy = evalfis(obj.linear_fis.pH, (U(1,:)'- U(3,:)')/2);
-                Y_fuzzy_Q1 = evalfis(obj.linear_fis.pH, (U(1,:)' + du - U(3,:)')/2);
-                Y_fuzzy_Q3 = evalfis(obj.linear_fis.pH, (U(1,:)'- (U(3,:)' + du))/2);
+                Y_stat = zeros(1, obiekt.kk);
+                Y_fuzzy_Wa4 = evalfis(obj.linear_fis.Wa4, [U(1,:)' U(3,:)']);
+                Y_fuzzy_Wb4 = evalfis(obj.linear_fis.Wb4, [U(1,:)' U(3,:)']);
 
-                y_1 = zeros(1,obiekt.kk);
-                y_2 = zeros(1,obiekt.kk);
-                y_3 = zeros(1,obiekt.kk);
-
-                for k = 4:obiekt.kk
-                    
-                    if(abs(U(1,k-1) + U(3, k-1)) ~= 0 )
-                        dydQ = Y_fuzzy(k-1) / (U(1,k-1) + U(3,k-1));
-                    else
-                        dydQ = 1;
-                    end
-
-                    dydQ1 = (Y_fuzzy(k-1) - Y_fuzzy_Q1(k-1)) / du;
-                    dydQ3 = abs((Y_fuzzy_Q3(k-1) - Y_fuzzy(k-1)) / du);
-                    K = Y_fuzzy(k-1) / (-U(1, k-1) + U(3, k-1));
-                    y_1(k) = -a_pH.Q1 * y_1(k-1:-1:k-2)' + K*b_pH.Q1 * U(1, k-1:-1:k-2)';
-                    y_2(k) = -a_pH.Q2 * y_2(k-1:-1:k-2)' + b_pH.Q2*U(2,k-1:-1:k-2)';
-                    y_3(k) = -a_pH.Q3 * y_3(k-1:-1:k-2)' + K*b_pH.Q3 * U(3, k-1:-1:k-2)';
-                    Y_out(k) = y_1(k) + y_2(k) + y_3(k);
-                    % Y_out(k) = -a_pH.Q1 * Y_out(k-1:-1:k-2)' + dydQ1*b_pH.Q1 * U(1, k-1:-1:k-2)';
-
-                    % Wa4 = (obiekt.W_a1*(obiekt.Q_10+U(1,k-1)) + obiekt.W_a2*obiekt.Q_20 + obiekt.W_a3*(obiekt.Q_30+U(3,k-1)))./(obiekt.Q_10+obiekt.Q_20+obiekt.Q_30+U(1,k-1)+U(3,k-1));
-                    % Wb4 = (obiekt.W_b1*(obiekt.Q_10+U(1,k-1)) + obiekt.W_b2*obiekt.Q_20 + obiekt.W_b3*(obiekt.Q_30+U(3,k-1)))./(obiekt.Q_10+obiekt.Q_20+obiekt.Q_30+U(1,k-1)+U(3,k-1));
-                    % Y_out(k) = obiekt.pH_calc(Wa4, Wb4) - obiekt.pH_0;
+                for k = 3:obiekt.kk
+                    Y_stat(k) = obiekt.pH_calc(Y_fuzzy_Wa4(k) + obiekt.W_a40, Y_fuzzy_Wb4(k) + obiekt.W_b40) - obiekt.pH_0;
+                    Y_out(k) = -(a_pH.Q1 + a_pH.Q3)/2 * Y_out(k-1:-1:k-2)' + (-b_pH.Q1 + b_pH.Q3)/2 * Y_stat(k:-1:k-1)';
                 end
 
                 E_lin = sum((Y_real(2, :) - Y_lin(2, :)).^2) / obiekt.kk;
@@ -194,12 +189,7 @@ classdef Hammerstein < handle
             if(strcmp(type, 'h'))
                 Y_fuzzy = evalfis(obj.nonlinear_fis.h, [sinh(U(1,:)'/15), sinh(U(3,:)'/15)]);
                 for k = 2:obiekt.kk
-                    if(U(1,k-1) + U(3, k-1) ~= 0)
-                        K = Y_fuzzy(k-1) / (U(1, k-1) + U(3, k-1));
-                    else
-                        K = 1;
-                    end
-                    Y_out(k) = - a_h*Y_out(k-1) + K*b_h*U(1, k-1) + b_h*U(2, k-1) + K*b_h*U(3, k-1);
+                    Y_out(k) = - a_h*Y_out(k-1) + b_h*Y_fuzzy(k-1);
                 end
 
                 E_lin = sum((Y_real(1, :) - Y_lin(1, :)).^2) / obiekt.kk;

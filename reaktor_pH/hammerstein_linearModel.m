@@ -23,9 +23,9 @@ pH = zeros(100,100);
 % Petla po siatce sterowań
 for i = 1:length(U)
     for j = 1:length(U)
-        u = [ones(1, 200)*U(1,i);
+        u = [ones(1, 200)*U(1,j);
              zeros(1, 200);
-             ones(1, 200)*U(2,j)];
+             ones(1, 200)*U(2,i)];
     
         [y, ~, ~] = obiekt.modifiedEuler(u, 200);
         h(i,j) =  y(1, end);
@@ -56,35 +56,33 @@ colorbar;
 
 %% ANFIS
 % Dane wejściowe
-% X = [Q1_grid(:)  Q3_grid(:)];
-X = [tanh((Q1_grid(:) -Q3_grid(:))/15)];
-Y = pH(:);
-data_train = [X Y];
+X1 = Q1_grid';
+X2 = Q3_grid';
+X = (X1(:)-X2(:))/2;
+% X = tanh((X1(:)-X2(:))/15);
 
-% Ustawienia
-numMFs = 5;                 % liczba funkcji przynależności na wejście
-mfType = 'gaussmf';         % typ MF: gaussmf, gbellmf, trimf, ...
+Y = pH';
+Y = Y(:);
 
+% 12 - linear_fis
+% 6 - nonlinear_fis
 % Generowanie systemu rozmytego
-fis = genfis1(data_train, numMFs, mfType, 'linear');
-% fis = genfis2(X, Y, 0.1);
+fis = genfis1([X Y], 12, 'gaussmf', 'linear');
+
+% opts = genfisOptions('FCMClustering');
+% opts.NumClusters = 25;
+% fis = genfis(X, Y, opts);  % lub Y_norm jeśli normalizujesz Y
 
 % Trening ANFIS
 options = anfisOptions('InitialFIS', fis, 'EpochNumber', 100, ...
     'DisplayANFISInformation', 0, 'DisplayErrorValues', 0);
-fis_trained = anfis(data_train, options);
-
-% % Predykcja
-% Y_pred = evalfis(fis_trained, X);
-% pH_pred = reshape(Y_pred, size(Q1_grid));
-
-fis_trained = readfis("D:\EiTI\MGR\reaktor_pH\hammerstein_linearFIS_pH.fis");
+fis_trained = anfis([X Y], options);
 
 Y_out = zeros(100,100);
 for i = 1:100
-    disp(i);
     for j = 1:100
-        Y_out(i,j) = evalfis(fis_trained, [U(1,j) U(2,i)]);
+        Y_out(i,j) = evalfis(fis_trained, (U(1,j)-U(2,i))/2);
+        % Y_out(i,j) = evalfis(fis_trained, tanh((U(1,j)-U(2,i))/15));
     end
 end
 
@@ -95,6 +93,8 @@ xlabel('Q_1'); ylabel('Q_3'); zlabel('pH');
 title('Dokładniejsza charakterystyka statyczna TS (genfis1 + ANFIS)');
 shading interp; colormap turbo;
 
+E = sum((pH(:) - Y_out(:)).^2) / numel(pH);
+disp(E);
 %% Tworzenie początkowego systemu rozmytego TS
 close all;
 fis = sugfis('Name', 'Hammerstein', 'Type', 'sugeno');

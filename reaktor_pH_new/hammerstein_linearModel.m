@@ -4,34 +4,29 @@ obiekt = Obiekt();
 %  pH_0, h_0, Q_10, Q_20, Q_30
 obiekt.linearization(16.6, 0.55, 15.6);
 
-%% Dane do wykresów 3D
-% Zakresy sterowania
+%% Przygotuj siatkę
+U = [linspace(1.6, 31.6, 100)
+    linspace(0.6, 30.6, 100)];
+[Q1_grid, Q3_grid] = meshgrid(U(1,:), U(2,:));
+h = ((Q1_grid + obiekt.Q_20 + Q3_grid) / obiekt.C_V).^2 - obiekt.h_0;
+Wa4 = (obiekt.W_a1*Q1_grid + obiekt.W_a2*obiekt.Q_20 + obiekt.W_a3*Q3_grid)./(Q1_grid+obiekt.Q_20+Q3_grid);
+Wb4 = (obiekt.W_b1*Q1_grid + obiekt.W_b2*obiekt.Q_20 + obiekt.W_b3*Q3_grid)./(Q1_grid+obiekt.Q_20+Q3_grid);
+
+for i = 1:100
+    for j = 1:100
+        pH(i,j) = obiekt.pH_calc(Wa4(i,j), Wb4(i,j)) - obiekt.pH_0;
+    end
+end
+
+Wa4 = Wa4 - obiekt.W_a40;
+Wb4 = Wb4 - obiekt.W_b40;
+
 U_min = -15;
 U_max = 15;
 U = [linspace(U_min, U_max, 100);
     linspace(U_min, U_max, 100)];
 
 [Q1_grid, Q3_grid] = meshgrid(U(1,:), U(2,:));  % kombinacje
-
-% load pH_data.mat;
-% load h_data.mat;
-
-%% Przygotuj siatkę
-h = zeros(100,100);
-pH = zeros(100,100);
-
-% Petla po siatce sterowań
-for i = 1:length(U)
-    for j = 1:length(U)
-        u = [ones(1, 200)*U(1,i);
-             zeros(1, 200);
-             ones(1, 200)*U(2,j)];
-    
-        [y, ~, ~] = obiekt.modifiedEuler(u, 200);
-        h(i,j) =  y(1, end);
-        pH(i,j) = y(2, end); 
-    end
-end
 
 % Rysuj 3D wykres
 figure;
@@ -42,7 +37,6 @@ zlabel('pH');
 title('Wpływ dopływów Q_1 oraz Q_3 na stężenie substancji pH');
 shading interp;
 colorbar;
-% saveas(gcf, 'D:/EiTI/MGR/raporty/raport_MGR/pictures/ph-_staticCharacteristic.png');  % Zapisuje jako plik PNG
 
 figure;
 surf(Q1_grid, Q3_grid, h);
@@ -52,39 +46,73 @@ zlabel('h [cm]');
 title('Wpływ dopływów Q_1 oraz Q_3 na wysokość słupa cieczy h');
 shading interp;
 colorbar;
-% saveas(gcf, 'D:/EiTI/MGR/raporty/raport_MGR/pictures/h_staticCharacteristic.png');  % Zapisuje jako plik PNG
+
+figure;
+surf(Q1_grid, Q3_grid, Wa4);
+xlabel('Q_1 [ml/s]');
+ylabel('Q_3 [ml/s]');
+zlabel('Wa4');
+title('Wpływ dopływów Q_1 oraz Q_3 na wysokość słupa cieczy Wa4');
+shading interp;
+colorbar;
+
+figure;
+surf(Q1_grid, Q3_grid, Wb4);
+xlabel('Q_1 [ml/s]');
+ylabel('Q_3 [ml/s]');
+zlabel('Wb4');
+title('Wpływ dopływów Q_1 oraz Q_3 na wysokość słupa cieczy Wb4');
+shading interp;
+colorbar;
 
 %% ANFIS
 % Dane wejściowe
-% X = [Q1_grid(:)  Q3_grid(:)];
-X = [tanh((Q1_grid(:)/15) - tanh(Q3_grid(:))/15)];
-Y = pH(:);
-data_train = [X Y];
+X1 = Q1_grid';
+X2 = Q3_grid';
+X_Wa4 = [tanh(X1(:)/15) tanh(X2(:)/15)];
+X_Wb4 = [sinh(X1(:)/15) sinh(X2(:)/15)];
+% X_Wa4 = [X1(:) X2(:)];
+% X_Wb4 = [X1(:) X2(:)];
 
-% Ustawienia
-numMFs = 15;                 % liczba funkcji przynależności na wejście
-mfType = 'gaussmf';         % typ MF: gaussmf, gbellmf, trimf, ...
+Y_Wa4 = Wa4';
+Y_Wa4 = Y_Wa4(:);
 
+Y_Wb4 = Wb4';
+Y_Wb4 = Y_Wb4(:);
+
+% 12 - linear_fis
+% 6 - nonlinear_fis
 % Generowanie systemu rozmytego
-fis = genfis1(data_train, numMFs, mfType, 'linear');
-% fis = genfis2(X, Y, 0.1);
+fis_Wa4 = genfis1([X_Wa4 Y_Wa4], 3, 'gaussmf', 'linear');
+fis_Wb4 = genfis1([X_Wb4 Y_Wb4], 3, 'gaussmf', 'linear');
 
 % Trening ANFIS
-options = anfisOptions('InitialFIS', fis, 'EpochNumber', 100, ...
+options_1 = anfisOptions('InitialFIS', fis_Wa4, 'EpochNumber', 100, ...
     'DisplayANFISInformation', 0, 'DisplayErrorValues', 0);
-fis_trained_hiperbolic = anfis(data_train, options);
+options_2 = anfisOptions('InitialFIS', fis_Wb4, 'EpochNumber', 100, ...
+    'DisplayANFISInformation', 0, 'DisplayErrorValues', 0);
+fis_trained_Wa4 = anfis([X_Wa4 Y_Wa4], options_1);
+fis_trained_Wb4 = anfis([X_Wb4 Y_Wb4], options_2);
 
-% Predykcja
-Y_pred = evalfis(fis_trained_hiperbolic, X);
-pH_pred = reshape(Y_pred, size(Q1_grid));
+Y_Wa = zeros(100,100);
+Y_Wb = zeros(100,100);
+Y_pH = zeros(100, 100);
+for i = 1:100
+    for j = 1:100
+        Y_Wa(i,j) = evalfis(fis_trained_Wa4, [tanh(U(1,j)/15) tanh(U(2,i)/15)]);
+        Y_Wb(i,j) = evalfis(fis_trained_Wb4, [sinh(U(1,j)/15) sinh(U(2,i)/15)]);
+        % Y_Wa(i,j) = evalfis(fis_trained_Wa4, [U(1,j) U(2,i)]);
+        % Y_Wb(i,j) = evalfis(fis_trained_Wb4, [U(1,j) U(2,i)]);
+        Y_pH(i,j) = obiekt.pH_calc(Y_Wa(i,j)+obiekt.W_a40, Y_Wb(i,j)+obiekt.W_b40) - obiekt.pH_0;
+    end
+end
 
 % Rysunek
 figure;
-surf(Q1_grid, Q3_grid, pH_pred);
+surf(Q1_grid, Q3_grid, Y_pH);
 xlabel('Q_1'); ylabel('Q_3'); zlabel('pH');
 title('Dokładniejsza charakterystyka statyczna TS (genfis1 + ANFIS)');
 shading interp; colormap turbo;
-
 %% Tworzenie początkowego systemu rozmytego TS
 close all;
 fis = sugfis('Name', 'Hammerstein', 'Type', 'sugeno');

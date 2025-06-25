@@ -1,8 +1,11 @@
 classdef Wiener < handle
     properties
         Y_h
-        Y_pH
+        Y_Wa4
+        Y_Wb4
         h
+        Wa4
+        Wb4
         pH
         Y_min = -30;
         Y_max = 30;
@@ -15,62 +18,86 @@ classdef Wiener < handle
 
     methods
 
-        function obj = Wiener(a_h, a_pH, b_h, b_pH, obiekt)
+        function obj = Wiener(a_h, a_Wa4, a_Wb4, b_h, b_Wa4, b_Wb4, obiekt)
             U = [linspace(1.6, 31.6, 100)
                 linspace(0.6, 30.6, 100)];
             [Q1_grid, Q3_grid] = meshgrid(U(1,:), U(2,:));
             obj.h = ((Q1_grid + obiekt.Q_20 + Q3_grid) / obiekt.C_V).^2 - obiekt.h_0;
-            Wa4 = (obiekt.W_a1*Q1_grid + obiekt.W_a2*obiekt.Q_20 + obiekt.W_a3*Q3_grid)./(Q1_grid+obiekt.Q_20+Q3_grid);
-            Wb4 = (obiekt.W_b1*Q1_grid + obiekt.W_b2*obiekt.Q_20 + obiekt.W_b3*Q3_grid)./(Q1_grid+obiekt.Q_20+Q3_grid);
+            obj.Wa4 = (obiekt.W_a1*Q1_grid + obiekt.W_a2*obiekt.Q_20 + obiekt.W_a3*Q3_grid)./(Q1_grid+obiekt.Q_20+Q3_grid);
+            obj.Wb4 = (obiekt.W_b1*Q1_grid + obiekt.W_b2*obiekt.Q_20 + obiekt.W_b3*Q3_grid)./(Q1_grid+obiekt.Q_20+Q3_grid);
             
             for i = 1:100
                 for j = 1:100
-                    obj.pH(i,j) = obiekt.pH_calc(Wa4(i,j), Wb4(i,j)) - obiekt.pH_0;
+                    obj.pH(i,j) = obiekt.pH_calc(obj.Wa4(i,j), obj.Wb4(i,j)) - obiekt.pH_0;
                 end
             end
+
+            obj.Wa4 = obj.Wa4 - obiekt.W_a40;
+            obj.Wb4 = obj.Wb4 - obiekt.W_b40;
 
             U = [linspace(obj.U_min, obj.U_max, 100);
                 linspace(obj.U_min, obj.U_max, 100)];
 
             [Q1_grid, Q3_grid] = meshgrid(U(1,:), U(2,:));
 
-            obj.Y_h = zeros(100, 100);
-            obj.Y_pH = zeros(100, 100);
+            obj.Y_h.Q1 = zeros(100, 100);
+            obj.Y_h.Q3 = zeros(100, 100);
+            obj.Y_Wa4.Q1 = zeros(100, 100);
+            obj.Y_Wa4.Q3 = zeros(100, 100);
+            obj.Y_Wb4.Q1 = zeros(100, 100);
+            obj.Y_Wb4.Q3 = zeros(100, 100);
             
-            y_h = zeros(1, 100);
-            y_1 = zeros(1, 100);
-            y_2 = zeros(1, 100);
-            y_pH = zeros(1, 100);
+            y_h.Q1 = zeros(1, 100);
+            y_h.Q3 = zeros(1, 100);
+            y_Wa4.Q1 = zeros(1, 100);
+            y_Wa4.Q3 = zeros(1, 100);
+            y_Wb4.Q1 = zeros(1, 100);
+            y_Wb4.Q3 = zeros(1, 100);
             
             for i = 1:100
                 for j = 1:100
                     u = [ones(1,100) * U(1,j);
                         ones(1,100) * U(2,i)];
-                    for k = 2:length(u)
-                        y_h(k) = - a_h*y_h(k-1) + b_h*u(1, k-1) + b_h*u(2, k-1);
-            
-                        if k >= 4
-                            y_1(k) = -a_pH.Q1 * y_1(k-1:-1:k-2)' + b_pH.Q1*u(1,k-1:-1:k-2)';
-                            y_2(k) = -a_pH.Q3 * y_2(k-1:-1:k-2)' + b_pH.Q3*u(2,k-1:-1:k-2)';
-                            y_pH(k) = y_1(k) + y_2(k);
-                        end
+                    for k = 2:100
+                        y_h.Q1(k) = - a_h*y_h.Q1(k-1) + b_h*u(1, k-1);
+                        y_h.Q3(k) = - a_h*y_h.Q3(k-1) + b_h*u(2, k-1);
+
+                        y_Wa4.Q1(k) = - a_Wa4*y_Wa4.Q1(k-1)' + b_Wa4*u(1, k-1)';
+                        y_Wa4.Q3(k) = - a_Wa4*y_Wa4.Q3(k-1)' - b_Wa4*u(2, k-1)';
+                    
+                        y_Wb4.Q1(k) = - a_Wb4*y_Wb4.Q1(k-1)' + b_Wb4*u(1, k-1)';
+                        y_Wb4.Q3(k) = - a_Wb4*y_Wb4.Q3(k-1)' + b_Wb4*u(2, k-1)';
                     end
-                    obj.Y_h(i,j) = y_h(end);
-                    obj.Y_pH(i,j) = y_pH(end);
+                    obj.Y_h.Q1(i,j) = y_h.Q1(end);
+                    obj.Y_h.Q3(i,j) = y_h.Q3(end);
+                    obj.Y_Wa4.Q1(i,j) = y_Wa4.Q1(end);
+                    obj.Y_Wa4.Q3(i,j) = y_Wa4.Q3(end);
+                    obj.Y_Wb4.Q1(i,j) = y_Wb4.Q1(end);
+                    obj.Y_Wb4.Q3(i,j) = y_Wb4.Q3(end);
                 end
             end
 
             figure;
-            surf(Q1_grid, Q3_grid, obj.Y_h);
+            surf(Q1_grid, Q3_grid, obj.Y_h.Q1, 'FaceColor', 'r'); % czerwona
+            figure;
+            surf(Q1_grid, Q3_grid, obj.Y_h.Q3, 'FaceColor', 'b');   % niebieska
 
             figure;
-            surf(Q1_grid, Q3_grid, obj.Y_pH);
+            surf(Q1_grid, Q3_grid, obj.Y_Wa4.Q1, 'FaceColor', 'r');
+            figure;
+            surf(Q1_grid, Q3_grid, obj.Y_Wa4.Q3, 'FaceColor', 'b');
+
+            figure;
+            surf(Q1_grid, Q3_grid, obj.Y_Wb4.Q1, 'FaceColor', 'r');
+            figure;
+            surf(Q1_grid, Q3_grid, obj.Y_Wb4.Q3, 'FaceColor', 'b');
+
         end
 
         function linearFuzzy(obj)
             % -------------------- h --------------------%
-            X = obj.Y_h';
-            X = X(:);
+            X1 = obj.Y_h.Q1';  X2 = obj.Y_h.Q3';
+            X = [X1(:) X2(:)];
             Y = obj.h';
             Y = Y(:);
             % Generowanie systemu rozmytego
@@ -80,23 +107,37 @@ classdef Wiener < handle
                 'DisplayANFISInformation', 0, 'DisplayErrorValues', 0);
             obj.linear_fis.h = anfis([X Y], options);
 
-            X = obj.Y_pH';
-            X = X(:);
-            Y = obj.pH';
+            % -------------------- pH --------------------%
+            X1 = obj.Y_Wa4.Q1';  X2 = obj.Y_Wa4.Q3';
+            X = [X1(:) X2(:)];
+            Y = obj.Wa4';
             Y = Y(:);
+
             % Generowanie systemu rozmytego
-            fis = genfis1([X Y], 12, 'gaussmf', 'linear');
+            fis = genfis1([X Y], 5, 'gaussmf', 'linear');
             % Trening ANFIS
-            options = anfisOptions('InitialFIS', fis, 'EpochNumber', 200, ...
+            options = anfisOptions('InitialFIS', fis, 'EpochNumber', 100, ...
                 'DisplayANFISInformation', 0, 'DisplayErrorValues', 0);
-            obj.linear_fis.pH = anfis([X Y], options);
+            obj.linear_fis.Wa4 = anfis([X Y], options);
+
+            X1 = obj.Y_Wb4.Q1';  X2 = obj.Y_Wb4.Q3';
+            X = [X1(:) X2(:)];
+            Y = obj.Wb4';
+            Y = Y(:);
+
+            % Generowanie systemu rozmytego
+            fis = genfis1([X Y], 5, 'gaussmf', 'linear');
+            % Trening ANFIS
+            options = anfisOptions('InitialFIS', fis, 'EpochNumber', 100, ...
+                'DisplayANFISInformation', 0, 'DisplayErrorValues', 0);
+            obj.linear_fis.Wb4 = anfis([X Y], options);
         end
 
         function nonlinearFuzzy(obj)
             % ------------------ h ------------------ %
-            X = obj.Y_h';
-            X = sinh(X(:)/30);
-            Y = obj.h;
+            X1 = obj.Y_h.Q1';  X2 = obj.Y_h.Q3';
+            X = [sinh(X1(:)/15) sinh(X2(:)/15)];
+            Y = obj.h';
             Y = Y(:);
             % Generowanie systemu rozmytego
             fis = genfis1([X Y], 3, 'gaussmf', 'linear');
@@ -105,31 +146,45 @@ classdef Wiener < handle
                 'DisplayANFISInformation', 0, 'DisplayErrorValues', 0);
             obj.nonlinear_fis.h = anfis([X Y], options);
 
-            X = obj.Y_pH';
-            X = tanh(X(:)/15);
-            Y = obj.pH';
+            X1 = obj.Y_Wa4.Q1';  X2 = obj.Y_Wa4.Q3';
+            X = [tanh(X1(:)/15) tanh(X2(:)/15)];
+            Y = obj.Wa4';
             Y = Y(:);
+
             % Generowanie systemu rozmytego
-            fis = genfis1([X Y], 4, 'gaussmf', 'linear');
+            fis = genfis1([X Y], 3, 'gaussmf', 'linear');
             % Trening ANFIS
-            options = anfisOptions('InitialFIS', fis, 'EpochNumber', 200, ...
+            options = anfisOptions('InitialFIS', fis, 'EpochNumber', 100, ...
                 'DisplayANFISInformation', 0, 'DisplayErrorValues', 0);
-            obj.nonlinear_fis.pH = anfis([X Y], options);
+            obj.nonlinear_fis.Wa4 = anfis([X Y], options);
+
+            X1 = obj.Y_Wb4.Q1';  X2 = obj.Y_Wb4.Q3';
+            X = [sinh(X1(:)/15) sinh(X2(:)/15)];
+            Y = obj.Wb4';
+            Y = Y(:);
+
+            % Generowanie systemu rozmytego
+            fis = genfis1([X Y], 3, 'gaussmf', 'linear');
+            % Trening ANFIS
+            options = anfisOptions('InitialFIS', fis, 'EpochNumber', 100, ...
+                'DisplayANFISInformation', 0, 'DisplayErrorValues', 0);
+            obj.nonlinear_fis.Wb4 = anfis([X Y], options);
         end
 
-        function testLinearModel(obj, U, a_h, a_pH, b_h, b_pH, obiekt, type, index)
+        function testLinearModel(obj, U, a_h, a_Wa4, a_Wb4, b_h, b_Wa4, b_Wb4, obiekt, type, index)
             [Y_real, Y_lin] = obiekt.modifiedEuler(U, obiekt.kk); % Symulacja rzeczywistego układu
             t = 0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp; 
 
-            v = zeros(1, obiekt.kk);
-            Y_out = zeros(1, obiekt.kk);
+            Y_out.Q1 = zeros(1, obiekt.kk);
+            Y_out.Q3 = zeros(1, obiekt.kk);
             Y_fuzzy = zeros(1, obiekt.kk);
 
             % -------------------- LINEAR H -------------------- %
             if(strcmp(type, 'h'))
                 for k = 2:obiekt.kk
-                    Y_out(k) = - a_h*Y_out(k-1) + b_h*U(1,k-1) + b_h * U(2, k-1) + b_h * U(3,k-1);
-                    Y_fuzzy(k) = evalfis(obj.linear_fis.h, Y_out(k));
+                    Y_out.Q1(k) = - a_h*Y_out.Q1(k-1) + b_h * U(1,k-1);
+                    Y_out.Q3(k) = - a_h*Y_out.Q3(k-1) + b_h * U(3,k-1);
+                    Y_fuzzy(k) = evalfis(obj.linear_fis.h, [Y_out.Q1(k), Y_out.Q3(k)]);
                 end
                 E_lin = sum((Y_real(1, :) - Y_lin(1, :)).^2) / obiekt.kk;
                 E_out = sum((Y_real(1, :) - Y_fuzzy).^2) / obiekt.kk;
@@ -152,17 +207,20 @@ classdef Wiener < handle
 
             % -------------------- LINEAR PH -------------------- %
             else
-                y_1 = zeros(1,obiekt.kk);
-                y_2 = zeros(1,obiekt.kk);
-                y_3 = zeros(1,obiekt.kk);
+                y_Wa4.Q1 = zeros(1,obiekt.kk);
+                y_Wa4.Q3 = zeros(1,obiekt.kk);
+                y_Wb4.Q1 = zeros(1,obiekt.kk);
+                y_Wb4.Q3 = zeros(1,obiekt.kk);
                 for k = 4:obiekt.kk
-                    y_1(k) = -a_pH.Q1 * y_1(k-1:-1:k-2)' + b_pH.Q1*U(1,k-1:-1:k-2)';
-                    y_2(k) = -a_pH.Q2 * y_2(k-1:-1:k-2)' + b_pH.Q2*U(2,k-1:-1:k-2)';
-                    y_3(k) = -a_pH.Q3 * y_3(k-1:-1:k-2)' + b_pH.Q3*U(3,k-1:-1:k-2)';
+                    y_Wa4.Q1(k) = -a_Wa4 * y_Wa4.Q1(k-1)' + b_Wa4*U(1,k-1)';
+                    y_Wa4.Q3(k) = -a_Wa4 * y_Wa4.Q3(k-1)'- b_Wa4*U(3,k-1)';
+                    y_Wb4.Q1(k) = -a_Wb4 * y_Wb4.Q1(k-1)' + b_Wb4*U(1,k-1)';
+                    y_Wb4.Q3(k) = -a_Wb4 * y_Wb4.Q3(k-1)' + b_Wb4*U(3,k-1)';
+
+                    W_a4 = evalfis(obj.linear_fis.Wa4, [y_Wa4.Q1(k), y_Wa4.Q3(k)]);
+                    W_b4 = evalfis(obj.linear_fis.Wb4, [y_Wb4.Q1(k), y_Wb4.Q3(k)]);
                 
-                    Y_out(k) = y_1(k) + y_2(k) + y_3(k);
-                    
-                    Y_fuzzy(k) = evalfis(obj.linear_fis.pH, Y_out(k));
+                    Y_fuzzy(k) = obiekt.pH_calc(W_a4 + obiekt.W_a40, W_b4 + obiekt.W_b40) - obiekt.pH_0;
                 end
                 E_lin = sum((Y_real(2, :) - Y_lin(2, :)).^2) / obiekt.kk;
                 E_out = sum((Y_real(2, :) - Y_fuzzy).^2) / obiekt.kk;
@@ -187,22 +245,24 @@ classdef Wiener < handle
             % saveas(gcf, sprintf('D:/EiTI/MGR/raporty/raport_MGR/pictures/WienerLinearModel_%d.png', index));  % Zapisuje jako plik PNG
         end
 
-        function testNonlinearModel(obj, U, a_h, a_pH, b_h, b_pH, obiekt, type, index)
+        function testNonlinearModel(obj, U, a_h, a_Wa4, a_Wb4, b_h, b_Wa4, b_Wb4, obiekt, type, index)
             [Y_real, Y_lin] = obiekt.modifiedEuler(U, obiekt.kk); % Symulacja rzeczywistego układu
             t = 0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp;
 
-            Y_out = zeros(1,obiekt.kk);
+            Y_out.Q1 = zeros(1,obiekt.kk);
+            Y_out.Q3 = zeros(1,obiekt.kk);
             Y_fuzzy = zeros(1,obiekt.kk);
 
             % -------------------- NONLINEAR H -------------------- %
             if(strcmp(type, 'h'))
                 for k = 2:obiekt.kk
-                    Y_out(k) = - a_h*Y_out(k-1) + b_h*U(1,k-1) + b_h * U(2, k-1) + b_h * U(3,k-1);
-                    Y_fuzzy(k) = evalfis(obj.nonlinear_fis.h, sinh(Y_out(k)/30));
+                    Y_out.Q1(k) = - a_h*Y_out.Q1(k-1) + b_h * U(1,k-1);
+                    Y_out.Q3(k) = - a_h*Y_out.Q3(k-1) + b_h * U(3,k-1);
+                    Y_fuzzy(k) = evalfis(obj.nonlinear_fis.h, [sinh(Y_out.Q1(k)/15), sinh(Y_out.Q3(k)/15)]);
                 end
                 E_lin = sum((Y_real(1, :) - Y_lin(1, :)).^2) / obiekt.kk;
                 E_out = sum((Y_real(1, :) - Y_fuzzy).^2) / obiekt.kk;
-                fprintf("\nWIENER LINEAR MODEL\n");
+                fprintf("\nWIENER NONLINEAR MODEL\n");
                 fprintf("E_lin = %.3f\n", E_lin);
                 fprintf("E_out = %.3f\n", E_out);
     
@@ -221,16 +281,20 @@ classdef Wiener < handle
 
             % -------------------- NONLINEAR PH -------------------- %
             else
-                y_1 = zeros(1,obiekt.kk);
-                y_2 = zeros(1,obiekt.kk);
-                y_3 = zeros(1,obiekt.kk);
+                y_Wa4.Q1 = zeros(1,obiekt.kk);
+                y_Wa4.Q3 = zeros(1,obiekt.kk);
+                y_Wb4.Q1 = zeros(1,obiekt.kk);
+                y_Wb4.Q3 = zeros(1,obiekt.kk);
                 for k = 4:obiekt.kk
-                    y_1(k) = -a_pH.Q1 * y_1(k-1:-1:k-2)' + b_pH.Q1*U(1,k-1:-1:k-2)';
-                    y_2(k) = -a_pH.Q2 * y_2(k-1:-1:k-2)' + b_pH.Q2*U(2,k-1:-1:k-2)';
-                    y_3(k) = -a_pH.Q3 * y_3(k-1:-1:k-2)' + b_pH.Q3*U(3,k-1:-1:k-2)';
+                    y_Wa4.Q1(k) = -a_Wa4 * y_Wa4.Q1(k-1)' + b_Wa4*U(1,k-1)';
+                    y_Wa4.Q3(k) = -a_Wa4 * y_Wa4.Q3(k-1)'- b_Wa4*U(3,k-1)';
+                    y_Wb4.Q1(k) = -a_Wb4 * y_Wb4.Q1(k-1)' + b_Wb4*U(1,k-1)';
+                    y_Wb4.Q3(k) = -a_Wb4 * y_Wb4.Q3(k-1)' + b_Wb4*U(3,k-1)';
+
+                    W_a4 = evalfis(obj.nonlinear_fis.Wa4, [tanh(y_Wa4.Q1(k)/15), tanh(y_Wa4.Q3(k)/15)]);
+                    W_b4 = evalfis(obj.nonlinear_fis.Wb4, [sinh(y_Wb4.Q1(k)/15), sinh(y_Wb4.Q3(k)/15)]);
                 
-                    Y_out(k) = y_1(k) + y_2(k) + y_3(k);
-                    Y_fuzzy(k) = evalfis(obj.nonlinear_fis.pH, tanh(Y_out(k)/15));
+                    Y_fuzzy(k) = obiekt.pH_calc(W_a4 + obiekt.W_a40, W_b4 + obiekt.W_b40) - obiekt.pH_0;
                 end
                 E_lin = sum((Y_real(2, :) - Y_lin(2, :)).^2) / obiekt.kk;
                 E_out = sum((Y_real(2, :) - Y_fuzzy).^2) / obiekt.kk;

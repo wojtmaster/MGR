@@ -123,7 +123,7 @@ classdef Hammerstein < handle
                         ['model Hammersteina' blanks(5) sprintf('E = %.3f', E_out)]}, ...
                         'Location', 'best');
     
-                title('Porównanie wyjścia obiektu testowego i jego modeli');
+                title('Por�wnanie wyj�cia obiektu testowego i jego modeli');
                 ylabel('h [cm]');
                 xlabel('t [s]');
                 grid on;
@@ -139,8 +139,14 @@ classdef Hammerstein < handle
                 y_2 = zeros(1,obiekt.kk);
                 y_3 = zeros(1,obiekt.kk);
 
+
+                a_Hamm=a_pH.Q3;
+                b_Hamm=b_pH.Q3;
+
+                Y_stat(1:3)=Y_out(1);
+
                 for k = 4:obiekt.kk
-                    
+
                     if(abs(U(1,k-1) + U(3, k-1)) ~= 0 )
                         dydQ = Y_fuzzy(k-1) / (U(1,k-1) + U(3,k-1));
                     else
@@ -149,16 +155,17 @@ classdef Hammerstein < handle
 
                     dydQ1 = (Y_fuzzy(k-1) - Y_fuzzy_Q1(k-1)) / du;
                     dydQ3 = abs((Y_fuzzy_Q3(k-1) - Y_fuzzy(k-1)) / du);
-                    K = Y_fuzzy(k-1) / (-U(1, k-1) + U(3, k-1));
-                    y_1(k) = -a_pH.Q1 * y_1(k-1:-1:k-2)' + K*b_pH.Q1 * U(1, k-1:-1:k-2)';
-                    y_2(k) = -a_pH.Q2 * y_2(k-1:-1:k-2)' + b_pH.Q2*U(2,k-1:-1:k-2)';
-                    y_3(k) = -a_pH.Q3 * y_3(k-1:-1:k-2)' + K*b_pH.Q3 * U(3, k-1:-1:k-2)';
-                    Y_out(k) = y_1(k) + y_2(k) + y_3(k);
-                    % Y_out(k) = -a_pH.Q1 * Y_out(k-1:-1:k-2)' + dydQ1*b_pH.Q1 * U(1, k-1:-1:k-2)';
+                    % y_1(k) = -a_pH.Q1 * y_1(k-1:-1:k-2)' + dydQ1*b_pH.Q1 * U(1, k-1:-1:k-2)';
+                    % y_2(k) = -a_pH.Q2 * y_2(k-1:-1:k-2)' + b_pH.Q2*U(2,k-1:-1:k-2)';
+                    % y_3(k) = -a_pH.Q3 * y_3(k-1:-1:k-2)' + dydQ3*b_pH.Q3 * U(3, k-1:-1:k-2)';
+                    % Y_out(k) = y_1(k) + y_2(k) + y_3(k);
+                    % -a_pH.Q1 * Y_out(k-1:-1:k-2)' + dydQ1*b_pH.Q1 * U(1, k-1:-1:k-2)';
 
-                    % Wa4 = (obiekt.W_a1*(obiekt.Q_10+U(1,k-1)) + obiekt.W_a2*obiekt.Q_20 + obiekt.W_a3*(obiekt.Q_30+U(3,k-1)))./(obiekt.Q_10+obiekt.Q_20+obiekt.Q_30+U(1,k-1)+U(3,k-1));
-                    % Wb4 = (obiekt.W_b1*(obiekt.Q_10+U(1,k-1)) + obiekt.W_b2*obiekt.Q_20 + obiekt.W_b3*(obiekt.Q_30+U(3,k-1)))./(obiekt.Q_10+obiekt.Q_20+obiekt.Q_30+U(1,k-1)+U(3,k-1));
-                    % Y_out(k) = obiekt.pH_calc(Wa4, Wb4) - obiekt.pH_0;
+                    Wa4 = (obiekt.W_a1*(obiekt.Q_10+U(1,k-1)) + obiekt.W_a2*obiekt.Q_20 + obiekt.W_a3*(obiekt.Q_30+U(3,k-1)))./(obiekt.Q_10+obiekt.Q_20+obiekt.Q_30+U(1,k-1)+U(3,k-1));
+                    Wb4 = (obiekt.W_b1*(obiekt.Q_10+U(1,k-1)) + obiekt.W_b2*obiekt.Q_20 + obiekt.W_b3*(obiekt.Q_30+U(3,k-1)))./(obiekt.Q_10+obiekt.Q_20+obiekt.Q_30+U(1,k-1)+U(3,k-1));
+                    Y_stat(k) = obiekt.pH_calc(Wa4, Wb4) - obiekt.pH_0;
+                    % Y_out(k) = -a_Hamm * Y_out(k-1:-1:k-2)' + b_Hamm * Y_stat(k:-1:k-1)';
+                    Y_out(k) = -(a_pH.Q1+a_pH.Q3)/2 * Y_out(k-1:-1:k-2)' + (-b_pH.Q1+b_pH.Q3)/2 * Y_stat(k:-1:k-1)';
                 end
 
                 E_lin = sum((Y_real(2, :) - Y_lin(2, :)).^2) / obiekt.kk;
@@ -175,7 +182,7 @@ classdef Hammerstein < handle
                         ['model Hammersteina' blanks(5) sprintf('E = %.3f', E_out)]}, ...
                         'Location', 'best');
 
-                title('Porównanie wyjścia obiektu testowego i jego modeli');
+                title('Por�wnanie wyj�cia obiektu testowego i jego modeli');
                 ylabel('pH');
                 xlabel('t [s]');
                 grid on;
@@ -216,7 +223,7 @@ classdef Hammerstein < handle
                         ['model Hammersteina' blanks(5) sprintf('E = %.3f', E_out)]}, ...
                         'Location', 'best');
     
-                title('Porównanie wyjścia obiektu testowego i jego modeli');
+                title('Por�wnanie wyj�cia obiektu testowego i jego modeli');
                 ylabel('h [cm]');
                 xlabel('t [s]');
                 grid on;
@@ -259,7 +266,7 @@ classdef Hammerstein < handle
                         ['model Hammersteina' blanks(5) sprintf('E = %.3f', E_out)]}, ...
                         'Location', 'best');
 
-                title('Porównanie wyjścia obiektu testowego i jego modeli');
+                title('Por�wnanie wyj�cia obiektu testowego i jego modeli');
                 ylabel('pH');
                 xlabel('t [s]');
                 grid on;
@@ -270,7 +277,7 @@ classdef Hammerstein < handle
         function show_fuzzy(~, fis, s)
             figure;
             plotmf(fis, 'input', 1);
-            title(sprintf('Funkcje przynależności dla u(k) - następniki %s', s));
+            title(sprintf('Funkcje przynale�no�ci dla u(k) - nast�pniki %s', s));
             xlabel('u');
             ylabel('$\mu(u)$', 'Interpreter', 'latex');
             grid on;
