@@ -157,200 +157,108 @@ E_out = sum((Y_real(1,:) - Y_out).^2);
 fprintf("\nE_lin = %.3f\n", E_lin);
 fprintf("E_out = %.3f\n", E_out);
 
-%% 
-%% 2. Tworzenie początkowego systemu rozmytego TS
-close all;
-fis_2 = sugfis('Name', 'F1_Hammerstein', 'Type', 'sugeno');
-fis_2 = addInput(fis_2, [U_min U_max], 'Name', 'U');
+%% Symulacja
+U = [repelem((rand(1, obiekt.kk/300) * 30 - 15), 300);
+    zeros(1, obiekt.kk);
+    repelem((rand(1, obiekt.kk/700) * 30 - 15), 700)];
 
-% Definiowanie funkcji przynależności (gaussmf)
-fis_2 = addMF(fis_2, 'U', 'gaussmf', [20, U_center(1)]);
-fis_2 = addMF(fis_2, 'U', 'gaussmf', [20, U_center(2)]);
-fis_2 = addMF(fis_2, 'U', 'gaussmf', [20, U_center(3)]);
+[Y_real, ~] = obiekt.modifiedEuler(U, obiekt.kk);
 
-% Definiowanie wyjścia i początkowych następników (a_i * u + b_i)
-fis_2 = addOutput(fis_2, [U_min U_max], 'Name', 'F1');
+y_Wa4.Q1 = zeros(1, obiekt.kk);
+y_Wa4.Q3 = zeros(1, obiekt.kk);
+y_Wb4.Q1 = zeros(1, obiekt.kk);
+y_Wb4.Q3 = zeros(1, obiekt.kk);
+Wa4 = zeros(1, obiekt.kk);
+Wb4 = zeros(1, obiekt.kk);
 
-% Początkowe współczynniki (a_i, b_i)
-a_param = [76.4472   72.8656  100.0000]; % Można dobrać inaczej
-b_param = [100.0000   71.1456   88.1261];
+for k = 3:obiekt.kk
+    y_Wa4.Q1(k) = - a_Wa4*y_Wa4.Q1(k-1)' + b_Wa4*U(1, k-1)';
+    y_Wa4.Q3(k) = - a_Wa4*y_Wa4.Q3(k-1)' - b_Wa4*U(3, k-1)';
 
-% Dodanie reguł TS w postaci liniowej
-for i = 1:length(U_center)
-    fis_2 = addMF(fis_2, 'F1', 'linear', [a_param(i), b_param(i)]);
+    y_Wb4.Q1(k) = - a_Wb4*y_Wb4.Q1(k-1)' + b_Wb4*U(1, k-1)';
+    y_Wb4.Q3(k) = - a_Wb4*y_Wb4.Q3(k-1)' + b_Wb4*U(3, k-1)';
+    
+    Wa4(k) = (obiekt.W_a1*(obiekt.Q_10+y_Wa4.Q1(k)) + obiekt.W_a2*obiekt.Q_20 + obiekt.W_a3*(obiekt.Q_30 - y_Wa4.Q3(k)))./(obiekt.Q_10+obiekt.Q_20+obiekt.Q_30+y_Wa4.Q1(k)-y_Wa4.Q3(k)) - obiekt.W_a40;
+    Wb4(k) = (obiekt.W_b1*(obiekt.Q_10-y_Wb4.Q1(k)) + obiekt.W_b2*obiekt.Q_20 + obiekt.W_b3*(obiekt.Q_30- y_Wb4.Q3(k)))./(obiekt.Q_10+obiekt.Q_20+obiekt.Q_30-y_Wb4.Q1(k)- y_Wb4.Q3(k)) - obiekt.W_b40;
+    pH(k) = obiekt.pH_calc(Wa4(k) + obiekt.W_a40, Wb4(k) + obiekt.W_b40) - obiekt.pH_0;
 end
 
-% Reguły Takagi-Sugeno: [inputMF, outputMF, weight]
-ruleList = [1 1 1 1;  % Reguła 1: wejście MF1 -> wyjście Out1
-            2 2 1 1;
-            3 3 1 1];  % Reguła 2: wejście MF2 -> wyjście Out2  % Reguła 3: wejście MF3 -> wyjście Out3
-
-% Dodanie reguł do systemu
-fis_2 = addRule(fis_2, ruleList);
-
-% Symulacja modelu Hammersteina
-U_fuzzy = zeros(obiekt.kk, 1); % Przepuszczenie przez model TS
-Y_out = zeros(1, obiekt.kk);
-
-% U = [repelem((rand(1, obiekt.kk/250) * 40 - 20), 250)];
-% [Y_real, Y_lin] = obiekt.rk4([U; zeros(1, obiekt.kk)], obiekt.kk); % Symulacja rzeczywistego układu
-
-for k = 1:obiekt.kk
-    [~, degrees] = evalfis(fis_2, U(1, k));
-    output = 0;
-    for i = 1:length(a_param)
-        output = output + degrees(i) * (a_param(i)*sinh(U(1, k)/b_param(i)));
-    end
-    U_fuzzy(k) = output / sum(degrees);
-
-    if k<obiekt.delay+3
-        Y_out(k) = 0;
-    else
-        Y_out(k) = - a*[Y_out(k-1:-1:k-2)]' + b*[U_fuzzy(k-(obiekt.delay+1):-1:k-(obiekt.delay+2))];
-    end
-end
-
-% Wizualizacja wyników
 figure;
-plot(t, Y_real, 'b', t, Y_lin, 'g', t, Y_out, 'r');
-% legend('RK4', 'RK4 liniowy', 'Hammerstein (optymalny TS)', 'Location', 'southwest');
-title('Porównanie wyjścia układu rzeczywistego i modelu');
-grid on;
-
-E_lin = sum((Y_real - Y_lin).^2);
-E_out = sum((Y_real - Y_out).^2);
-fprintf("\nE_lin = %.3f\n", E_lin);
-fprintf("E_out = %.3f\n", E_out);
-
-%% Losowość
-for j = 1:5
-    U = [repelem((rand(1, obiekt.kk/250) * 90 - 45), 250)];
-    [Y_real, Y_lin] = obiekt.rk4([U; zeros(1, obiekt.kk)], obiekt.kk); % Symulacja rzeczywistego układu
-    
-    % Symulacja modelu Hammersteina
-    U_fuzzy = zeros(obiekt.kk, 1); % Przepuszczenie przez model TS
-    U_fuzzy_2 = zeros(obiekt.kk, 1); % Przepuszczenie przez model TS
-    Y_out = zeros(1, obiekt.kk);
-    Y_out_2 = zeros(1, obiekt.kk);
-    
-    for k = obiekt.delay+3:obiekt.kk
-        [~, degrees] = evalfis(fis, U(k));
-        [~, degrees_2] = evalfis(fis_2, U(k));
-        output = 0;
-        output_2 = 0;
-        for i = 1:length(a_param)
-            output = output + degrees(i) * (fis.Outputs.MembershipFunctions(i).Parameters(1)*sinh(U(k)/fis.Outputs.MembershipFunctions(i).Parameters(2)));
-            output_2 = output_2 + degrees_2(i) * (fis_2.Outputs.MembershipFunctions(i).Parameters(1)*sinh(U(k)/fis_2.Outputs.MembershipFunctions(i).Parameters(2)));
-        end
-        U_fuzzy(k) = output / sum(degrees);
-        U_fuzzy_2(k) = output_2 / sum(degrees_2);
-        Y_out(k) = - a*[Y_out(k-1:-1:k-2)]' + b*[U_fuzzy(k-(obiekt.delay+1):-1:k-(obiekt.delay+2))];
-        Y_out_2(k) = - a*[Y_out_2(k-1:-1:k-2)]' + b*[U_fuzzy_2(k-(obiekt.delay+1):-1:k-(obiekt.delay+2))];
-    end
-    
-    % figure;
-    % plot(t, Y_real, 'b', t, Y_lin, 'g', t, Y_out, 'r');
-    % % legend('RK4', 'RK4 liniowy', 'Hammerstein (optymalny TS)');
-    % title('Porównanie wyjścia układu rzeczywistego i modelu');
-    % grid on;
-    
-    E_lin = sum((Y_real - Y_lin).^2);
-    E_out = sum((Y_real - Y_out).^2);
-    E_out_2 = sum((Y_real - Y_out_2).^2);
-    fprintf("\n%d. E_lin = %.3f\n", j, E_lin);
-    fprintf("%d. E_out = %.3f\n", j, E_out);
-    fprintf("%d. E_out_2 = %.3f\n", j, E_out_2);
-end
-
-%% Rysowanie wykresów
-u = [ones(1, obiekt.kk)*-15
-    ones(1, obiekt.kk)*0
-    ones(1, obiekt.kk)*-15];
-[y, y_L, E_h, E_pH] = obiekt.modifiedEuler(u, obiekt.kk);
-
-if ~exist('ph_figure', 'var') || ~isvalid(ph_figure)
-    ph_figure = figure;
-else
-    figure(ph_figure); % Jeśli istnieje, przełącz na nią
-end
-
-plot(0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp, y(1,:), 'g-', 'LineWidth', 2);
+plot(Y_real(3,:), 'b');
 hold on;
-plot(0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp, y_L(1,:), 'm-', 'LineWidth', 2);
-xlabel('t [s]');
-ylabel('h [cm]');
-title('Wartość sygnału wyjściowego h - wymuszenie Q_1');
-legend('h (nieliniowe)', 'h (liniowe)', 'Location', 'northeast');
-grid on;
-% saveas(gcf, 'D:/EiTI/MGR/raporty/raport_MGR/pictures/wymuszenie_Q1h.png');  % Zapisuje jako plik PNG
+plot(Wa4, 'r');
+title('Wa4');
 
-% file = fopen('errors.txt', 'a'); % Otwórz plik do zapisu (tryb 'w' nadpisuje plik)
-% fprintf(file, '%.2f\t%.3f\t%.3f\n', u(1,1), E_h, E_pH);
-% fclose(file); % Zamknij plik
+figure;
+plot(Y_real(4,:), 'b');
+hold on;
+plot(Wb4, 'r');
+title('Wb4');
 
-if ~exist('h_figure', 'var') || ~isvalid(h_figure)
-    h_figure = figure;
-else
-    figure(h_figure); % Jeśli istnieje, przełącz na nią
+figure;
+plot(Y_real(2,:), 'b');
+hold on;
+plot(pH, 'r');
+title('pH');
+
+%% Losowa sekwencja
+U = [repelem((rand(1, obiekt.kk/300) * 30 - 15), 300);
+    zeros(1, obiekt.kk);
+    repelem((rand(1, obiekt.kk/700) * 30 - 15), 700)];
+
+[Y_real, Y_lin] = obiekt.modifiedEuler(U, obiekt.kk);
+t = 0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp; 
+v_wa4 = zeros(1, obiekt.kk);
+v_wa4(1:2) = Y_real(3,1:2);
+v_wb4 = zeros(1, obiekt.kk);
+v_wb4(1:2) = Y_real(4,1:2);
+du = 0.1;
+Y_fuzzy_wa4 = evalfis(hammerstein.linear_fis.Wa4, [U(1,:)' U(3,:)']);
+Y_fuzzy_wb4 = evalfis(hammerstein.linear_fis.Wb4, [U(1,:)' U(3,:)']);
+
+% Y_fuzzy_wa4_q1 = evalfis(fis_trained_Wa4, [U(1,:)'-du U(3,:)']);
+% Y_fuzzy_wb4_q1 = evalfis(fis_trained_Wb4, [U(1,:)'-du U(3,:)']);
+
+% Y_fuzzy_wa4_q3 = evalfis(fis_trained_Wa4, [U(1,:)' U(3,:)'-du]);
+% Y_fuzzy_wb4_q3 = evalfis(fis_trained_Wb4, [U(1,:)' U(3,:)'-du]);
+
+Y_out = zeros(1, obiekt.kk);
+Y_out(1:2) = Y_real(2, 1:2);
+
+for k = 3:obiekt.kk
+    % dydq1_wa4 = (Y_fuzzy_wa4(k-1) - Y_fuzzy_wa4_q1(k-1)) / du;
+    % dydq1_wb4 = (Y_fuzzy_wb4(k-1) - Y_fuzzy_wb4_q1(k-1)) / du;
+    % dydq3_wa4 = (Y_fuzzy_wa4(k-1) - Y_fuzzy_wa4_q3(k-1)) / du;
+    % dydq3_wb4 = (Y_fuzzy_wb4(k-1) - Y_fuzzy_wb4_q3(k-1)) / du;
+    
+    K_wa4 = Y_fuzzy_wa4(k-1) / (U(1, k-1) - U(3, k-1));
+    K_wb4 = Y_fuzzy_wb4(k-1) / (- U(1, k-1) - U(3, k-1));
+    
+    % disp(dydq1_wa4);
+    % disp(dydq1_wb4);
+    % disp(dydq3_wa4);
+    % disp(dydq3_wb4);
+
+    v_wa4(k) = -a_Wa4 * v_wa4(k-1) + K_wa4*b_Wa4 * U(1, k-1) - K_wa4*b_Wa4 * U(3, k-1);
+    v_wb4(k) = -a_Wb4 * v_wb4(k-1) + K_wb4*b_Wb4 * U(1, k-1) + K_wb4*b_Wb4 * U(3, k-1);
+    Y_out(k) = obiekt.pH_calc(obiekt.W_a40 + v_wa4(k), obiekt.W_b40 + v_wb4(k)) - obiekt.pH_0;
 end
 
-plot(0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp, y(2,:), 'b-', 'LineWidth', 2);
-hold on;
-plot(0:obiekt.Tp:(obiekt.kk-1)*obiekt.Tp, y_L(2,:), 'r-', 'LineWidth', 2);
-xlabel('t [s]');
-ylabel('pH');
-title('Wartość sygnału wyjściowego pH - wymuszenie Q_1');
-legend('pH (nieliniowe)', 'pH (liniowe)', 'Location', 'northeast');
-grid on;
+figure;
+plot(t, Y_real(2, :), 'b', t, Y_lin(2, :), 'g', t, Y_out, 'r', 'LineWidth', 1.5);
+% plot(t, Y_real(3, :), 'b', t, Y_lin(3, :), 'g', 'LineWidth', 1.5);
 
-% saveas(gcf, 'D:/EiTI/MGR/raporty/raport_MGR/pictures/wymuszenie_Q1pH.png');  % Zapisuje jako plik PNG
-
-%%
-% Układ wielowymiarowy (MIMO): 3 wejścia (U1, U2, U3), 1 wyjście (Y)
-
-% Podukład 1 (U1)
-A1 = [1.6301  -0.6572;
-      1       0];
-B1 = [1;
-      0];
-C1 = [-0.0271  0];
-D1 = 0;
-
-% Podukład 2 (U2)
-A2 = [1.5218  -0.5632;
-      1        0];
-B2 = [1;
-      0];
-C2 = [0.0413   0];
-D2 = 0;
-
-% Podukład 3 (U3)
-A3 = [2.7830  -2.5937   0.8095;
-      1        0        0;
-      0        1        0];
-B3 = [1;
-      0;
-      0];
-C3 = [0.0012  0  0];
-D3 = 0;
-
-% Macierz A (blok diagonalny)
-A = blkdiag(A1, A2, A3);
-
-% Macierz B (kolumny B1, B2, B3 umieszczone odpowiednio)
-B = [B1, zeros(2,1), zeros(2,1);
-     zeros(2,1), B2, zeros(2,1);
-     zeros(3,2), B3];
-
-% Macierz C (zsumowanie wpływu wszystkich wejść)
-C = [C1, C2, C3];
-
-% Macierz D (brak sprzężenia bezpośredniego)
-D = [0 0 0];
-
-% Stworzenie obiektu systemu
-sys = ss(A, B, C, D, 10);  % -1 oznacza dyskretny czas z nieokreślonym krokiem
-
-G = tf(sys);
-G
-
+%% Do obliczania macierzy K w DMC 
+% [nRows, nCols] = size(obj.K);
+% 
+% % Sprawdzenie, czy da się podzielić na bloki 2x2
+% if mod(nRows,2) ~= 0 || mod(nCols,2) ~= 0
+%     error('Wymiary macierzy muszą być podzielne przez 2.');
+% end
+% 
+% % Wektory rozmiarów bloków
+% rowBlocks = repmat(2, 1, nRows/2);  % np. [2 2 2 2]
+% colBlocks = repmat(2, 1, nCols/2);  % np. [2 2 ... x100]
+% 
+% % Podział na komórki 2x2
+% K_cell = mat2cell(obj.K, rowBlocks, colBlocks);

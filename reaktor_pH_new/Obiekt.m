@@ -17,7 +17,7 @@ classdef Obiekt < handle
         % Okres próbkowania
         Tp = 10;
         % Próbki dyskretne
-        kk = 2100;  % 1200
+        kk = 1200;  % 1200
 
         % Punkt pracy
         % Q_1, Q_3 - wartości sterujące
@@ -34,7 +34,7 @@ classdef Obiekt < handle
 
         % Współczynniki modelu
         delay
-        dynamic_horizont = 120;
+        dynamic_horizont = 200;
     end
 
     methods
@@ -86,6 +86,7 @@ classdef Obiekt < handle
                 a = G_z.Denominator{1}(2);
                 b = G_z.Numerator{1}(2);
 
+                S.Q2 = S.Q1;
                 S.Q3 = S.Q1;
     
                 % Rysowanie wykresu
@@ -181,103 +182,6 @@ classdef Obiekt < handle
                 title(sprintf('Model %s ( Q_3 )', type));
                 grid on;
             end
-        end
-
-        function [a, b, S] = Wa4Model(obj, index)
-
-            u = [zeros(1, obj.dynamic_horizont);
-                 zeros(1, obj.dynamic_horizont);
-                 zeros(1, obj.dynamic_horizont)];
-            u(1, 20:end) = 1;  % skok na Q1
-            u(3, 50:end) = 1;  % skok na Q3
-            
-            [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
-            y = s(index,:) / abs(s(index,end));  % np. Wa4
-            
-            data = iddata(y', u([1,3], :)', obj.Tp);
-            model = tfest(data, 2, 1);  % identyfikacja MIMO
-
-            t = (0:length(y)-1) * obj.Tp;
-
-            G = tf(model);
-            G.InputName = {'u1', 'u3'};
-            G.OutputName = {'y1'};
-            [Y, ~] = step(G, t);
-            S.Q1 = Y(:,1,1);
-            S.Q3 = Y(:,1,2);
-
-            G_z = c2d(G, obj.Tp, 'zoh');
-            G_z.Variable = 'z^-1';
-            a.Q1 = G_z.Denominator{1}(2:3);
-            b.Q1 = G_z.Numerator{1}(2:3);
-            a.Q3 = G_z.Denominator{2}(2:3);
-            b.Q3 = G_z.Numerator{2}(2:3);
-
-            % Rysowanie wykresu
-            figure;
-            plot(t, y, 'b', 'LineWidth', 2); 
-            hold on;
-            plot(t, Y(:, 1, 1), 'r--', 'LineWidth', 2);
-            plot(t, Y(:, 1, 2), 'g--', 'LineWidth', 2);
-            % legend('Odpowiedź rzeczywista', 'Model', 'Location', 'best');
-            xlabel('Czas');
-            ylabel('Odpowiedź skokowa');
-            title(sprintf('Odpowiedź układu na wymuszenie jednostkowe Q1'));
-            grid on;
-        end
-
-        function [a, b, S] = Wb4Model(obj, index)
-
-            u = [ones(1,obj.dynamic_horizont)
-                zeros(1,obj.dynamic_horizont)
-                zeros(1,obj.dynamic_horizont)];
-            [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
-            y.Q1 = s(index,:) / abs(s(index, end));
-            model.Q1 = tfest(iddata(y.Q1', u(1,:)', obj.Tp), 2, 1);
-
-            u = [zeros(1,obj.dynamic_horizont)
-                zeros(1,obj.dynamic_horizont)
-                ones(1,obj.dynamic_horizont)];
-            [s, ~] = obj.modifiedEuler(u, obj.dynamic_horizont);
-            y.Q3 = s(index,:) / abs(s(index, end));
-            model.Q3 = tfest(iddata(y.Q3', u(3,:)', obj.Tp), 2, 1);
-
-            t = (0:length(y.Q1)-1) * obj.Tp;
-
-            G = [tf(model.Q1), tf(model.Q3)];
-            G.InputName = {'u1', 'u3'};
-            G.OutputName = {'y1'};
-            [Y, ~] = step(G, t);
-            S.Q1 = Y(:,1,1);  % odpowiedź na skok w wejściu 1
-            S.Q3 = Y(:,1,2);  % odpowiedź na skok w wejściu 3
-
-            G_z = c2d(G, obj.Tp, 'zoh');
-            G_z.Variable = 'z^-1';
-            G_z
-            a = G_z.Denominator{1}(2:3);
-            b = G_z.Numerator{1}(2:3);
-
-            % Rysowanie wykresu
-            figure;
-            subplot(1,2,1);
-            plot(t, y.Q1, 'b', 'LineWidth', 2); 
-            hold on;
-            plot(t, S.Q1, 'r--', 'LineWidth', 2);
-            legend('Odpowiedź rzeczywista', 'Model', 'Location', 'best');
-            xlabel('Czas');
-            ylabel('Odpowiedź skokowa');
-            title(sprintf('Odpowiedź układu na wymuszenie jednostkowe Q1'));
-            grid on;
-
-            subplot(1,2,2);
-            plot(t, y.Q3, 'b', 'LineWidth', 2); 
-            hold on;
-            plot(t, S.Q3, 'r--', 'LineWidth', 2);
-            legend('Odpowiedź rzeczywista', 'Model', 'Location', 'best');
-            xlabel('Czas');
-            ylabel('Odpowiedź skokowa');
-            title(sprintf('Odpowiedź układu na wymuszenie jednostkowe Q3'));
-            grid on;
         end
 
         function [a, b, S] = tfestModel(obj)
@@ -468,31 +372,32 @@ classdef Obiekt < handle
             pH=log10(p);
         end
 
-        function show_staticCharacteristic(obj, Q2)
-            U_min = -15;
-            U_max = 15;
+        function show_staticCharacteristic(obj)
+            U = [linspace(1.6, 31.6, 100)
+                linspace(0.6, 30.6, 100)];
 
-            U = [linspace(U_min, U_max, 100);
-                linspace(U_min, U_max, 100)];
-            [Q1_grid, Q3_grid] = meshgrid(U(1,:), U(2,:));  % kombinacje
-            
-            h = zeros(100,100);
+            [Q1_grid, Q3_grid] = meshgrid(U(1,:), U(2,:));
+            h = ((Q1_grid + obj.Q_20 + Q3_grid) / obj.C_V).^2;
+            Wa4 = (obj.W_a1*Q1_grid + obj.W_a2*obj.Q_20 + obj.W_a3*Q3_grid)./(Q1_grid+obj.Q_20+Q3_grid);
+            Wb4 = (obj.W_b1*Q1_grid + obj.W_b2*obj.Q_20 + obj.W_b3*Q3_grid)./(Q1_grid+obj.Q_20+Q3_grid);
+
             pH = zeros(100,100);
             
-            % Petla po siatce sterowań
-            for i = 1:length(U)
-                for j = 1:length(U)
-                    u = [ones(1, 200)*U(1,i);
-                         ones(1, 200)*Q2;
-                         ones(1, 200)*U(2,j)];
-                
-                    [y, ~, ~] = obj.modifiedEuler(u, 200);
-                    h(i,j) =  y(1, end);
-                    pH(i,j) = y(2, end); 
+            for i = 1:100
+                for j = 1:100
+                    pH(i,j) = obj.pH_calc(Wa4(i,j), Wb4(i,j));
                 end
             end
-            
-            % Rysuj 3D wykres
+                        
+            figure;
+            surf(Q1_grid, Q3_grid, h);
+            xlabel('Q_1 [ml/s]');
+            ylabel('Q_3 [ml/s]');
+            zlabel('h [cm]');
+            title('Wpływ dopływów Q_1 oraz Q_3 na wysokość słupa cieczy h');
+            shading interp;
+            colorbar;
+
             figure;
             surf(Q1_grid, Q3_grid, pH);
             xlabel('Q_1 [ml/s]');
@@ -502,15 +407,6 @@ classdef Obiekt < handle
             shading interp;
             colorbar;
             view(-45, 30);
-            
-            figure;
-            surf(Q1_grid, Q3_grid, h);
-            xlabel('Q_1 [ml/s]');
-            ylabel('Q_3 [ml/s]');
-            zlabel('h [cm]');
-            title('Wpływ dopływów Q_1 oraz Q_3 na wysokość słupa cieczy h');
-            shading interp;
-            colorbar;
         end
     end
 end

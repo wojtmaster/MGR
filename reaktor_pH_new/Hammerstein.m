@@ -122,6 +122,7 @@ classdef Hammerstein < handle
             if(strcmp(type, 'h'))
                 Y_fuzzy = evalfis(obj.linear_fis.h, [U(1,:)', U(3,:)']);
                 for k = 2:obiekt.kk
+                    % Y_fuzzy(k) = ((obiekt.Q_10+obiekt.Q_20+obiekt.Q_30+U(1,k-1)+U(3,k-1)) / obiekt.C_V).^2 - obiekt.h_0;
                     Y_out(k) = - a_h*Y_out(k-1) + b_h*Y_fuzzy(k);
                 end
 
@@ -151,6 +152,10 @@ classdef Hammerstein < handle
                 Y_fuzzy_Wb4 = evalfis(obj.linear_fis.Wb4, [U(1,:)' U(3,:)']);
 
                 for k = 3:obiekt.kk
+                    % Y_fuzzy_Wa4(k) = (obiekt.W_a1*(obiekt.Q_10+U(1,k-1)) + obiekt.W_a2*obiekt.Q_20 + obiekt.W_a3*(obiekt.Q_30+U(3,k-1)))./(obiekt.Q_10+obiekt.Q_20+obiekt.Q_30+U(1,k-1)+U(3,k-1));
+                    % Y_fuzzy_Wb4(k) = (obiekt.W_b1*(obiekt.Q_10+U(1,k-1)) + obiekt.W_b2*obiekt.Q_20 + obiekt.W_b3*(obiekt.Q_30+U(3,k-1)))./(obiekt.Q_10+obiekt.Q_20+obiekt.Q_30+U(1,k-1)+U(3,k-1));
+                    % Y_stat(k) = obiekt.pH_calc(Y_fuzzy_Wa4(k), Y_fuzzy_Wb4(k)) - obiekt.pH_0;
+                    
                     Y_stat(k) = obiekt.pH_calc(Y_fuzzy_Wa4(k) + obiekt.W_a40, Y_fuzzy_Wb4(k) + obiekt.W_b40) - obiekt.pH_0;
                     Y_out(k) = -(a_pH.Q1 + a_pH.Q3)/2 * Y_out(k-1:-1:k-2)' + (-b_pH.Q1 + b_pH.Q3)/2 * Y_stat(k:-1:k-1)';
                 end
@@ -241,6 +246,60 @@ classdef Hammerstein < handle
                 grid on;
                 % saveas(gcf, sprintf('D:/EiTI/MGR/raporty/raport_MGR/pictures/HammersteinNonlinearModel_%d.png', index));  % Zapisuje jako plik PNG
             end
+        end
+
+        function checkStatic(obj, type)
+            U = [linspace(obj.U_min, obj.U_max, 100);
+                linspace(obj.U_min, obj.U_max, 100)];
+            
+            Y_Hout = zeros(100,100);
+            Y_Aout = zeros(100,100);
+            Y_Bout = zeros(100,100);
+
+            if (strcmp(type, 'linear'))
+                for i = 1:100
+                    for j = 1:100
+                        Y_Hout(i,j) = evalfis(obj.linear_fis.h, [U(1,j) U(2,i)]);
+                        Y_Aout(i,j) = evalfis(obj.linear_fis.Wa4, [U(1,j) U(2,i)]);
+                        Y_Bout(i,j) = evalfis(obj.linear_fis.Wb4, [U(1,j) U(2,i)]);
+                    end
+                end
+            else
+                for i = 1:100
+                    for j = 1:100
+                        Y_Hout(i,j) = evalfis(obj.nonlinear_fis.h, [sinh(U(1,j)/15) sinh(U(2,i)/15)]);
+                        Y_Aout(i,j) = evalfis(obj.nonlinear_fis.Wa4, [tanh(U(1,j)/15) tanh(U(2,i)/15)]);
+                        Y_Bout(i,j) = evalfis(obj.nonlinear_fis.Wb4, [sinh(U(1,j)/15) sinh(U(2,i)/15)]);
+                    end
+                end
+            end
+
+            figure;
+            surf(obj.Q1_grid, obj.Q3_grid, Y_Hout);
+            xlabel('Q_1 [ml/s]');
+            ylabel('Q_3 [ml/s]');
+            zlabel('h');
+            title(sprintf('h'));
+            shading interp;
+            colorbar;
+            
+            figure;
+            surf(obj.Q1_grid, obj.Q3_grid, Y_Aout);
+            xlabel('Q_1 [ml/s]');
+            ylabel('Q_3 [ml/s]');
+            zlabel('pH');
+            title(sprintf('Wa4'));
+            shading interp;
+            colorbar;
+            
+            figure;
+            surf(obj.Q1_grid, obj.Q3_grid, Y_Bout);
+            xlabel('Q_1 [ml/s]');
+            ylabel('Q_3 [ml/s]');
+            zlabel('pH');
+            title(sprintf('Wb4'));
+            shading interp;
+            colorbar;
         end
 
         function show_fuzzy(~, fis, s)

@@ -184,7 +184,9 @@ classdef Wiener < handle
                 for k = 2:obiekt.kk
                     Y_out.Q1(k) = - a_h*Y_out.Q1(k-1) + b_h * U(1,k-1);
                     Y_out.Q3(k) = - a_h*Y_out.Q3(k-1) + b_h * U(3,k-1);
-                    Y_fuzzy(k) = evalfis(obj.linear_fis.h, [Y_out.Q1(k), Y_out.Q3(k)]);
+
+                    Y_fuzzy(k) = ((obiekt.Q_10+obiekt.Q_20+obiekt.Q_30+Y_out.Q1(k)+Y_out.Q3(k)) / obiekt.C_V).^2 - obiekt.h_0;
+                    % Y_fuzzy(k) = evalfis(obj.linear_fis.h, [Y_out.Q1(k), Y_out.Q3(k)]);
                 end
                 E_lin = sum((Y_real(1, :) - Y_lin(1, :)).^2) / obiekt.kk;
                 E_out = sum((Y_real(1, :) - Y_fuzzy).^2) / obiekt.kk;
@@ -217,9 +219,12 @@ classdef Wiener < handle
                     y_Wb4.Q1(k) = -a_Wb4 * y_Wb4.Q1(k-1)' + b_Wb4*U(1,k-1)';
                     y_Wb4.Q3(k) = -a_Wb4 * y_Wb4.Q3(k-1)' + b_Wb4*U(3,k-1)';
 
+                    % W_a4 = (obiekt.W_a1*(obiekt.Q_10+y_Wa4.Q1(k))+ obiekt.W_a2*obiekt.Q_20+obiekt.W_a3*(obiekt.Q_30-y_Wa4.Q3(k)))./(obiekt.Q_10+obiekt.Q_20+obiekt.Q_30+y_Wa4.Q1(k)-y_Wa4.Q3(k));
+                    % W_b4 = (obiekt.W_b1*(obiekt.Q_10-y_Wb4.Q1(k)) + obiekt.W_b2*obiekt.Q_20 + obiekt.W_b3*(obiekt.Q_30-y_Wb4.Q3(k)))./(obiekt.Q_10+obiekt.Q_20+obiekt.Q_30-y_Wb4.Q1(k)-y_Wb4.Q3(k));
+                    % Y_fuzzy(k) = obiekt.pH_calc(W_a4, W_b4) - obiekt.pH_0;
+
                     W_a4 = evalfis(obj.linear_fis.Wa4, [y_Wa4.Q1(k), y_Wa4.Q3(k)]);
                     W_b4 = evalfis(obj.linear_fis.Wb4, [y_Wb4.Q1(k), y_Wb4.Q3(k)]);
-                
                     Y_fuzzy(k) = obiekt.pH_calc(W_a4 + obiekt.W_a40, W_b4 + obiekt.W_b40) - obiekt.pH_0;
                 end
                 E_lin = sum((Y_real(2, :) - Y_lin(2, :)).^2) / obiekt.kk;
@@ -317,6 +322,61 @@ classdef Wiener < handle
             end
 
             % saveas(gcf, sprintf('D:/EiTI/MGR/raporty/raport_MGR/pictures/WienerNonlinearModel_%d.png', index));  % Zapisuje jako plik PNG
+        end
+
+        function checkStatic(obj, type)
+            U = [linspace(obj.U_min, obj.U_max, 100);
+                linspace(obj.U_min, obj.U_max, 100)];
+            [Q1_grid, Q3_grid] = meshgrid(U(1,:), U(2,:));
+            
+            Y_Hout = zeros(100,100);
+            Y_Aout = zeros(100,100);
+            Y_Bout = zeros(100,100);
+
+            if (strcmp(type, 'linear'))
+                for i = 1:100
+                    for j = 1:100
+                        Y_Hout(i,j) = evalfis(obj.linear_fis.h, [obj.Y_h.Q1(i,j), obj.Y_h.Q3(i,j)]);
+                        Y_Aout(i,j) = evalfis(obj.linear_fis.Wa4, [obj.Y_Wa4.Q1(i,j), obj.Y_Wa4.Q3(i,j)]);
+                        Y_Bout(i,j) = evalfis(obj.linear_fis.Wb4, [obj.Y_Wb4.Q1(i,j), obj.Y_Wb4.Q3(i,j)]);
+                    end
+                end
+            else
+                for i = 1:100
+                    for j = 1:100
+                        Y_Hout(i,j) = evalfis(obj.nonlinear_fis.h, [sinh(obj.Y_h.Q1(i,j)/15), sinh(obj.Y_h.Q3(i,j)/15)]);
+                        Y_Aout(i,j) = evalfis(obj.nonlinear_fis.Wa4, [tanh(obj.Y_Wa4.Q1(i,j)/15), tanh(obj.Y_Wa4.Q3(i,j)/15)]);
+                        Y_Bout(i,j) = evalfis(obj.nonlinear_fis.Wb4, [sinh(obj.Y_Wb4.Q1(i,j)/15), sinh(obj.Y_Wb4.Q3(i,j)/15)]);
+                    end
+                end
+            end
+
+            figure;
+            surf(Q1_grid, Q3_grid, Y_Hout);
+            xlabel('Q_1 [ml/s]');
+            ylabel('Q_3 [ml/s]');
+            zlabel('h');
+            title(sprintf('h'));
+            shading interp;
+            colorbar;
+            
+            figure;
+            surf(Q1_grid, Q3_grid, Y_Aout);
+            xlabel('Q_1 [ml/s]');
+            ylabel('Q_3 [ml/s]');
+            zlabel('pH');
+            title(sprintf('Wa4'));
+            shading interp;
+            colorbar;
+            
+            figure;
+            surf(Q1_grid, Q3_grid, Y_Bout);
+            xlabel('Q_1 [ml/s]');
+            ylabel('Q_3 [ml/s]');
+            zlabel('pH');
+            title(sprintf('Wb4'));
+            shading interp;
+            colorbar;
         end
 
         function show_fuzzy(~, fis, s)

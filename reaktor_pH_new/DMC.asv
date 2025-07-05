@@ -574,10 +574,10 @@ classdef DMC < handle
                 v_hat.pH = obiekt.pH_calc(v_hat.Wa4+obiekt.W_a40, v_hat.Wb4+obiekt.W_b40) - obiekt.pH_0;
                 
                 y_hat.h = -a_h * y(1, k-1) + b_h * v_hat.h; 
-                y_hat.pH = -(a_pH.Q1 + a_pH.Q3)/2 * y(2, k-1:-1:k-2)' + (-b_pH.Q1 + b_pH.Q3)/2 * [v_hat.pH v.pH(k-1)]';
+                y_hat.pH = -(a_pH.Q1 + a_pH.Q3)/2 * y(2, k-1:-1:k-2)' + (-b_pH.Q1 + b_pH.Q3)/2 * [v_hat.pH v.pH(k)]';
                 % dk.h = y(1, k) - y_hat.h;
-                dk.h = 0;
                 % dk.pH = y(2, k) - y_hat.pH;
+                dk.h = 0;
                 dk.pH = 0;
         
                 for m = 1:N
@@ -1071,7 +1071,7 @@ classdef DMC < handle
                 else
                     h = evalfis(fis.h, [sinh(v_h.Q1(k)/15), sinh(v_h.Q3(k)/15)]);
                     Wa4 = evalfis(fis.Wa4, [tanh(v_Wa4.Q1(k)/15) tanh(v_Wa4.Q3(k)/15)]);
-                    Wb4 = evalfis(fis.Wb4, [sinh(v_Wb4.Q1(k)/15) sinh(v_Wb4.Q3(k)/15)]);
+                    Wb4 = evalfis(fis.Wb4, [sinh(v_Wa4.Q1(k)/15) sinh(v_Wa4.Q3(k)/15)]);
                 end
 
                 pH = obiekt.pH_calc(Wa4 + obiekt.W_a40, Wb4 + obiekt.W_b40) - obiekt.pH_0;
@@ -1138,10 +1138,8 @@ classdef DMC < handle
 
                 y_hat.pH = obiekt.pH_calc(y_hat.Wa4 + obiekt.W_a40, y_hat.Wb4 + obiekt.W_b40) - obiekt.pH_0;
 
-                % dk.h = y(1, k) - y_hat.h;
-                % dk.pH = y(2, k) - y_hat.pH;
-                dk.h = 0;
-                dk.pH = 0;
+                dk.h = y(1, k) - y_hat.h;
+                dk.pH = y(2, k) - y_hat.pH;
         
                 for j = 1:N
                     if j == 1
